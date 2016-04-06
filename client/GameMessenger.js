@@ -16,35 +16,35 @@ GameMessenger.prototype.constructor = GameMessenger;
  * @param message the message to react to.
  */
 GameMessenger.prototype.handleMessage = function (message) {
-  var decodedMessage = JSON.parse(message);
-  if (debug) console.log("MESSAGE IN:" + decodedMessage.type);
-  switch (decodedMessage.type) {
-    case "REGISTERED":
-      this.interpretRegistered(decodedMessage);
-      break;
-    case "READY":
-      this.interpretReady(decodedMessage);
-      break;
-    case "PENDING_GAME":
-      this.interpretPendingGame(decodedMessage);
-      break;
-    case "NOTIFY_TURN":
-      this.interpretNotifyTurn(decodedMessage);
-      break;
-    case "NOTIFY":
-      this.interpretNotify(decodedMessage);
-      break;
-    case "GAME_OVER":
-      this.interpretGameOver(decodedMessage);
-      break;
-    case "GAMES":
-      this.interpretGames(decodedMessage);
-      break;
-    case "CONNECTION":
-      this.interpretConnection(decodedMessage);
-    default:
-      break;
-  }
+	var decodedMessage = JSON.parse(message);
+	if (debug) console.log("MESSAGE IN:" + decodedMessage.type);
+	switch (decodedMessage.type) {
+	case "REGISTERED":
+		this.interpretRegistered(decodedMessage);
+		break;
+	case "READY":
+		this.interpretReady(decodedMessage);
+		break;
+	case "PENDING_GAME":
+		this.interpretPendingGame(decodedMessage);
+		break;
+	case "NOTIFY_TURN":
+		this.interpretNotifyTurn(decodedMessage);
+		break;
+	case "NOTIFY":
+		this.interpretNotify(decodedMessage);
+		break;
+	case "GAME_OVER":
+		this.interpretGameOver(decodedMessage);
+		break;
+	case "GAMES":
+		this.interpretGames(decodedMessage);
+		break;
+	case "CONNECTION":
+		this.interpretConnection(decodedMessage);
+	default:
+		break;
+	}
 };
 
 /**
@@ -53,9 +53,9 @@ GameMessenger.prototype.handleMessage = function (message) {
  * @param messageRegistered the REGISTERED message.
  */
 GameMessenger.prototype.interpretRegistered = function (messageRegistered) {
-  gameId = messageRegistered['game_id'];
-  guiConnector.showGameIdPane(gameId);
-  this.storedMessage = messageRegistered;
+	gameId = messageRegistered['game_id'];
+	guiConnector.showGameIdPane(gameId);
+	this.storedMessage = messageRegistered;
 };
 
 /**
@@ -64,7 +64,14 @@ GameMessenger.prototype.interpretRegistered = function (messageRegistered) {
  * @param messageReady the READY message.
  */
 GameMessenger.prototype.interpretReady = function (messageReady) {
-  //TODO:
+	var rounds = messageReady['rounds'];
+	var currentRound = messageReady['current_round'];
+	var locations = messageReady['locations'];
+	var tickets = messageReady['tickets'];
+	guiConnector.setSetUpViewVisible(false);
+	guiConnector.setTicketView(rounds, currentRound);
+	guiConnector.setPlayerLocations(locations);
+	guiConnector.setPlayerTickets(tickets);
 };
 
 /**
@@ -73,8 +80,8 @@ GameMessenger.prototype.interpretReady = function (messageReady) {
  * @param messagePendingGame the PENDING_GAME message.
  */
 GameMessenger.prototype.interpretPendingGame = function (messagePendingGame) {
-  var missingPlayers = messagePendingGame['opponents'];
-  guiConnector.showStringInSetUpView("Waiting for: " + missingPlayers.toString());
+	var missingPlayers = messagePendingGame['opponents'];
+	guiConnector.showStringInSetUpView("Waiting for: " + missingPlayers.toString());
 };
 
 /**
@@ -83,7 +90,26 @@ GameMessenger.prototype.interpretPendingGame = function (messagePendingGame) {
  * @param messageNotify the NOTIFY message.
  */
 GameMessenger.prototype.interpretNotify = function (messageNotify) {
-  //TODO:
+	var move_type = messageNotify['move_type'];
+	var move = messageNotify['move'];
+	var player = move['colour'];
+
+	switch (move_type) {
+		case "MoveTicket":
+			var target = move['target'];
+			var ticket = move['ticket'];
+			guiConnector.animatePlayer(player, target);
+			guiConnector.removeTicket(player, ticket);
+			if (player == "Black")
+				guiConnector.updateTicketView(ticket, target);
+			break;
+		case "MoveDouble":
+			var double = "Double";
+			guiConnector.removeTicket(player, double);
+			break;
+		default:
+			break;
+	}
 };
 
 /**
@@ -93,7 +119,8 @@ GameMessenger.prototype.interpretNotify = function (messageNotify) {
  * @param messageGameOver the GAME_OVER message.
  */
 GameMessenger.prototype.interpretGameOver = function (messageGameOver) {
-  //TODO:
+	gameId = null;
+	guiConnector.setGameOver(messageGameOver);
 };
 
 /**
@@ -102,7 +129,7 @@ GameMessenger.prototype.interpretGameOver = function (messageGameOver) {
  * @param messageGames the GAMES message.
  */
 GameMessenger.prototype.interpretGames = function (messageGames) {
-  guiConnector.updateGamesList(messageGames['games']);
+	guiConnector.updateGamesList(messageGames['games']);
 };
 
 /**
@@ -112,7 +139,13 @@ GameMessenger.prototype.interpretGames = function (messageGames) {
  * @param messageConnection the CONNECTION message.
  */
 GameMessenger.prototype.interpretConnection = function (messageConnection) {
-  //TODO:
+	gameMessenger.changeConnection("ws://" + messageConnection.host + ":" + messageConnection.port);
+	var gameId = guiConnector.getSelectedGame();
+	var message = {
+		type: "SPECTATE",
+		game_id: gameId
+	}
+	gameMessenger.sendMessage(message);
 };
 
 /**
@@ -122,7 +155,7 @@ GameMessenger.prototype.interpretConnection = function (messageConnection) {
  * @param messageNotifyTurn the NOTIFY_TURN message.
  */
 GameMessenger.prototype.interpretNotifyTurn = function (messageNotifyTurn) {
-  //TODO:
+	guiConnector.startTurn(messageNotifyTurn, false);
 };
 
 /**
@@ -131,32 +164,32 @@ GameMessenger.prototype.interpretNotifyTurn = function (messageNotifyTurn) {
  * @param message the REGISTERED message containing connection and game information.
  */
 GameMessenger.prototype.sendJoin = function () {
-  var self = this;
-  var message = this.storedMessage;
-  var callback = function () {
-    var colours = message.colours;
-    var aiColours = [];
+	var self = this;
+	var message = this.storedMessage;
+	var callback = function () {
+		var colours = message.colours;
+		var aiColours = [];
 
-    for (var i = 0; i < colours.length; i++) {
-      if (AIPlayers.indexOf(colours[i]) != -1) {
-        aiColours.push(colours[i]);
-      } else {
-        var joinMessage = {};
-        joinMessage['type'] = "JOIN";
-        joinMessage['colour'] =  colours[i];
-        joinMessage['game_id'] = message['game_id'];
-        self.sendMessage(joinMessage);
-      }
-    }
-    if (aiColours.length > 0 && aiMessenger && aiMessenger.isConnected()) {
-      message.colours = aiColours;
-      if (aiMessenger) aiMessenger.sendMessage(message);
-    }
-  };
-  var precallback = function () {
-    if (self.isConnected()) {
-      callback();
-    }
-  };
-  this.changeConnection("ws://" + message.host + ":" + message.port, precallback);
+		for (var i = 0; i < colours.length; i++) {
+			if (AIPlayers.indexOf(colours[i]) != -1) {
+				aiColours.push(colours[i]);
+			} else {
+				var joinMessage = {};
+				joinMessage['type'] = "JOIN";
+				joinMessage['colour'] = colours[i];
+				joinMessage['game_id'] = message['game_id'];
+				self.sendMessage(joinMessage);
+			}
+		}
+		if (aiColours.length > 0 && aiMessenger && aiMessenger.isConnected()) {
+			message.colours = aiColours;
+			if (aiMessenger) aiMessenger.sendMessage(message);
+		}
+	};
+	var precallback = function () {
+		if (self.isConnected()) {
+			callback();
+		}
+	};
+	this.changeConnection("ws://" + message.host + ":" + message.port, precallback);
 };
