@@ -9,7 +9,7 @@ var debug = true;
  * @param url the url of the matchmaker.
  */
 var Messenger = function (url) {
-  this.url = url;
+	this.url = url;
 };
 
 /**
@@ -19,24 +19,24 @@ var Messenger = function (url) {
  * @param callback the callback function to be called once a connection is established.
  */
 Messenger.prototype.changeConnection = function (url, callback, errorCallback) {
-  if (this.socket) this.socket.close();
-  this.connected = false;
-  this.socket = new WebSocket(url);
-  var self = this;
-  this.socket.onerror = function (event) {
-    self.connected = false;
-    if (errorCallback) errorCallback(event);
-  };
-  this.socket.onopen = function (event) {
-    self.connected = true;
-    if (callback) callback();
-  };
-  this.socket.onmessage = function (event) {
-    self.handleMessage(event.data);
-  };
-  this.socket.onclose = function (event) {
-    self.connected = false;
-  };
+	if (this.socket) this.socket.close();
+	this.connected = false;
+	this.socket = new WebSocket(url);
+	var self = this;
+	this.socket.onerror = function (event) {
+		self.connected = false;
+		if (errorCallback) errorCallback(event);
+	};
+	this.socket.onopen = function (event) {
+		self.connected = true;
+		if (callback) callback();
+	};
+	this.socket.onmessage = function (event) {
+		self.handleMessage(event.data);
+	};
+	this.socket.onclose = function (event) {
+		self.connected = false;
+	};
 };
 
 /**
@@ -45,8 +45,8 @@ Messenger.prototype.changeConnection = function (url, callback, errorCallback) {
  * @param callback the callback function to be called once the socket has been closed.
  */
 Messenger.prototype.close = function (callback) {
-  if (this.socket) this.socket.close();
-    if (callback) callback();
+	if (this.socket) this.socket.close();
+	if (callback) callback();
 };
 
 /**
@@ -55,7 +55,7 @@ Messenger.prototype.close = function (callback) {
  * @return true if this websocket is connected to a server, false otherwise.
  */
 Messenger.prototype.isConnected = function () {
-  return this.socket && this.connected;
+	return this.socket && this.connected;
 };
 
 /**
@@ -64,7 +64,7 @@ Messenger.prototype.isConnected = function () {
  * @param message the message to write to the websocket.
  */
 Messenger.prototype.sendMessage = function (message) {
-  if (debug) console.log("MESSAGE OUT:" + message.type);
-  if (this.socket && this.connected) this.socket.send(JSON.stringify(message));
-  else console.log("Not sent");
+	if (debug) console.log("MESSAGE OUT:" + message.type);
+	if (this.socket && this.connected) this.socket.send(JSON.stringify(message));
+	else console.log("Not sent");
 };

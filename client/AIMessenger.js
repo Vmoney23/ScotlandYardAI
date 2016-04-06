@@ -16,18 +16,18 @@ AIMessenger.prototype.constructor = GameMessenger;
  * @param message the message to react to.
  */
 AIMessenger.prototype.handleMessage = function (message) {
-  var decodedMessage = JSON.parse(message);
-  if (debug) console.log("MESSAGE IN FROM AI:" + decodedMessage.type);
-  switch (decodedMessage.type) {
-    case "JOIN":
-      this.interpretJoin(decodedMessage);
-      break;
-    case "MOVE":
-      this.interpretMove(decodedMessage);
-      break;
-    default:
-      break;
-  }
+	var decodedMessage = JSON.parse(message);
+	if (debug) console.log("MESSAGE IN FROM AI:" + decodedMessage.type);
+	switch (decodedMessage.type) {
+	case "JOIN":
+		this.interpretJoin(decodedMessage);
+		break;
+	case "MOVE":
+		this.interpretMove(decodedMessage);
+		break;
+	default:
+		break;
+	}
 };
 
 /**
@@ -37,7 +37,7 @@ AIMessenger.prototype.handleMessage = function (message) {
  * @param messageJoin the JOIN message.
  */
 AIMessenger.prototype.interpretJoin = function (messageJoin) {
-  gameMessenger.sendMessage(messageJoin);
+	gameMessenger.sendMessage(messageJoin);
 };
 
 /**
@@ -47,5 +47,5 @@ AIMessenger.prototype.interpretJoin = function (messageJoin) {
  * @param messageMove the MOVE message.
  */
 AIMessenger.prototype.interpretMove = function (messageMove) {
-  gameMessenger.sendMessage(messageMove);
+	gameMessenger.sendMessage(messageMove);
 };
