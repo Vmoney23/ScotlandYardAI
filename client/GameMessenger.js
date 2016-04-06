@@ -72,6 +72,8 @@ GameMessenger.prototype.interpretReady = function (messageReady) {
 	guiConnector.setTicketView(rounds, currentRound);
 	guiConnector.setPlayerLocations(locations);
 	guiConnector.setPlayerTickets(tickets);
+	if (aiMessenger.connected && AIPlayers.length != 0)
+		aiMessenger.sendMessage(messageReady);
 };
 
 /**
@@ -102,10 +104,14 @@ GameMessenger.prototype.interpretNotify = function (messageNotify) {
 			guiConnector.removeTicket(player, ticket);
 			if (player == "Black")
 				guiConnector.updateTicketView(ticket, target);
+			if (aiMessenger.connected && AIPlayers.length != 0)
+				aiMessenger.sendMessage(messageNotify);
 			break;
 		case "MoveDouble":
 			var double = "Double";
 			guiConnector.removeTicket(player, double);
+			if (aiMessenger.connected && AIPlayers.length != 0)
+				aiMessenger.sendMessage(messageNotify);
 			break;
 		default:
 			break;
@@ -121,6 +127,8 @@ GameMessenger.prototype.interpretNotify = function (messageNotify) {
 GameMessenger.prototype.interpretGameOver = function (messageGameOver) {
 	gameId = null;
 	guiConnector.setGameOver(messageGameOver);
+	if (aiMessenger.connected && AIPlayers.length != 0)
+				aiMessenger.sendMessage(messageGameOver);
 };
 
 /**
@@ -155,7 +163,15 @@ GameMessenger.prototype.interpretConnection = function (messageConnection) {
  * @param messageNotifyTurn the NOTIFY_TURN message.
  */
 GameMessenger.prototype.interpretNotifyTurn = function (messageNotifyTurn) {
+	var validMoves = messageNotifyTurn['valid_moves'];
+	var move = validMoves[0].move;
+	var player = move['colour'];
 	guiConnector.startTurn(messageNotifyTurn, false);
+	if (aiMessenger.connected && AIPlayers.length != 0) {
+		if (AIPlayers.some(elem => elem == player)) {
+			aiMessenger.sendMessage(messageNotifyTurn);
+		}
+	}
 };
 
 /**
