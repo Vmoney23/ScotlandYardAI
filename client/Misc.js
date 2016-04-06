@@ -14,17 +14,17 @@
  * @param radius the radius of the corners of the rectangle.
  */
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, radius) {
-	if (height < 0) height = 0;
-	if (width < 0) width = 0;
-	if (width < 2 * radius) radius = width / 2;
-	if (height < 2 * radius) radius = height / 2;
-	this.beginPath();
-	this.arc(x + width - radius, y + height - radius, radius, 0, Math.PI / 2);
-	this.arc(x + radius, y + height - radius, radius, Math.PI / 2, Math.PI);
-	this.arc(x + radius, y + radius, radius, Math.PI, 3 * (Math.PI / 2));
-	this.arc(x + width - radius, y + radius, radius, 3 * (Math.PI / 2), Math.PI * 2);
-	this.closePath();
-	return this;
+  if (height < 0) height = 0;
+  if (width < 0) width = 0;
+  if (width < 2 * radius) radius = width / 2;
+  if (height < 2 * radius) radius = height / 2;
+  this.beginPath();
+  this.arc(x + width - radius, y + height - radius, radius, 0, Math.PI/2);
+  this.arc(x + radius, y + height - radius, radius, Math.PI/2, Math.PI);
+  this.arc(x + radius, y + radius, radius, Math.PI, 3*(Math.PI/2));
+  this.arc(x + width - radius, y + radius, radius, 3*(Math.PI/2), Math.PI*2);
+  this.closePath();
+  return this;
 };
 
 /**
@@ -37,7 +37,7 @@ CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, ra
  * @param radius the radius of the corners of the rectangle.
  */
 CanvasRenderingContext2D.prototype.strokeRoundRect = function (x, y, width, height, radius) {
-	this.roundRect(x, y, width, height, radius).stroke();
+  this.roundRect(x, y, width, height, radius).stroke();
 };
 
 /**
@@ -50,7 +50,7 @@ CanvasRenderingContext2D.prototype.strokeRoundRect = function (x, y, width, heig
  * @param radius the radius of the corners of the rectangle.
  */
 CanvasRenderingContext2D.prototype.fillRoundRect = function (x, y, width, height, radius) {
-	this.roundRect(x, y, width, height, radius).fill();
+  this.roundRect(x, y, width, height, radius).fill();
 };
 
 /**
@@ -61,10 +61,10 @@ CanvasRenderingContext2D.prototype.fillRoundRect = function (x, y, width, height
  * @param radius the radius of the circle.
  */
 CanvasRenderingContext2D.prototype.circle = function (x, y, radius) {
-	this.beginPath();
-	this.arc(x, y, radius, 0, 2 * Math.PI);
-	this.closePath();
-	return this;
+    this.beginPath();
+    this.arc(x, y, radius, 0, 2 * Math.PI);
+    this.closePath();
+    return this;
 };
 
 /**
@@ -76,8 +76,8 @@ CanvasRenderingContext2D.prototype.circle = function (x, y, radius) {
  * @param lineWidth the width of the stroked line.
  */
 CanvasRenderingContext2D.prototype.strokeCircle = function (x, y, radius, lineWidth) {
-	this.lineWidth = lineWidth;
-	this.circle(x, y, radius).stroke();
+    this.lineWidth = lineWidth;
+    this.circle(x, y, radius).stroke();
 };
 
 /**
@@ -88,5 +88,5 @@ CanvasRenderingContext2D.prototype.strokeCircle = function (x, y, radius, lineWi
  * @param radius the radius of the circle.
  */
 CanvasRenderingContext2D.prototype.fillCircle = function (x, y, radius) {
-	this.circle(x, y, radius).fill();
+    this.circle(x, y, radius).fill();
 };
