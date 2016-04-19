@@ -21,3 +21,6 @@
 ## Overall ToDo	
 - Recursive Tree generator  
 -  
+
+## Tree Structure
+- Node is 
