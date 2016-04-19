@@ -25,6 +25,5 @@ public class RandomPlayer implements Player {
         // Collections.shuffle(moves);
         // System.out.println("Moves: " + moves);
         System.out.println("Playing random move: " + moves.get(0));
-        receiver.playMove(moves.get(0), token);
     }
 }
