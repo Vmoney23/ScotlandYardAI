@@ -15,12 +15,6 @@ public class MiniMaxPlayer implements Player {
 
     @Override
     public void notify(int location, List<Move> moves, Integer token, Receiver receiver) {
-        //TODO: Some clever AI here ...
-        System.out.println("Getting random move");
-        // Collections.shuffle(moves);
-        // System.out.println("Moves: " + moves);
-        System.out.println("Playing random move: " + moves.get(0));
-
         System.out.println("Getting move");
         Move aiMove = getAIMove();
 
@@ -34,23 +28,20 @@ public class MiniMaxPlayer implements Player {
      * @return the chosen move
      */
     Move getAIMove() {
-        int treeDepth = 3;
-        Graph gameTree = generateTree(treeDepth);
-        pruneTree(gameTree);
-        return minimax(gameTree.getLastMovesList());
+        int treeDepth = 0;
+        GameTree<ScotlandYardView, Move> gameTree = new GameTree(currentGameState);
+        generateTree(gameTree, treeDepth);//calls pruneTree() on recurses
+        ArrayList<ScotlandYardView> finalStates = gameTree.getFinalStatesList();
+        return minimax(finalStates); //calls score()
     }
 
     /**
-     * Generates a game tree, 
-     * @return
-     */
-    private Graph generateTree(int treeDepth) {}
-
-    /**
-     * Prunes a game tree using alpha-beta pruning.
+     * Generates a game tree to specified depth and returns it
      *
-     * @param gameTree the tree to prune
      */
-    private void pruneTree(Graph gameTree) {}
+    public void generateTree(GameTree gameTree, int treeDepth) {
+
+    }
+
 
 }
