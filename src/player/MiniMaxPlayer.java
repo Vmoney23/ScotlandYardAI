@@ -1,6 +1,6 @@
 package player;
 
-import aigraph.ScotlandYardGameTree;
+import aigraph.*;
 import scotlandyard.*;
 
 import java.util.*;
@@ -10,7 +10,8 @@ import java.util.*;
  */
 public class MiniMaxPlayer implements Player {
 
-    ScotlandYardView currentGameState;
+    private ScotlandYardView currentGameState;
+    private List<Move> moves;
 
     public MiniMaxPlayer(ScotlandYardView view, String graphFilename) {
         //TODO: A better AI makes use of `view` and `graphFilename`.
@@ -24,6 +25,7 @@ public class MiniMaxPlayer implements Player {
         if (!(receiver instanceof ScotlandYardView))
             throw new IllegalArgumentException("Receiver must implement ScotlandYardView");
         currentGameState = (ScotlandYardView) receiver;
+        this.moves = moves;
 
         // get ai move
         System.out.println("Getting move");
@@ -35,23 +37,25 @@ public class MiniMaxPlayer implements Player {
     }
 
     /**
-     * Chooses a move
+     * Chooses a move.
      *
-     * @return the chosen move
+     * @return the chosen move.
      */
     Move getAIMove() {
         // create new game tree to specified depth, with root as current state of the game
         int treeDepth = 0;
-        ScotlandYardGameTree<ScotlandYardView, Move> gameTree = new ScotlandYardGameTree<>(currentGameState);
+        ScotlandYardGameTree gameTree = new ScotlandYardGameTree(currentGameState);
         generateTree(gameTree, treeDepth);//calls pruneTree(), score()
 
         // return best moved based on MiniMax
-        List<ScotlandYardView> finalStates = gameTree.getFinalStatesList();
-        return minimax(finalStates);
+        //List<AINode<ScotlandYardView>> finalStates = gameTree.getFinalStatesList();
+        //return minimax(finalStates); // TODO HOW TO GET INITIAL MOVE?? map scores/states->initial move?
+        return moves.get(0);
     }
 
     /**
-     * Generates a game tree to specified depth.
+     * Generates a game tree to specified depth, given game tree with just root
+     * node.
      *
      */
     private void generateTree(ScotlandYardGameTree gameTree, int treeDepth) {
@@ -59,7 +63,7 @@ public class MiniMaxPlayer implements Player {
     }
 
 
-    private Move minimax(List<ScotlandYardView> gameStates) {
+    private Move minimax(List<AINode<ScotlandYardView>> gameStates) {
         return null;
     }
 
