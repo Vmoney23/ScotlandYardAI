@@ -3,14 +3,14 @@ package aigraph;
 import graph.*;
 import scotlandyard.*;
 
-import java.util.List;
+import java.util.*;
 
 /**
  *
- * @param <X>
- * @param <Y>
  */
-public class ScotlandYardGameTree<X extends ScotlandYardView, Y extends Move> extends UndirectedGraph {
+public class ScotlandYardGameTree extends UndirectedGraph {
+
+    private AINode<ScotlandYardView> head;
 
     /**
      * Creates a game tree with just the parent node.
@@ -20,14 +20,19 @@ public class ScotlandYardGameTree<X extends ScotlandYardView, Y extends Move> ex
      */
     public ScotlandYardGameTree(ScotlandYardView currentGameState) {
         super();
-        this.add(new AINode<>(currentGameState, 0));
+        this.head = new AINode<>(currentGameState, 0);
+        this.add(head);
     }
 
-    public List<X> getFinalStatesList() {
-        return null;
+    public List<AINode<ScotlandYardView>> getFinalStatesList() {
+        return new ArrayList<AINode<ScotlandYardView>>(Arrays.asList(getHead()));
     }
 
     public List<Integer> getFinalScoresList() {
         return null;
+    }
+
+    public AINode<ScotlandYardView> getHead() {
+        return head;
     }
 }
