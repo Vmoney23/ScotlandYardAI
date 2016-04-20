@@ -14,7 +14,7 @@ public class MiniMaxPlayerFactory implements PlayerFactory {
     @Override
     public Player getPlayer(Colour colour, ScotlandYardView view, String mapFilename) {
         //TODO: Update this with your AI implementation.
-        return new MiniMaxPlayerFactory(view, mapFilename);
+        return new MiniMaxPlayer(view, mapFilename);
     }
 
     @Override
