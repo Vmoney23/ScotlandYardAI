@@ -14,18 +14,25 @@ public class MiniMaxPlayer implements Player {
 
     private int location;
     private ScotlandYardView currentGameState;
+    private HashMap<Colour, Integer> playerLocationMap;
     private UndirectedGraph<Integer, Transport> graph;
     private List<Move> moves;
 
     public MiniMaxPlayer(ScotlandYardView view, String graphFilename) {
-        //TODO: A better AI makes use of `view` and `graphFilename`.
-
+        // store current game
         this.currentGameState = view;
+
+        // store graph
         ScotlandYardGraphReader graphReader = new ScotlandYardGraphReader();
         try {
             this.graph = graphReader.readGraph("lib/scotlandyard.jar/" + graphFilename);
         } catch (IOException e) {
             System.err.println("failed to read " + graphFilename);
+        }
+
+        // store locations of other players
+        for (Colour player : currentGameState.getPlayers()) {
+            playerLocationMap.put(player, currentGameState.getPlayerLocation(player));
         }
     }
 
@@ -69,8 +76,10 @@ public class MiniMaxPlayer implements Player {
         HashMap<Move, Integer> moveScores = score();
         // return best moved based on MiniMax
         //List<AINode<ScotlandYardView>> finalStates = gameTree.getFinalStatesList();
-        //return minimax(finalStates); // TODO HOW TO GET INITIAL MOVE?? map scores/states->initial move?
-        return moves.get(0);
+        //return minimax(finalStates);
+
+        // return key associated with  highest value
+        return Collections.max(moveScores.entrySet(), (entry1, entry2) -> (entry1.getValue() > entry2.getValue()) ? 1 : -1).getKey();
     }
 
     /**
@@ -82,25 +91,56 @@ public class MiniMaxPlayer implements Player {
         // create map of moves to scores
         HashMap<Move, Integer> moveScoreMap = new HashMap<>();
 
-        // store locations of other players
-        HashMap<Colour, Integer> playerLocationMap = new HashMap<>();
-        for (Colour player : currentGameState.getPlayers()) {
-            playerLocationMap.put(player, currentGameState.getPlayerLocation(player));
-        }
-
         // iterate through possible moves, calculating score for each one and
         // adding to moveScoreMap
         for (Move move : moves) {
             int score = 0;
 
+            // TODO score a mrX move
+            // TODO score a detective move
             // TODO score a double move
             // TODO score a single move
-            if (move instanceof MoveTicket) {
-
+            if (move.colour == Colour.Black) {
+                if (move instanceof MoveTicket)
+                    score = scoreMoveTicket((MoveTicket) move);
+                else if (move instanceof MoveDouble)
+                    score = scoreMoveDouble((MoveDouble) move);
             }
+
+            // put (move, score) in map
+            moveScoreMap.put(move, score);
         }
 
         return moveScoreMap;
+    }
+
+    /**
+     * Assigns a score to a possible MoveTicket using currentGameState, and
+     * returns that score.
+     *
+     * @param move the MoveTicket to calculate score for.
+     * @return the score for move.
+     */
+    private int scoreMoveTicket(MoveTicket move) {
+        int score = 0;
+
+        // give a move a higher score if it results in MrX being further away
+        // from detectives
+        for (Colour player : currentGameState.getPlayers())
+            score += Djikstra(move.target, playerLocationMap.get(player));
+
+        return score;
+    }
+
+    /**
+     * Assigns a score to a possible MoveDouble using currentGameState, and
+     * returns that score.
+     *
+     * @param move the MoveTicket to calculate score for.
+     * @return the score for move.
+     */
+    private int scoreMoveDouble(MoveDouble move) {
+        return -1;
     }
 
     /**
@@ -111,11 +151,5 @@ public class MiniMaxPlayer implements Player {
     private void generateTree(ScotlandYardGameTree gameTree, int treeDepth) {
 
     }
-
-
-    private static Move minimax(List<AINode<ScotlandYardView>> gameStates) {
-        return null;
-    }
-
 
 }

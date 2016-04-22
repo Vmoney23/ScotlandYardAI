@@ -8,7 +8,7 @@ import java.util.*;
 /**
  *
  */
-public class ScotlandYardGameTree extends UndirectedGraph {
+public class ScotlandYardGameTree extends UndirectedGraph<ScotlandYardView, Move> {
 
     private AINode<ScotlandYardView> head;
 
@@ -25,7 +25,7 @@ public class ScotlandYardGameTree extends UndirectedGraph {
     }
 
     public List<AINode<ScotlandYardView>> getFinalStatesList() {
-        return new ArrayList<AINode<ScotlandYardView>>(Arrays.asList(getHead()));
+        return new ArrayList<AINode<ScotlandYardView>>(Collections.singletonList(getHead()));
     }
 
     public List<Integer> getFinalScoresList() {
