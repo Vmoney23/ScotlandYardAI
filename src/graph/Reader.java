@@ -27,7 +27,7 @@ public class Reader
      * @param filename The filename of the file that contains the graph
      * @throws IOException
      */
-    void read(String filename) throws IOException
+    public void read(String filename) throws IOException
     {
     	
     	// initialise the graph

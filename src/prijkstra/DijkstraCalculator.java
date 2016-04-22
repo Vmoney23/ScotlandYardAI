@@ -6,9 +6,9 @@ package prijkstra;
 import graph.*;
 
 // implements Dijkstra's
-public class DijkstraCalculator extends GraphCalculator {
+public class DijkstraCalculator<X, Y> extends GraphCalculator<X, Y> {
 
-  public DijkstraCalculator(Graph<Integer,Integer> graph) {
+  public DijkstraCalculator(Graph<X, Y> graph) {
 	super(graph);
   }
   
@@ -18,20 +18,22 @@ public class DijkstraCalculator extends GraphCalculator {
   }
   
   // runs Dijkstra's algorithm and output particular route
-  public Graph<Integer,Integer> getResult(Integer startNodeID, Integer destinationNodeID) {
+  public Graph<X, Y> getResult(X startNodeID, X destinationNodeID) {
     
 	// calculate graph with paths from every node to start node with its distance
-	Graph<Integer,Integer> startToAnyNode = getResult(startNodeID);
+	Graph<X, Y> startToAnyNode = getResult(startNodeID);
 
     // trace route from end node to start node
-    Node<Integer> current = startToAnyNode.getNode(destinationNodeID);  
-    Graph<Integer,Integer> route = new DirectedGraph<Integer,Integer>();
+    Node<X> current = startToAnyNode.getNode(destinationNodeID);
+    Graph<X, Y> route = new DirectedGraph<>();
     route.add(current);
     while (!startToAnyNode.getEdgesFrom(current).isEmpty()) {
-      Edge<Integer,Integer> e = startToAnyNode.getEdgesFrom(current).get(0);
+      Edge<X, Y> e = startToAnyNode.getEdgesFrom(current).get(0);
       route.add(e.getTarget());
       route.add(e);
       current = e.getTarget();
     }
     return route;
-} }
+  }
+
+}

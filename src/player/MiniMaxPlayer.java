@@ -1,7 +1,8 @@
 package player;
 
 import aigraph.*;
-import graph.UndirectedGraph;
+import prijkstra.*;
+import graph.*;
 import scotlandyard.*;
 
 import java.io.IOException;
@@ -15,7 +16,7 @@ public class MiniMaxPlayer implements Player {
     private int location;
     private ScotlandYardView currentGameState;
     private HashMap<Colour, Integer> playerLocationMap;
-    private UndirectedGraph<Integer, Transport> graph;
+    private DijkstraCalculator dijkstraGraph;
     private List<Move> moves;
 
     public MiniMaxPlayer(ScotlandYardView view, String graphFilename) {
@@ -25,7 +26,10 @@ public class MiniMaxPlayer implements Player {
         // store graph
         ScotlandYardGraphReader graphReader = new ScotlandYardGraphReader();
         try {
-            this.graph = graphReader.readGraph("lib/scotlandyard.jar/" + graphFilename);
+            // read the graph, convert it to a DijkstraCalculator and store it.
+            Reader reader = new Reader();
+            reader.read("lib/scotlandyard.jar/" + graphFilename);
+            this.dijkstraGraph = new DijkstraCalculator(reader.graph());
         } catch (IOException e) {
             System.err.println("failed to read " + graphFilename);
         }
@@ -126,8 +130,10 @@ public class MiniMaxPlayer implements Player {
 
         // give a move a higher score if it results in MrX being further away
         // from detectives
-        for (Colour player : currentGameState.getPlayers())
-            score += Djikstra(move.target, playerLocationMap.get(player));
+        for (Colour player : currentGameState.getPlayers()) {
+            Graph<Integer, Transport> route = dijkstraGraph.getResult(location, playerLocationMap.get(player));
+            score += route.getEdges().size();
+        }
 
         return score;
     }

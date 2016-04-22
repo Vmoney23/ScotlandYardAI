@@ -7,38 +7,39 @@ import java.util.*;
 import graph.*;
 
 // implements base algorithm for Prim's and Dijkstra's
-public abstract class GraphCalculator {
+public abstract class GraphCalculator<X, Y> {
 
   // reference to input graph
-  protected Graph<Integer,Integer> graph;
+  protected Graph<X, Y> graph;
 
   // constructor
-  public GraphCalculator(Graph<Integer,Integer> graph) {
+  public GraphCalculator(Graph<X, Y> graph) {
 	this.graph = graph;	  
   }
 	
   // applies algorithm to input graph
-  public Graph<Integer,Integer> getResult(Integer startNodeID) {
+  public Graph<X, Y> getResult(X startNodeID) {
 	
 	// define node collections
-	final Set<Node<Integer>> visited = new HashSet<Node<Integer>>();
-	final PriorityQueue<Node<Integer>> unvisited = new PriorityQueue<Node<Integer>>();
+	final Set<Node<X>> visited = new HashSet<>();
+	final PriorityQueue<Node<X>> unvisited = new PriorityQueue<>();
 	
 	// make a result graph
-	Graph<Integer,Integer> ourResult = new DirectedGraph<Integer,Integer>();
+	Graph<X, Y> ourResult = new DirectedGraph<>();
 	
 	// initialise starting node
-	Node<Integer> currentNode = graph.getNode(startNodeID);
+	Node<X> currentNode = graph.getNode(startNodeID);
 	currentNode.setWeight(0.0);
 	visited.add(currentNode);
 	
 	// initialise node collections
-	for (Node<Integer> node : graph.getNodes()) {
+	for (Node<X> node : graph.getNodes()) {
 	  ourResult.add(node);
 	  if (!currentNode.getIndex().equals(node.getIndex())) {
 	    node.setWeight(Double.POSITIVE_INFINITY);
 	    unvisited.add(node);
-	} }
+      }
+    }
 	
 	// find initial direct distances to start node
 	updateDistances(unvisited, currentNode, ourResult);
@@ -57,25 +58,34 @@ public abstract class GraphCalculator {
   // update rule to be specified
   protected abstract Double update(Double distance, Double currentDistance, Double directDistance );
 
+  // TODO update so edge does not have fixed weight = 1.0 (weight on transport)
   // updates all unvisited node distances by considering routes via currentNode
-  private void updateDistances(PriorityQueue<Node<Integer>> unvisited,
-	 	                       Node<Integer> currentNode,
-		                       Graph<Integer,Integer> ourResult) {
+  private void updateDistances(PriorityQueue<Node<X>> unvisited,
+	 	                       Node<X> currentNode,
+		                       Graph<X, Y> ourResult) {
 	
 	// consider neighbours of current node (others can't gain from update)
-    for(Edge<Integer,Integer> e : graph.getEdgesFrom(currentNode)) {
-      Node<Integer> neighbour = e.getTarget();
+    for(Edge<X, Y> e : graph.getEdgesFrom(currentNode)) {
+      Node<X> neighbour = e.getTarget();
       
       // only update unvisited nodes (others already have shortest distance)
       if (unvisited.contains(neighbour)) {
    	    Double distance = neighbour.getWeight();
+
    	    // apply update rule (here with fixed edge weight of 1.0)
-        Double possibleUpdate = update(distance, currentNode.getWeight(),1.0); 
+        Double possibleUpdate = update(distance, currentNode.getWeight(), 1.0);
+
         // only update nodes with better option
-        if (distance>possibleUpdate) {	
+        if (distance > possibleUpdate) {
           unvisited.remove(neighbour);
           neighbour.setWeight(possibleUpdate);
-          unvisited.add(neighbour); 
+          unvisited.add(neighbour);
+
           // add reverse edge to result (to create paths to start node rather than from)
-          ourResult.add(new Edge<Integer,Integer>(neighbour,currentNode,0));
-} } } } }
+          ourResult.add(new Edge<X, Y>(neighbour, currentNode, e.getData()));
+        }
+      }
+    }
+  }
+
+}
