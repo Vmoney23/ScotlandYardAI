@@ -35,6 +35,7 @@ public class MiniMaxPlayer implements Player {
         }
 
         // store locations of other players
+        playerLocationMap = new HashMap<>();
         for (Colour player : currentGameState.getPlayers()) {
             playerLocationMap.put(player, currentGameState.getPlayerLocation(player));
         }
@@ -131,7 +132,10 @@ public class MiniMaxPlayer implements Player {
         // give a move a higher score if it results in MrX being further away
         // from detectives
         for (Colour player : currentGameState.getPlayers()) {
-            Graph<Integer, Transport> route = dijkstraGraph.getResult(location, playerLocationMap.get(player));
+            // calculate shortest route from MiniMax player to player
+            Graph<Integer, Transport> route = dijkstraGraph.getResult(move.target, playerLocationMap.get(player));
+
+            // add number of edges in route to score
             score += route.getEdges().size();
         }
 
@@ -146,7 +150,9 @@ public class MiniMaxPlayer implements Player {
      * @return the score for move.
      */
     private int scoreMoveDouble(MoveDouble move) {
-        return -1;
+        // score the move as if single move, then divide by factor to account
+        // for using double move ticket
+        return scoreMoveTicket(move.move2) / 2;
     }
 
     /**
