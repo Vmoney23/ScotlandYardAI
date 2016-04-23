@@ -83,7 +83,7 @@ public class MiniMaxPlayer implements Player {
         //List<AINode<ScotlandYardView>> finalStates = gameTree.getFinalStatesList();
         //return minimax(finalStates);
 
-        // return key associated with  highest value
+        // return key associated with highest value
         return Collections.max(moveScores.entrySet(), (entry1, entry2) -> (entry1.getValue() > entry2.getValue()) ? 1 : -1).getKey();
     }
 
