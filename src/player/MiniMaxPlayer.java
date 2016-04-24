@@ -1,13 +1,17 @@
 package player;
 
+import aigraph.ScotlandYardGameTree;
+import graph.Edge;
+import graph.Graph;
+import graph.Reader;
+import prijkstra.DijkstraCalculator;
 import prijkstra.Weighter;
-import aigraph.*;
-import prijkstra.*;
-import graph.*;
 import scotlandyard.*;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * A class for a player in a Scotland Yard game, implementing Player. A player
@@ -53,8 +57,8 @@ public class MiniMaxPlayer implements Player {
 
 
     /**
-     * Gets the current state of the game from Receiver (the Scotland Yard
-     * model), chooses a move, and tells the receiver to play it. This method
+     * Gets the current state of the game from a Receiver (the Scotland Yard
+     * model), chooses a move, and makes the receiver play it. This method
      * should be called by the receiver.
      *
      * @param location the location of the player to request a move from.
@@ -87,7 +91,7 @@ public class MiniMaxPlayer implements Player {
      *
      * @return the chosen move.
      */
-    Move getAIMove() {
+    protected Move getAIMove() {
         // create new game tree to specified depth, with root as current state of the game
         //int treeDepth = 0;
         //ScotlandYardGameTree gameTree = new ScotlandYardGameTree(currentGameState);
@@ -108,7 +112,7 @@ public class MiniMaxPlayer implements Player {
      *
      * @return a HashMap of each given move to its score.
      */
-    private HashMap<Move, Double> score() {
+    protected HashMap<Move, Double> score() {
 
         // create map of moves to scores
         HashMap<Move, Double> moveScoreMap = new HashMap<>();
@@ -116,16 +120,13 @@ public class MiniMaxPlayer implements Player {
         // iterate through possible moves, calculating score for each one and
         // adding to moveScoreMap
         for (Move move : moves) {
-            double score = 0;
+
+            double score = 0.0;
 
             // TODO make score more complex
-            // TODO score a detective move
+            // TODO score a detective move better
 
-            // give a MovePass a score of 0
-            if (move instanceof MovePass) {
-                score = 0;
-            }
-            // calculate score for player
+            // calculate score for move. A MovePass is left with score = 0;
             if (move instanceof MoveTicket)
                 score = scoreMoveTicket((MoveTicket) move);
             else if (move instanceof MoveDouble)
@@ -145,7 +146,7 @@ public class MiniMaxPlayer implements Player {
      * @param move the MoveTicket to calculate score for.
      * @return the score for move.
      */
-    private double scoreMoveTicket(MoveTicket move) {
+    protected double scoreMoveTicket(MoveTicket move) {
         // upon return, score = total / routes
         double score;
         double total = 0;
@@ -192,7 +193,7 @@ public class MiniMaxPlayer implements Player {
      * @param move the MoveTicket to calculate score for.
      * @return the score for move.
      */
-    private double scoreMoveDouble(MoveDouble move) {
+    protected double scoreMoveDouble(MoveDouble move) {
         // score the move as if single move, then divide by some factor to
         // account for using a valuable double move ticket
         return scoreMoveTicket(move.move2) / 2.5;
@@ -203,7 +204,7 @@ public class MiniMaxPlayer implements Player {
      * Dijkstra's. This Weighter assigns a higher weight to transports with
      * which players start with less tickets for.
      */
-    private static final Weighter<Transport> TRANSPORT_WEIGHTER = new Weighter<Transport>() {
+    protected static final Weighter<Transport> TRANSPORT_WEIGHTER = new Weighter<Transport>() {
         @Override
         public double toWeight(Transport t) {
             int val = 0;
@@ -230,7 +231,7 @@ public class MiniMaxPlayer implements Player {
      * Dijkstra's. This Weighter assigns a lower weight to transports with
      * which players start with less tickets for.
      */
-    private static final Weighter<Transport> TRANSPORT_INV_WEIGHTER = new Weighter<Transport>() {
+    protected static final Weighter<Transport> TRANSPORT_INV_WEIGHTER = new Weighter<Transport>() {
         @Override
         public double toWeight(Transport t) {
             int val = 0;
@@ -257,7 +258,7 @@ public class MiniMaxPlayer implements Player {
      * node.
      *
      */
-    private void generateTree(ScotlandYardGameTree gameTree, int treeDepth) {
+    protected void generateTree(ScotlandYardGameTree gameTree, int treeDepth) {
 
     }
 
