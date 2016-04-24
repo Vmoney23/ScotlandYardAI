@@ -4,6 +4,7 @@ package prijkstra;
 // (code compacted for screen presentation)
 
 import graph.*;
+import weighter.Weighter;
 
 // implements Dijkstra's
 public class DijkstraCalculator<X, Y> extends GraphCalculator<X, Y> {
@@ -18,7 +19,7 @@ public class DijkstraCalculator<X, Y> extends GraphCalculator<X, Y> {
   }
   
   // runs Dijkstra's algorithm and output particular route
-  public Graph<X, Y> getResult(X startNodeID, X destinationNodeID) {
+  public Graph<X, Y> getResult(X startNodeID, X destinationNodeID, Weighter<Y> edgeWeighter) {
     
 	// calculate graph with paths from every node to start node with its distance
 	Graph<X, Y> startToAnyNode = getResult(startNodeID);

@@ -1,5 +1,6 @@
 package player;
 
+import weighter.Weighter;
 import aigraph.*;
 import prijkstra.*;
 import graph.*;
@@ -101,10 +102,8 @@ public class MiniMaxPlayer implements Player {
         for (Move move : moves) {
             int score = 0;
 
-            // TODO score a mrX move
+            // TODO make score more complex
             // TODO score a detective move
-            // TODO score a double move
-            // TODO score a single move
             if (move.colour == Colour.Black) {
                 if (move instanceof MoveTicket)
                     score = scoreMoveTicket((MoveTicket) move);
@@ -133,7 +132,8 @@ public class MiniMaxPlayer implements Player {
         // from detectives
         for (Colour player : currentGameState.getPlayers()) {
             // calculate shortest route from MiniMax player to player
-            Graph<Integer, Transport> route = dijkstraGraph.getResult(move.target, playerLocationMap.get(player));
+            // TODO weight transports differently (including boat)
+            Graph<Integer, Transport> route = dijkstraGraph.getResult(move.target, playerLocationMap.get(player), TRANSPORT_WEIGHTER);
 
             // add number of edges in route to score
             score += route.getEdges().size();
@@ -156,6 +156,30 @@ public class MiniMaxPlayer implements Player {
     }
 
     /**
+     *
+     */
+    private static final Weighter<Transport> TRANSPORT_WEIGHTER = new Weighter<Transport>() {
+        public double toWeight(Transport t) {
+            int val = 0;
+            switch (t) {
+                case Taxi:
+                    val = 1;
+                    break;
+                case Bus:
+                    val = 2;
+                    break;
+                case Underground:
+                    val = 4;
+                    break;
+                case Boat:
+                    val = 8;
+                    break;
+            }
+            return val;
+        }
+    };
+
+    /** TODO generate a tree
      * Generates a game tree to specified depth, given game tree with just root
      * node.
      *
