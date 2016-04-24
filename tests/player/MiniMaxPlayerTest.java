@@ -36,11 +36,17 @@ public class MiniMaxPlayerTest {
     @Test
     public void scoreCalculatesMrXMoveToAwayFromDetectivesAsBetter() throws Exception {
         // instantiate a game with MrX as MiniMax player
-        ScotlandYard game = TestHelper.getStoppedGame(1, "graph.txt");
+        ScotlandYard game = TestHelper.getStoppedGame(1, "test_resources/graph.txt");
         MiniMaxPlayer mrx = new TestHelper.MrXMiniMaxTestPlayer(game, "graph.txt");
         TestHelper.addMrxToGame(game, mrx, 1);
 
-        // TODO create a weaker and a stronger move.
+        // TODO get a weaker and a stronger move.
+
+        // check mrx has enough moves
+        if (mrx.moves.size() < 2) throw new Exception("internal error: not enough mrx moves");
+        System.err.println(mrx.moves);
+
+
         MoveTicket moveStrong = null;
         MoveTicket moveWeak = null;
 
@@ -48,6 +54,7 @@ public class MiniMaxPlayerTest {
         Double moveStrongScore = mrx.scoreMoveTicket(moveStrong);
         Double moveWeakScore = mrx.scoreMoveTicket(moveWeak);
 
+        // assert the better move has a better score
         assertTrue(moveStrongScore > moveWeakScore);
     }
 

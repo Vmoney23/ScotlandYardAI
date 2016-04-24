@@ -31,7 +31,7 @@ public class MiniMaxPlayer implements Player {
     private ScotlandYardView currentGameState;
     private HashMap<Colour, Integer> playerLocationMap;
     private DijkstraCalculator dijkstraGraph;
-    private List<Move> moves;
+    protected List<Move> moves;
 
     public MiniMaxPlayer(ScotlandYardView view, String graphFilename) {
         // store current game
