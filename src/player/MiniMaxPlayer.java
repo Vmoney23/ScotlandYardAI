@@ -1,6 +1,6 @@
 package player;
 
-import weighter.Weighter;
+import prijkstra.Weighter;
 import aigraph.*;
 import prijkstra.*;
 import graph.*;
@@ -109,6 +109,7 @@ public class MiniMaxPlayer implements Player {
      * @return a HashMap of each given move to its score.
      */
     private HashMap<Move, Double> score() {
+
         // create map of moves to scores
         HashMap<Move, Double> moveScoreMap = new HashMap<>();
 

@@ -4,7 +4,6 @@ package prijkstra;
 // (code compacted for screen presentation)
 
 import graph.*;
-import weighter.Weighter;
 
 // implements Dijkstra's
 public class DijkstraCalculator<X, Y> extends GraphCalculator<X, Y> {

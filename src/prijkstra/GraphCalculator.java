@@ -5,7 +5,6 @@ package prijkstra;
 
 import java.util.*;
 import graph.*;
-import weighter.Weighter;
 
 // implements base algorithm for Prim's and Dijkstra's
 public abstract class GraphCalculator<X, Y> {
