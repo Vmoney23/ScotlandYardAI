@@ -92,10 +92,12 @@ public class MiniMaxPlayer implements Player {
         //int treeDepth = 0;
         //ScotlandYardGameTree gameTree = new ScotlandYardGameTree(currentGameState);
         //generateTree(gameTree, treeDepth);//calls pruneTree(), score()
-        HashMap<Move, Double> moveScores = score();
         // return best moved based on MiniMax
         //List<AINode<ScotlandYardView>> finalStates = gameTree.getFinalStatesList();
         //return minimax(finalStates);
+
+        // calculate a score for each move and put this info in a map
+        HashMap<Move, Double> moveScores = score();
 
         // return key associated with highest value
         return Collections.max(moveScores.entrySet(), (entry1, entry2) -> (entry1.getValue() > entry2.getValue()) ? 1 : -1).getKey();
@@ -143,32 +145,42 @@ public class MiniMaxPlayer implements Player {
      * @return the score for move.
      */
     private double scoreMoveTicket(MoveTicket move) {
-        int score = 0;
+        // upon return, score = total / routes
+        double score;
+        double total = 0;
+        int routes = 0;
 
-        // give a move a higher score if it results in MrX being further away
-        // from detectives
+        // loop through all other players, find 'best' route to each other
+        // player from move target, score this route, add route score to total.
         for (Colour player : currentGameState.getPlayers()) {
-            // no need to calculate distance between player and himself
+
+            // no need to calculate distance between player and himself...
             if (move.colour == player) continue;
 
             // calculate shortest route from MiniMax player to other player
             Graph<Integer, Transport> route = dijkstraGraph.getResult(move.target, playerLocationMap.get(player), TRANSPORT_WEIGHTER);
 
-            // add weight of each edge in route to score
+            // add weight of each edge in route to score. Use a different
+            // Weighter if player is Detective or MrX.
             if (move.colour == Colour.Black) {
                 // add more to score if edge requires greater value transport
                 // to traverse.
                 for (Edge<Integer, Transport> e : route.getEdges())
-                    score += TRANSPORT_WEIGHTER.toWeight(e.getData());
+                    total += TRANSPORT_WEIGHTER.toWeight(e.getData());
             }
             else {
                 // add more to score if edge requires lesser value transport
                 // to traverse. TODO change for route to other detectives vs MrX
                 for (Edge<Integer, Transport> e : route.getEdges())
-                    score += TRANSPORT_INV_WEIGHTER.toWeight(e.getData());
+                    total += TRANSPORT_INV_WEIGHTER.toWeight(e.getData());
             }
+
+            // increment routes, for taking mean later
+            routes++;
         }
 
+        // calculate mean and return it
+        score = total / routes;
         return score;
     }
 
@@ -180,9 +192,9 @@ public class MiniMaxPlayer implements Player {
      * @return the score for move.
      */
     private double scoreMoveDouble(MoveDouble move) {
-        // score the move as if single move, then divide by factor to account
-        // for using double move ticket
-        return scoreMoveTicket(move.move2) / 2;
+        // score the move as if single move, then divide by some factor to
+        // account for using a valuable double move ticket
+        return scoreMoveTicket(move.move2) / 2.5;
     }
 
     /**
