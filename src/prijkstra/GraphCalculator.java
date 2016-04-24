@@ -5,6 +5,7 @@ package prijkstra;
 
 import java.util.*;
 import graph.*;
+import weighter.Weighter;
 
 // implements base algorithm for Prim's and Dijkstra's
 public abstract class GraphCalculator<X, Y> {
@@ -18,7 +19,7 @@ public abstract class GraphCalculator<X, Y> {
   }
 	
   // applies algorithm to input graph
-  public Graph<X, Y> getResult(X startNodeID) {
+  public Graph<X, Y> getResult(X startNodeID, Weighter<Y> edgeWeighter) {
 	
 	// define node collections
 	final Set<Node<X>> visited = new HashSet<>();
@@ -42,13 +43,13 @@ public abstract class GraphCalculator<X, Y> {
     }
 	
 	// find initial direct distances to start node
-	updateDistances(unvisited, currentNode, ourResult);
+	updateDistances(unvisited, currentNode, ourResult, edgeWeighter);
 	  
 	// greedily update nodes
 	while (!unvisited.isEmpty()) {
 	  visited.add(currentNode);
 	  currentNode = unvisited.poll();
-	  updateDistances(unvisited, currentNode, ourResult);
+	  updateDistances(unvisited, currentNode, ourResult, edgeWeighter);
 	}
 	
 	// return result
@@ -58,11 +59,11 @@ public abstract class GraphCalculator<X, Y> {
   // update rule to be specified
   protected abstract Double update(Double distance, Double currentDistance, Double directDistance );
 
-  // TODO update so edge does not have fixed weight = 1.0 (weight on transport)
   // updates all unvisited node distances by considering routes via currentNode
   private void updateDistances(PriorityQueue<Node<X>> unvisited,
 	 	                       Node<X> currentNode,
-		                       Graph<X, Y> ourResult) {
+		                       Graph<X, Y> ourResult,
+                               Weighter<Y> edgeWeighter) {
 	
 	// consider neighbours of current node (others can't gain from update)
     for(Edge<X, Y> e : graph.getEdgesFrom(currentNode)) {
@@ -73,7 +74,7 @@ public abstract class GraphCalculator<X, Y> {
    	    Double distance = neighbour.getWeight();
 
    	    // apply update rule (here with fixed edge weight of 1.0)
-        Double possibleUpdate = update(distance, currentNode.getWeight(), 1.0);
+        Double possibleUpdate = update(distance, currentNode.getWeight(), edgeWeighter.toWeight(e.getData()));
 
         // only update nodes with better option
         if (distance > possibleUpdate) {

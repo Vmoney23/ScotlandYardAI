@@ -22,7 +22,7 @@ public class DijkstraCalculator<X, Y> extends GraphCalculator<X, Y> {
   public Graph<X, Y> getResult(X startNodeID, X destinationNodeID, Weighter<Y> edgeWeighter) {
     
 	// calculate graph with paths from every node to start node with its distance
-	Graph<X, Y> startToAnyNode = getResult(startNodeID);
+	Graph<X, Y> startToAnyNode = getResult(startNodeID, edgeWeighter);
 
     // trace route from end node to start node
     Node<X> current = startToAnyNode.getNode(destinationNodeID);

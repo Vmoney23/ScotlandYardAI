@@ -132,7 +132,6 @@ public class MiniMaxPlayer implements Player {
         // from detectives
         for (Colour player : currentGameState.getPlayers()) {
             // calculate shortest route from MiniMax player to player
-            // TODO weight transports differently (including boat)
             Graph<Integer, Transport> route = dijkstraGraph.getResult(move.target, playerLocationMap.get(player), TRANSPORT_WEIGHTER);
 
             // add number of edges in route to score
