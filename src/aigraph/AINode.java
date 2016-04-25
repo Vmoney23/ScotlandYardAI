@@ -25,7 +25,7 @@ public class AINode extends Node<ScotlandYard> {
         super.setIndex(gameState);
     }
 
-    public double getScore() {
+    public Double getScore() {
         return score;
     }
 
