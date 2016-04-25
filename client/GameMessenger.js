@@ -166,10 +166,9 @@ GameMessenger.prototype.interpretNotifyTurn = function (messageNotifyTurn) {
 	var validMoves = messageNotifyTurn['valid_moves'];
 	var move = validMoves[0].move;
 	var player = move['colour'];
-	if (aiMessenger.connected && AIPlayers.length != 0) {
+	if (aiMessenger.connected && AIPlayers.length != 0 && AIPlayers.some(elem => elem == player)) {
 		guiConnector.startTurn(messageNotifyTurn, true);
-		if (AIPlayers.some(elem => elem == player))
-			aiMessenger.sendMessage(messageNotifyTurn);
+		aiMessenger.sendMessage(messageNotifyTurn);
 	} else {
 		guiConnector.startTurn(messageNotifyTurn, false);
 	}
