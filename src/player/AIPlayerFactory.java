@@ -23,6 +23,7 @@ public class AIPlayerFactory implements PlayerFactory {
     @Override
     public void ready() {
         //TODO: Any code you need to execute when the game starts, put here.
+		System.out.println("Game started!");
     }
 
     @Override
@@ -35,6 +36,7 @@ public class AIPlayerFactory implements PlayerFactory {
     @Override
     public void finish() {
         //TODO: Any code you need to execute when the game ends, put here.
+		System.out.println("Game ended!");
     }
 
 }
