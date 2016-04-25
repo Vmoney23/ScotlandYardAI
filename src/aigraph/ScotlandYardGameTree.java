@@ -2,7 +2,7 @@ package aigraph;
 
 import graph.UndirectedGraph;
 import scotlandyard.Move;
-import scotlandyard.ScotlandYardView;
+import scotlandyard.ScotlandYard;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +11,7 @@ import java.util.List;
 /**
  *
  */
-public class ScotlandYardGameTree extends UndirectedGraph<ScotlandYardView, Move> {
+public class ScotlandYardGameTree extends UndirectedGraph<ScotlandYard, Move> {
 
     private AINode head;
 
@@ -21,7 +21,7 @@ public class ScotlandYardGameTree extends UndirectedGraph<ScotlandYardView, Move
      * @param currentGameState ScotlandYardView implementing object to be root
      *                         node of ScotlandYardGameTree.
      */
-    public ScotlandYardGameTree(ScotlandYardView currentGameState) {
+    public ScotlandYardGameTree(ScotlandYard currentGameState) {
         super();
         this.head = new AINode(currentGameState, 0.0);
         this.add(head);

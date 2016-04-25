@@ -1,5 +1,6 @@
 package player;
 
+import aigraph.ScotlandYardGameTree;
 import graph.Edge;
 import graph.Graph;
 import prijkstra.DijkstraCalculator;
@@ -26,16 +27,19 @@ import java.util.List;
 public class MiniMaxPlayer implements Player {
 
     private int location;
-    private ScotlandYardView currentGameState;
+    private ScotlandYard currentGameState;
     private HashMap<Colour, Integer> playerLocationMap;
     private ScotlandYardGraph graph;
-    private ScotlandYardGraph gameTree;
+    private ScotlandYardGameTree gameTree;
     private DijkstraCalculator dijkstraGraph;
     protected List<Move> moves;
 
     public MiniMaxPlayer(ScotlandYardView view, String graphFilename) {
         // store current game
-        this.currentGameState = view;
+        if (!(view instanceof ScotlandYard))
+            throw new IllegalArgumentException("view must be " +
+                                               "a ScotlandYard object");
+        this.currentGameState = (ScotlandYard) view;
 
         // store graph
         ScotlandYardGraphReader graphReader = new ScotlandYardGraphReader();
@@ -73,9 +77,10 @@ public class MiniMaxPlayer implements Player {
     public void notify(int location, List<Move> moves, Integer token,
                        Receiver receiver) {
         // update current game state
-        if (!(receiver instanceof ScotlandYardView))
-            throw new IllegalArgumentException("Receiver must implement ScotlandYardView also");
-        this.currentGameState = (ScotlandYardView) receiver;
+        if (!(receiver instanceof ScotlandYard))
+            throw new IllegalArgumentException("Receiver must be " +
+                                               "a ScotlandYard object");
+        this.currentGameState = (ScotlandYard) receiver;
         this.moves = moves;
         this.location = location;
 
@@ -102,6 +107,9 @@ public class MiniMaxPlayer implements Player {
         //List<AINode<ScotlandYardView>> finalStates = gameTree.getFinalStatesList();
         //return minimax(finalStates);
 
+        // initialise tree
+
+
         // calculate a score for each move and put this info in a map
         HashMap<Move, Double> moveScores = score();
 
@@ -118,7 +126,7 @@ public class MiniMaxPlayer implements Player {
 
         // create map of moves to scores
         HashMap<Move, Double> moveScoreMap = new HashMap<>();
-
+/*
         // iterate through possible moves, calculating score for each one and
         // adding to moveScoreMap
         for (Move move : moves) {
@@ -137,6 +145,12 @@ public class MiniMaxPlayer implements Player {
             // put entry (move, score) in map
             moveScoreMap.put(move, score);
         }
+
+        return moveScoreMap;
+*/
+
+
+
 
         return moveScoreMap;
     }
