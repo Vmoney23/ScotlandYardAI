@@ -1,6 +1,6 @@
 package aigraph;
 
-import graph.UndirectedGraph;
+import graph.*;
 import scotlandyard.Move;
 import scotlandyard.ScotlandYard;
 
@@ -27,8 +27,8 @@ public class ScotlandYardGameTree extends UndirectedGraph<ScotlandYard, Move> {
         this.add(head);
     }
 
-    public List<AINode> getFinalStatesList() {
-        return new ArrayList<AINode>(Collections.singletonList(getHead()));
+    public List<Edge<ScotlandYard, Move>> getListFirstLevelEdges() {
+        return null;
     }
 
     public List<Integer> getFinalScoresList() {

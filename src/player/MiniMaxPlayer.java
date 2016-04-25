@@ -113,10 +113,12 @@ public class MiniMaxPlayer implements Player {
 
         // calculate a score for each move and put this info in a map
         int depth = 1;
-        HashMap<Move, Double> moveScores = score(gameTree.getHead(), depth, true);
+        //HashMap<Move, Double> moveScores = score(gameTree.getHead(), depth,true);
 
         // return key associated with highest value
-        return Collections.max(moveScores.entrySet(), (entry1, entry2) -> (entry1.getValue() > entry2.getValue()) ? 1 : -1).getKey();
+        //return Collections.max(moveScores.entrySet(), (entry1, entry2) ->(entry1.getValue() > entry2.getValue()) ? 1 : -1).getKey();
+
+        return score(depth, true);
     }
 
     /**
@@ -124,10 +126,13 @@ public class MiniMaxPlayer implements Player {
      *
      * @return a HashMap of each given move to its score.
      */
-    protected HashMap<Move, Double> score(AINode head, int depth, boolean max) {
+    protected Move score(int depth, boolean mrx) {
 
         // create map of moves to scores
-        HashMap<Move, Double> moveScoreMap = new HashMap<>();
+        // HashMap<Move, Double> moveScoreMap = new HashMap<>();
+
+        // move ai chooses
+        Move aiMove = null;
 /*
         // iterate through possible moves, calculating score for each one and
         // adding to moveScoreMap
@@ -150,11 +155,21 @@ public class MiniMaxPlayer implements Player {
 
         return moveScoreMap;
 */
+        // generate the game tree
+        gameTree = generateTree(gameTree, depth, mrx);
 
+        // choose the move
+        double bestMoveScore = gameTree.getHead().getScore();
 
+        // check all first level edges to see which move gave the best score
+        for (Edge<ScotlandYard, Move> possibleBest : gameTree.getListFirstLevelEdges()) {
+            if (((AINode)possibleBest.getTarget()).getScore() == bestMoveScore) {
+                aiMove = possibleBest.getData();
+            }
 
+        }
 
-        return moveScoreMap;
+        return aiMove;
     }
 
     /**
@@ -270,4 +285,20 @@ public class MiniMaxPlayer implements Player {
             return val;
         }
     };
+
+    /**
+     *
+     * @param gameTree
+     * @param depth
+     * @param max
+     * @return
+     */
+    protected ScotlandYardGameTree generateTree(ScotlandYardGameTree gameTree,
+                                                int depth,
+                                                boolean max) {
+        return null;
+        // need to call another generateTree() method which returns and takes
+        // an AINode, as opposed to a gameTree.
+        // TODO make this a method for a ScotlandYardGameTree?
+    }
 }
