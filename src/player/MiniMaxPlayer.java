@@ -1,5 +1,6 @@
 package player;
 
+import aigraph.AINode;
 import aigraph.ScotlandYardGameTree;
 import graph.Edge;
 import graph.Graph;
@@ -108,10 +109,11 @@ public class MiniMaxPlayer implements Player {
         //return minimax(finalStates);
 
         // initialise tree
-
+        gameTree = new ScotlandYardGameTree(currentGameState);
 
         // calculate a score for each move and put this info in a map
-        HashMap<Move, Double> moveScores = score();
+        int depth = 1;
+        HashMap<Move, Double> moveScores = score(gameTree.getHead(), depth, true);
 
         // return key associated with highest value
         return Collections.max(moveScores.entrySet(), (entry1, entry2) -> (entry1.getValue() > entry2.getValue()) ? 1 : -1).getKey();
@@ -122,7 +124,7 @@ public class MiniMaxPlayer implements Player {
      *
      * @return a HashMap of each given move to its score.
      */
-    protected HashMap<Move, Double> score() {
+    protected HashMap<Move, Double> score(AINode head, int depth, boolean max) {
 
         // create map of moves to scores
         HashMap<Move, Double> moveScoreMap = new HashMap<>();
@@ -253,32 +255,19 @@ public class MiniMaxPlayer implements Player {
             int val = 0;
             switch (t) {
                 case Taxi:
-                    val = 8;
-                    break;
-                case Bus:
-                    val = 4;
-                    break;
-                case Underground:
-                    val = 2;
-                    break;
-                case Boat:
-                    val = 0; // detective cannot use a boat.
-                    break;
+                val = 8;
+                break;
+            case Bus:
+                val = 4;
+                break;
+            case Underground:
+                val = 2;
+                break;
+            case Boat:
+                val = 0; // detective cannot use a boat.
+                break;
             }
             return val;
         }
     };
-
-    /** TODO generate a tree
-     * Generates a game tree to specified depth, given game tree with just root
-     * node.
-     *
-     */
-    protected void generateTree(ScotlandYardGraph gameTree, int treeDepth) {
-        // base case
-        if (treeDepth == 0 /*|| node is terminal*/) {
-            return;
-        }
-    }
-
 }
