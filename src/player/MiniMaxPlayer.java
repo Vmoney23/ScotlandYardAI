@@ -9,7 +9,6 @@ import prijkstra.Weighter;
 import scotlandyard.*;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -156,7 +155,7 @@ public class MiniMaxPlayer implements Player {
         return moveScoreMap;
 */
         // generate the game tree
-        gameTree = generateTree(gameTree, depth, mrx);
+        gameTree.generateTree(depth, mrx);
 
         // choose the move
         double bestMoveScore = gameTree.getHead().getScore();
@@ -165,8 +164,8 @@ public class MiniMaxPlayer implements Player {
         for (Edge<ScotlandYard, Move> possibleBest : gameTree.getListFirstLevelEdges()) {
             if (((AINode)possibleBest.getTarget()).getScore() == bestMoveScore) {
                 aiMove = possibleBest.getData();
+                break;
             }
-
         }
 
         return aiMove;
@@ -286,19 +285,4 @@ public class MiniMaxPlayer implements Player {
         }
     };
 
-    /**
-     *
-     * @param gameTree
-     * @param depth
-     * @param max
-     * @return
-     */
-    protected ScotlandYardGameTree generateTree(ScotlandYardGameTree gameTree,
-                                                int depth,
-                                                boolean max) {
-        return null;
-        // need to call another generateTree() method which returns and takes
-        // an AINode, as opposed to a gameTree.
-        // TODO make this a method for a ScotlandYardGameTree?
-    }
 }

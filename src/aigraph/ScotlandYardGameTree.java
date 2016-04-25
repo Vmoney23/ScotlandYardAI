@@ -1,11 +1,10 @@
 package aigraph;
 
-import graph.*;
+import graph.Edge;
+import graph.UndirectedGraph;
 import scotlandyard.Move;
 import scotlandyard.ScotlandYard;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -27,6 +26,7 @@ public class ScotlandYardGameTree extends UndirectedGraph<ScotlandYard, Move> {
         this.add(head);
     }
 
+    // TODO getFirstLevelEdges
     public List<Edge<ScotlandYard, Move>> getListFirstLevelEdges() {
         return null;
     }
@@ -37,5 +37,15 @@ public class ScotlandYardGameTree extends UndirectedGraph<ScotlandYard, Move> {
 
     public AINode getHead() {
         return head;
+    }
+
+    // TODO generateTree
+    public void generateTree(int depth, boolean max) {
+        MiniMax(head, depth, max);
+    }
+
+    // TODO Implement the minimax algorithm
+    private AINode MiniMax(AINode node, int depth, boolean max) {
+        return null;
     }
 }
