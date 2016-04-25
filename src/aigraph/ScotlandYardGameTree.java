@@ -1,16 +1,19 @@
 package aigraph;
 
-import graph.*;
-import scotlandyard.*;
+import graph.UndirectedGraph;
+import scotlandyard.Move;
+import scotlandyard.ScotlandYardView;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  *
  */
 public class ScotlandYardGameTree extends UndirectedGraph<ScotlandYardView, Move> {
 
-    private AINode<ScotlandYardView> head;
+    private AINode head;
 
     /**
      * Creates a game tree with just the parent node.
@@ -20,19 +23,19 @@ public class ScotlandYardGameTree extends UndirectedGraph<ScotlandYardView, Move
      */
     public ScotlandYardGameTree(ScotlandYardView currentGameState) {
         super();
-        this.head = new AINode<>(currentGameState, 0);
+        this.head = new AINode(currentGameState, 0.0);
         this.add(head);
     }
 
-    public List<AINode<ScotlandYardView>> getFinalStatesList() {
-        return new ArrayList<AINode<ScotlandYardView>>(Collections.singletonList(getHead()));
+    public List<AINode> getFinalStatesList() {
+        return new ArrayList<AINode>(Collections.singletonList(getHead()));
     }
 
     public List<Integer> getFinalScoresList() {
         return null;
     }
 
-    public AINode<ScotlandYardView> getHead() {
+    public AINode getHead() {
         return head;
     }
 }

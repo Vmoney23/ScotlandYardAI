@@ -1,9 +1,7 @@
 package player;
 
-import aigraph.ScotlandYardGameTree;
 import graph.Edge;
 import graph.Graph;
-import graph.Reader;
 import prijkstra.DijkstraCalculator;
 import prijkstra.Weighter;
 import scotlandyard.*;
@@ -30,6 +28,8 @@ public class MiniMaxPlayer implements Player {
     private int location;
     private ScotlandYardView currentGameState;
     private HashMap<Colour, Integer> playerLocationMap;
+    private ScotlandYardGraph graph;
+    private ScotlandYardGraph gameTree;
     private DijkstraCalculator dijkstraGraph;
     protected List<Move> moves;
 
@@ -41,12 +41,14 @@ public class MiniMaxPlayer implements Player {
         ScotlandYardGraphReader graphReader = new ScotlandYardGraphReader();
         try {
             // read the graph, convert it to a DijkstraCalculator and store it.
-            Reader reader = new Reader();
-            reader.read("lib/scotlandyard.jar/" + graphFilename);
-            this.dijkstraGraph = new DijkstraCalculator(reader.graph());
+            this.graph = graphReader.readGraph("resources/" + graphFilename);
         } catch (IOException e) {
             System.err.println("failed to read " + graphFilename);
+            e.printStackTrace(System.err);
         }
+
+        // store dijkstra graph
+        this.dijkstraGraph = new DijkstraCalculator(this.graph);
 
         // store locations of other players
         playerLocationMap = new HashMap<>();
@@ -258,8 +260,11 @@ public class MiniMaxPlayer implements Player {
      * node.
      *
      */
-    protected void generateTree(ScotlandYardGameTree gameTree, int treeDepth) {
-
+    protected void generateTree(ScotlandYardGraph gameTree, int treeDepth) {
+        // base case
+        if (treeDepth == 0 /*|| node is terminal*/) {
+            return;
+        }
     }
 
 }
