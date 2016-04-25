@@ -45,11 +45,14 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYard, Move> {
         head.setScore(MiniMax(head, depth, max));
     }
 
-    // TODO Implement the minimax algorithm
+    // TODO score is left uninitialised for non-head nodes
+    //for ai nodes
     private Double MiniMax(AINode node, int depth, boolean max) {
         // base case
-        if (depth == 0)
+        if (depth <= 0) {
+            node.calculateScore();
             return node.getScore();
+        }
 
         // store the score for the best move
         Double bestScore;

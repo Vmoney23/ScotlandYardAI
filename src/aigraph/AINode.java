@@ -33,6 +33,10 @@ public class AINode extends Node<ScotlandYard> {
         this.score = score;
     }
 
+    public void calculateScore() {
+
+    }
+
     /**
      * Returns a string representation of the score of the game state associated
      * with this node.
