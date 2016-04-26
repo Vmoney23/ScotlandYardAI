@@ -302,14 +302,21 @@ public class MiniMaxPlayer implements Player {
         gameTree.getHead().setScore(MiniMax(gameTree.getHead(), depth, max));
     }
 
-    /** TODO 1) duplicateGameState
+    /**
+     *  TODO 1) duplicateGameState.
+     *  TODO 2) alpha-beta pruning.
+     * <p>Implements the MiniMax algorithm with alpha-beta pruning.
      *
-     * @param node
-     * @param depth
-     * @param max
-     * @return
+     * @param node the AINode from which to create a tree from. node will be
+     *             head of the (sub)tree.
+     * @param depth the number of lays to generate for the tree.
+     * @param max If true, the player who's turn it is in node.getGameState()
+     *            should be a maximising player, else minimising player.
+     * @return the best possible score that scoreMoveTicket or
+     * scoreMoveDouble assigns that node.getGameState().getCurrentPlayer()
+     * can get, based on a tree of {@code depth} depth.
      */
-    protected Double MiniMax(AINode node, int depth, boolean max) {
+    private Double MiniMax(AINode node, int depth, boolean max) {
         // base case
         if (depth <= 0) {
             node.calculateScore();
