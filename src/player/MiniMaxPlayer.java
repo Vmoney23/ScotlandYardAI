@@ -27,11 +27,13 @@ import java.util.List;
 public class MiniMaxPlayer implements Player {
 
     private int location;
+    private Colour colour;
     private ScotlandYard currentGameState;
     private HashMap<Colour, Integer> playerLocationMap;
     private ScotlandYardGraph graph;
     private ScotlandYardGameTree gameTree;
     private DijkstraCalculator dijkstraGraph;
+    private Integer token;
     protected List<Move> moves;
 
     public MiniMaxPlayer(ScotlandYardView view, String graphFilename) {
@@ -59,6 +61,9 @@ public class MiniMaxPlayer implements Player {
         for (Colour player : currentGameState.getPlayers()) {
             playerLocationMap.put(player, currentGameState.getPlayerLocation(player));
         }
+
+        // store this players colour
+        this.colour = currentGameState.getCurrentPlayer();
     }
 
 
@@ -83,6 +88,7 @@ public class MiniMaxPlayer implements Player {
         this.currentGameState = (ScotlandYard) receiver;
         this.moves = moves;
         this.location = location;
+        this.token = token;
 
         // get ai move
         System.out.println("Getting move");
@@ -296,7 +302,7 @@ public class MiniMaxPlayer implements Player {
         gameTree.getHead().setScore(MiniMax(gameTree.getHead(), depth, max));
     }
 
-    /**
+    /** TODO 1) duplicateGameState
      *
      * @param node
      * @param depth
@@ -304,7 +310,77 @@ public class MiniMaxPlayer implements Player {
      * @return
      */
     protected Double MiniMax(AINode node, int depth, boolean max) {
-        return null;
+        // base case
+        if (depth <= 0) {
+            node.calculateScore();
+            return node.getScore();
+        }
+
+        // store the score for the best move
+        Double bestScore;
+
+        // this player is maximising MrX score
+        if (max) {
+            bestScore = Double.NEGATIVE_INFINITY;
+
+            // create children nodes
+            for (Move move : node.getGameState().validMoves(colour)) {
+                // make a copy of currentGameState for the next move
+                ScotlandYard stateAfterMove = duplicateGameState(node.getGameState());
+                stateAfterMove.playMove(move, token); // TODO will token be valid?
+
+                // create node for this game state and link to tree. Give
+                // unassigned score = 0
+                AINode child = new AINode(stateAfterMove, 0.0);
+                gameTree.add(child);
+                Edge<ScotlandYard, Move> edgeToChild = new Edge<>(node, child, move);
+                gameTree.add(edgeToChild);
+            }
+
+            // find child node with highest score
+            for (AINode child : gameTree.getChildren(node)) {
+                Double v = MiniMax(child, depth - 1, false);
+                bestScore = bestScore > v ? bestScore : v;
+            }
+        }
+
+        // or player is minimising MrX score
+        else {
+            bestScore = Double.POSITIVE_INFINITY;
+
+            // create children nodes
+            for (Move move : node.getGameState().validMoves(colour)) {
+                // make a copy of currentGameState for the next move
+                ScotlandYard stateAfterMove = duplicateGameState(node.getGameState());
+                stateAfterMove.playMove(move, token);
+
+                // create node for this game state and link to tree. Give
+                // unassigned score = 0
+                AINode child = new AINode(stateAfterMove, 0.0);
+                gameTree.add(child);
+                Edge<ScotlandYard, Move> edgeToChild = new Edge<>(node, child, move);
+                gameTree.add(edgeToChild);
+            }
+
+            // find child with lowest score
+            for (AINode child : gameTree.getChildren(node)) {
+                Double v = MiniMax(child, depth - 1, true);
+                bestScore = bestScore < v ? bestScore : v;
+            }
+        }
+
+        // return the best score
+        return bestScore;
+    }
+
+    //TODO implement duplicateGameState
+    protected ScotlandYard duplicateGameState(ScotlandYard sy) {
+        ScotlandYard copy = new ScotlandYard(sy.getPlayers().size() - 1,
+                                             sy.getRounds(),
+                                             this.graph,
+                                             null,//sy.queue is private
+                                             null);//sy.gameId is private
+        return copy;
     }
 
 }
