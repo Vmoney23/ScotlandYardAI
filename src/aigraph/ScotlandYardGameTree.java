@@ -47,7 +47,7 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYard, Move> {
      * @param node the node to get the children of.
      * @return a list with the children of node.
      */
-    private List<AINode> getChildren(AINode node) {
+    public List<AINode> getChildren(AINode node) {
         List<AINode> children = new ArrayList<>();
         for (Edge<ScotlandYard, Move> e : this.getEdgesFrom(node)) {
             children.add((AINode) e.getTarget());
