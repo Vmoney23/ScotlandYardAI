@@ -40,47 +40,6 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYard, Move> {
         return head;
     }
 
-    // TODO generateTree
-    public void generateTree(int depth, boolean max) {
-        head.setScore(MiniMax(head, depth, max));
-    }
-
-    // TODO score is left uninitialised for non-head nodes
-    //for ai nodes
-    private Double MiniMax(AINode node, int depth, boolean max) {
-        // base case
-        if (depth <= 0) {
-            node.calculateScore();
-            return node.getScore();
-        }
-
-        // store the score for the best move
-        Double bestScore;
-
-        // this player is maximising MrX score
-        if (max) {
-            bestScore = Double.NEGATIVE_INFINITY;
-
-            for (AINode child : this.getChildren(node)) {
-                Double v = MiniMax(child, depth - 1, false);
-                bestScore = bestScore > v ? bestScore : v;
-            }
-        }
-
-        // or player is minimising MrX score
-        else {
-            bestScore = Double.POSITIVE_INFINITY;
-
-            for (AINode child : this.getChildren(node)) {
-                Double v = MiniMax(child, depth - 1, true);
-                bestScore = bestScore < v ? bestScore : v;
-            }
-        }
-
-        // return the best score
-        return bestScore;
-    }
-
     /**
      * Returns children of node in a tree as a List.
      * TODO downcast to AINode is unchecked.

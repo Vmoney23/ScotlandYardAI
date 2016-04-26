@@ -155,7 +155,7 @@ public class MiniMaxPlayer implements Player {
         return moveScoreMap;
 */
         // generate the game tree
-        gameTree.generateTree(depth, mrx);
+        generateTree(gameTree, depth, mrx);
 
         // choose the move
         double bestMoveScore = gameTree.getHead().getScore();
@@ -284,5 +284,27 @@ public class MiniMaxPlayer implements Player {
             return val;
         }
     };
+
+    /**
+     *
+     * @param gameTree
+     * @param depth
+     * @param max
+     */
+    private void generateTree(ScotlandYardGameTree gameTree, int depth,
+                                boolean max) {
+        gameTree.getHead().setScore(MiniMax(gameTree.getHead(), depth, max));
+    }
+
+    /**
+     *
+     * @param node
+     * @param depth
+     * @param max
+     * @return
+     */
+    protected Double MiniMax(AINode node, int depth, boolean max) {
+        return null;
+    }
 
 }
