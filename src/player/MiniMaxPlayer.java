@@ -304,7 +304,9 @@ public class MiniMaxPlayer implements Player {
 
     /**
      *  TODO 1) duplicateGameState.
-     *  TODO 2) alpha-beta pruning.
+     *  TODO 2) dont switch max on each recurse, as could be more than 1
+     *  TODO    detective playing, who will also want to min
+     *  TODO 3) alpha-beta pruning.
      * <p>Implements the MiniMax algorithm with alpha-beta pruning.
      *
      * @param node the AINode from which to create a tree from. node will be
