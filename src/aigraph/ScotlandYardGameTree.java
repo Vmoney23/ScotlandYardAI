@@ -32,7 +32,7 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYard, Move> {
         return null;
     }
 
-    public List<Integer> getFinalScoresList() {
+    public List<Double> getFinalScoresList() {
         return null;
     }
 
@@ -42,7 +42,6 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYard, Move> {
 
     /**
      * Returns children of node in a tree as a List.
-     * TODO downcast to AINode is unchecked.
      *
      * @param node the node to get the children of.
      * @return a list with the children of node.
@@ -54,4 +53,5 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYard, Move> {
         }
         return children;
     }
+
 }

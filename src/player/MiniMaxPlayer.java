@@ -310,11 +310,13 @@ public class MiniMaxPlayer implements Player {
      * @param node the AINode from which to create a tree from. node will be
      *             head of the (sub)tree.
      * @param depth the number of lays to generate for the tree.
-     * @param max If true, the player who's turn it is in node.getGameState()
+     * @param max If true, the player who's turn it is in
+     *            {@code node.getGameState()}
      *            should be a maximising player, else minimising player.
      * @return the best possible score that scoreMoveTicket or
-     * scoreMoveDouble assigns that node.getGameState().getCurrentPlayer()
-     * can get, based on a tree of {@code depth} depth.
+     *         scoreMoveDouble assigns that
+     *         {@code node.getGameState().getCurrentPlayer()}
+     *         can get, based on a tree of {@code depth} depth.
      */
     private Double MiniMax(AINode node, int depth, boolean max) {
         // base case
