@@ -2,26 +2,27 @@ package aigraph;
 
 import graph.Node;
 import scotlandyard.ScotlandYard;
+import player.ScotlandYardState;
 
 /**
  * This class extends Node<ScotlandYardView>. Each AINode contains two pieces
  * of data: a ScotlandYardView gameState, and an associated score: a double
  * score.
  */
-public class AINode extends Node<ScotlandYard> {
+public class AINode extends Node<ScotlandYardState> {
 
     private Double score;
 
-    public AINode(ScotlandYard gameState, Double score) {
+    public AINode(ScotlandYardState gameState, Double score) {
         super(gameState);
         this.score = score;
     }
 
-    public ScotlandYard getGameState() {
+    public ScotlandYardState getGameState() {
         return super.getIndex();
     }
 
-    public void setGameState(ScotlandYard gameState) {
+    public void setGameState(ScotlandYardState gameState) {
         super.setIndex(gameState);
     }
 
