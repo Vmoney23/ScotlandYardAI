@@ -2,36 +2,75 @@ package player;
 
 import scotlandyard.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 /**
- * Created by ahmerb on 28/04/16.
+ * A class to store the state of a Scotland Yard game at some fixed point duing
+ * the game. An object of this type can be cloned.
  */
+// TODO if playMove returns the cloned object, fields can be made final as the updated fields can be calculated before creating new instance of object.
 public final class ScotlandYardState implements Cloneable {
-    public final ScotlandYardView view;
-    //private final Map<Colour, PlayerData> playersMap;
     private final ScotlandYardGraph graph;
     private final List<Colour> players;
 
+    // which of these are these needed for MiniMax?
+    private Set<Colour> winningPlayers;
+    private Map<Colour, Integer> playerLocations;
+    private Map<Colour, Map<Ticket, Integer>> playerTickets;
+    private boolean gameOver;
+    private boolean ready;
+    private Colour currentPlayer;
+    int round;
+    private List<Boolean> rounds;
+
+
+    private ScotlandYardState(ScotlandYardGraph graph, List<Colour> players, Set<Colour> winningPlayers, Map<Colour, Integer> playerLocations, Map<Colour, Map<Ticket, Integer>> playerTickets, boolean gameOver, boolean ready, Colour currentPlayer, int round, List<Boolean> rounds) {
+        this.graph = graph;
+        this.players = players;
+        this.winningPlayers = new HashSet<>(winningPlayers);
+        this.playerLocations = new HashMap<>(playerLocations);
+        this.playerTickets = new HashMap<>(playerTickets);
+        this.gameOver = gameOver;
+        this.ready = ready;
+        this.currentPlayer = currentPlayer;
+        this.round = round;
+        this.rounds = new ArrayList<>(rounds);
+    }
+
     public ScotlandYardState(ScotlandYardView view, ScotlandYardGraph graph) {
-        this.view = view;
         this.graph = graph;
         this.players = view.getPlayers();
 
-        // TODO initialise playersMap
+        this.winningPlayers = view.getWinningPlayers();
 
+        this.playerLocations = new HashMap<>();
+        for (Colour player : players)
+            playerLocations.put(player, view.getPlayerLocation(player));
+
+        this.playerTickets = new HashMap<>();
+        for (Colour player : players) {
+            HashMap<Ticket, Integer> thisPlayersTicketMap = new HashMap<>();
+            for (Ticket ticket : Ticket.values()) {
+                thisPlayersTicketMap.put(ticket, view.getPlayerTickets(player, ticket));
+            }
+            playerTickets.put(player, thisPlayersTicketMap);
+        }
+
+        this.gameOver = view.isGameOver();
+        this.ready = view.isReady();
+        this.currentPlayer = view.getCurrentPlayer();
+        this.round = view.getRound();
+        this.rounds = view.getRounds();
     }
 
-    // TODO: Possible FIX: don't use playerData's? To get location, use view.getPlayerLocation(Colour player)?
+
     /**
      * Returns the list of valid moves for a given player.
      *
      * @param player the player whose moves we want to see.
      * @return the list of valid moves for a given player.
      */
+    // TODO: Possible FIX: don't use playerData's? To get location, use view.getPlayerLocation(Colour player)?
     public List<Move> validMoves(Colour player) {
         int location = view.getPlayerLocation();
         List<Move> moves = graph.generateMoves(player, location);
@@ -79,22 +118,73 @@ public final class ScotlandYardState implements Cloneable {
         return validMoves;
     }
 
+
     // TODO: Implement playMove
     public void playMove(Move move) {
 
     }
 
 
-    // TODO maybe use a copy constructor instead of using clone?
-    @Override
-    public Object clone() throws CloneNotSupportedException{
-        // run super.clone()
-        ScotlandYardState copy = (ScotlandYardState) super.clone();
+    /**
+     * Returns a deep copy of this ScotlandYardState.
+     *
+     * @return a deep copy of this ScotlandYardState.
+     */
+    public ScotlandYardState copy() {
+        return new ScotlandYardState(graph,
+                                     players,
+                                     winningPlayers,
+                                     playerLocations,
+                                     playerTickets,
+                                     gameOver,
+                                     ready,
+                                     currentPlayer,
+                                     round,
+                                     rounds);
+    }
 
-        // TODO copy everything else
 
-        // all done
-        return copy;
+
+    // GETTERS
+    //
+    public Set<Colour> getWinningPlayers() {
+        return winningPlayers;
+    }
+
+    public Map<Colour, Integer> getPlayerLocations() {
+        return playerLocations;
+    }
+
+    public Map<Colour, Map<Ticket, Integer>> getPlayerTickets() {
+        return playerTickets;
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public boolean isReady() {
+        return ready;
+    }
+
+    public Colour getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public int getRound() {
+        return round;
+    }
+
+    public List<Boolean> getRounds() {
+        return rounds;
+    }
+
+    public ScotlandYardGraph getGraph() {
+        return graph;
+    }
+
+    public List<Colour> getPlayers() {
+        return players;
     }
 
 }
