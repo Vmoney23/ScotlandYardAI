@@ -205,20 +205,11 @@ public class MiniMaxPlayer implements Player {
             // calculate shortest route from MiniMax player to other player
             Graph<Integer, Transport> route = dijkstraGraph.getResult(move.target, playerLocationMap.get(player), TRANSPORT_WEIGHTER);
 
-            // add weight of each edge in route to score. Use a different
-            // Weighter if player is Detective or MrX.
-            if (move.colour == Colour.Black) {
-                // add more to score if edge requires greater value transport
-                // to traverse.
-                for (Edge<Integer, Transport> e : route.getEdges())
-                    total += TRANSPORT_WEIGHTER.toWeight(e.getData());
-            }
-            else {
-                // add more to score if edge requires lesser value transport
-                // to traverse. TODO change for route to other detectives vs MrX
-                for (Edge<Integer, Transport> e : route.getEdges())
-                    total += TRANSPORT_INV_WEIGHTER.toWeight(e.getData());
-            }
+            // add weight of each edge in route to score.
+            // add more to score if edge requires greater value transport
+            // to traverse.
+            for (Edge<Integer, Transport> e : route.getEdges())
+                total += TRANSPORT_WEIGHTER.toWeight(e.getData());
 
             // increment routes, for taking mean later
             routes++;
@@ -243,58 +234,29 @@ public class MiniMaxPlayer implements Player {
     }
 
     /**
-     * An anonymous class that implements Weighter<Transport>, to be passed to
+     * A lambda function implements Weighter<Transport>, to be passed to
      * Dijkstra's. This Weighter assigns a higher weight to transports with
      * which players start with less tickets for.
      */
-    protected static final Weighter<Transport> TRANSPORT_WEIGHTER = new Weighter<Transport>() {
-        @Override
-        public double toWeight(Transport t) {
-            int val = 0;
-            switch (t) {
-                case Taxi:
-                    val = 1;
-                    break;
-                case Bus:
-                    val = 2;
-                    break;
-                case Underground:
-                    val = 4;
-                    break;
-                case Boat:
-                    val = 8;
-                    break;
-            }
-            return val;
-        }
-    };
-
-    /**
-     * An anonymous class that implements Weighter<Transport>, to be passed to
-     * Dijkstra's. This Weighter assigns a lower weight to transports with
-     * which players start with less tickets for.
-     */
-    protected static final Weighter<Transport> TRANSPORT_INV_WEIGHTER = new Weighter<Transport>() {
-        @Override
-        public double toWeight(Transport t) {
-            int val = 0;
-            switch (t) {
-                case Taxi:
-                val = 8;
+    protected static final Weighter<Transport> TRANSPORT_WEIGHTER = t -> {
+        int val = 0;
+        switch (t) {
+            case Taxi:
+                val = 1;
                 break;
             case Bus:
-                val = 4;
-                break;
-            case Underground:
                 val = 2;
                 break;
-            case Boat:
-                val = 0; // detective cannot use a boat.
+            case Underground:
+                val = 4;
                 break;
-            }
-            return val;
+            case Boat:
+                val =10;
+                break;
         }
+        return val;
     };
+
 
     /**
      *
