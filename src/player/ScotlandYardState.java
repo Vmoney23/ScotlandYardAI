@@ -37,6 +37,7 @@ public final class ScotlandYardState implements Cloneable {
         this.rounds = new ArrayList<>(rounds);
     }
 
+
     public ScotlandYardState(ScotlandYardView view, ScotlandYardGraph graph) {
         this.graph = graph;
         this.players = view.getPlayers();
