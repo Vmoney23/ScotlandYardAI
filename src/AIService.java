@@ -1,6 +1,8 @@
-import ai.*;
-import net.*;
-import player.*;
+import ai.AIServer;
+import net.MessengerServer;
+import net.PlayerFactory;
+import net.Server;
+import player.MiniMaxPlayerFactory;
 
 /**
  * The AIService uses your AI to play a game of scotlandyard. Your AI can be
@@ -27,7 +29,7 @@ public class AIService {
         System.out.println("Welcome! AI service started on localhost:" + port);
 
         //TODO: Replace this player factory with your own AI.
-        PlayerFactory factory = new RandomPlayerFactory();
+        PlayerFactory factory = new MiniMaxPlayerFactory();
 
         MessengerServer<Integer> server = new Server(port);
         AIServer client = new AIServer(server, "graph.txt", factory);
