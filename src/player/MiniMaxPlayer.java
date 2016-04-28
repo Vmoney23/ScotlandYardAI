@@ -294,17 +294,17 @@ public class MiniMaxPlayer implements Player {
 
         // this player is maximising MrX score
         if (max) {
-            // create children nodes
+            // create children nodes and add to tree
             for (Move move : node.getGameState().validMoves(colour)) {
                 // make a copy of currentGameState for the next move
-                ScotlandYard stateAfterMove = duplicateGameState(node.getGameState());
-                stateAfterMove.playMove(move, token); // TODO will token be valid?
+                ScotlandYardState stateAfterMove = duplicateGameState(node.getGameState());
+                stateAfterMove.playMove(move); // TODO will token be valid?
 
-                // create node for this game state and link to tree. Give
-                // unassigned score = 0
+                // create node for this game state and link to tree.
+                // Give unassigned score = 0
                 AINode child = new AINode(stateAfterMove, 0.0);
                 gameTree.add(child);
-                Edge<ScotlandYard, Move> edgeToChild = new Edge<>(node, child, move);
+                Edge<ScotlandYardState, Move> edgeToChild = new Edge<>(node, child, move);
                 gameTree.add(edgeToChild);
             }
 
@@ -319,17 +319,17 @@ public class MiniMaxPlayer implements Player {
 
         // or player is minimising MrX score
         else {
-            // create children nodes
+            // create children nodes and add to tree
             for (Move move : node.getGameState().validMoves(colour)) {
                 // make a copy of currentGameState for the next move
-                ScotlandYard stateAfterMove = duplicateGameState(node.getGameState());
-                stateAfterMove.playMove(move, token);
+                ScotlandYardState stateAfterMove = duplicateGameState(node.getGameState());
+                stateAfterMove.playMove(move); // TODO will token be valid?
 
-                // create node for this game state and link to tree. Give
-                // unassigned score = 0
+                // create node for this game state and link to tree.
+                // Give unassigned score = 0
                 AINode child = new AINode(stateAfterMove, 0.0);
                 gameTree.add(child);
-                Edge<ScotlandYard, Move> edgeToChild = new Edge<>(node, child, move);
+                Edge<ScotlandYardState, Move> edgeToChild = new Edge<>(node, child, move);
                 gameTree.add(edgeToChild);
             }
 
@@ -348,13 +348,13 @@ public class MiniMaxPlayer implements Player {
 
 
     //TODO implement duplicateGameState
-    protected ScotlandYard duplicateGameState(ScotlandYard sy) {
+    protected ScotlandYardState duplicateGameState(ScotlandYardState sy) {
         // create the queue
         ScotlandYardMapQueue<Integer, Token> queue = new ScotlandYardMapQueue<>();
         queue.put(token, new Token(token, colour, 0));//random timestamp given
 
-        return new ScotlandYard(sy.getPlayers().size() - 1,
-                                             sy.getRounds(),
+        return new ScotlandYard(sy.view.getPlayers().size() - 1,
+                                             sy.view.getRounds(),
                                              this.graph,
                                              queue,//sy.queue is private
                                              token);//sy.gameId is private
