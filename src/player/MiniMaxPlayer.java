@@ -79,9 +79,6 @@ public class MiniMaxPlayer implements Player {
             throw new IllegalArgumentException("Receiver must be " +
                     "a ScotlandYard object. Passed: " + receiver.getClass());
 
-        this.currentGameState =
-                (ScotlandYard) receiver; // FAIL to cast
-
         this.moves = moves;
         this.location = location;
         this.token = token;
