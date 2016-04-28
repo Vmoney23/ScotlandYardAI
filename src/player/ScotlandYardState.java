@@ -9,11 +9,11 @@ import java.util.*;
  * the game. An object of this type can be cloned.
  */
 // TODO if playMove returns the cloned object, fields can be made final as the updated fields can be calculated before creating new instance of object.
-public final class ScotlandYardState implements Cloneable {
+public final class ScotlandYardState {
     private final ScotlandYardGraph graph;
     private final List<Colour> players;
 
-    // which of these are these needed for MiniMax?
+    // which of these are these needed?
     private Set<Colour> winningPlayers;
     private Map<Colour, Integer> playerLocations;
     private Map<Colour, Map<Ticket, Integer>> playerTickets;
@@ -62,6 +62,25 @@ public final class ScotlandYardState implements Cloneable {
         this.currentPlayer = view.getCurrentPlayer();
         this.round = view.getRound();
         this.rounds = view.getRounds();
+    }
+
+
+    /**
+     * Returns a deep copy of this ScotlandYardState.
+     *
+     * @return a deep copy of this ScotlandYardState.
+     */
+    public ScotlandYardState copy() {
+        return new ScotlandYardState(graph,
+                                     players,
+                                     winningPlayers,
+                                     playerLocations,
+                                     playerTickets,
+                                     gameOver,
+                                     ready,
+                                     currentPlayer,
+                                     round,
+                                     rounds);
     }
 
 
@@ -121,30 +140,103 @@ public final class ScotlandYardState implements Cloneable {
     }
 
 
-    // TODO: Implement playMove
+    /**
+     * Plays a move sent from a player.
+     *
+     * @param move the move chosen by the player.
+     */
     public void playMove(Move move) {
+        play(move);
+        nextPlayer(); // TODO is this needed?
+    }
 
+
+    // playMove helpers
+    //
+
+    /**
+     * Passes priority onto the next player whose turn it is to play.
+     */
+    protected void nextPlayer() {
+        int nextPlayerIndex = (players.indexOf(currentPlayer) + 1) % players.size();
+        currentPlayer = players.get(nextPlayerIndex);
+    }
+
+    /**
+     * Allows the game to play a given move.
+     *
+     * @param move the move that is to be played.
+     */
+    protected void play(Move move) {
+        if (move instanceof MoveTicket)
+            play((MoveTicket) move);
+        else if (move instanceof MoveDouble)
+            play((MoveDouble) move);
+        // if MovePass game state doesn't change
+    }
+
+    /**
+     * Plays a MoveTicket.
+     *
+     * @param move the MoveTicket to play.
+     */
+    private void play(MoveTicket move) {
+        giveTicketsToMrX(move);
+        updatePlayerTickets(move);
+        updatePlayerLocation(move);
+    }
+
+    /**
+     * Plays a MoveDouble.
+     *
+     * @param move the MoveDouble to play.
+     */
+    private void play(MoveDouble move) {
+        updatePlayerTickets(move);
+        play(move.move1);
+        play(move.move2);
     }
 
 
     /**
-     * Returns a deep copy of this ScotlandYardState.
+     * Gives the ticket(s) a detective uses when playing a move to mrX
      *
-     * @return a deep copy of this ScotlandYardState.
+     * @param move the move to determine what tickets to give to mrX
      */
-    public ScotlandYardState copy() {
-        return new ScotlandYardState(graph,
-                                     players,
-                                     winningPlayers,
-                                     playerLocations,
-                                     playerTickets,
-                                     gameOver,
-                                     ready,
-                                     currentPlayer,
-                                     round,
-                                     rounds);
+    private void giveTicketsToMrX(Move move) {
+        // if current player detective, update corresponding tickets in
+        // playersMap used in for tickets used in move for mrX
+        if (move.colour != Colour.Black) {
+            if (move instanceof MoveTicket)
+                playerTickets.get(Colour.Black).computeIfPresent(((MoveTicket) move).ticket, (k, v) -> v + 1);
+        }
     }
 
+    /**
+     * Removes the corresponding tickets for a player when a move is played.
+     *
+     * @param move the move that specifies the tickets to remove
+     */
+    private void updatePlayerTickets(Move move) {
+        // decrement player's tickets in playerTickets map
+        if (move instanceof MoveTicket) {
+            playerTickets.get(move.colour).computeIfPresent(((MoveTicket) move).ticket, (k, v) -> v - 1);
+        }
+        else if (move instanceof MoveDouble) {
+            playerTickets.get(move.colour).computeIfPresent(Ticket.Double, (k, v) -> v - 1);
+            // tickets for specific moves in double move are removed when
+            // play(MoveTicket move) is called in play(MoveDouble move)
+        }
+    }
+
+    /**
+     * Updates a players location when a move is played.
+     *
+     * @param move the move that specifies the location to move to
+     */
+    private void updatePlayerLocation(MoveTicket move) {
+        playerLocations.put(move.colour, move.target);
+    }
 
 
     // GETTERS

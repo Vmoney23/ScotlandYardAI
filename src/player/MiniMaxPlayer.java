@@ -331,8 +331,6 @@ public class MiniMaxPlayer implements Player {
     }
 
 
-
-
     /**
      * Calculates a score for a given node's game state, and sets said node's
      * score.
