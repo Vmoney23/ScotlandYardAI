@@ -33,7 +33,7 @@ public final class ScotlandYardState implements Cloneable {
      * @return the list of valid moves for a given player.
      */
     public List<Move> validMoves(Colour player) {
-        int location = playersMap.get(player).getLocation();
+        int location = view.getPlayerLocation();
         List<Move> moves = graph.generateMoves(player, location);
         List<Move> validMoves = new ArrayList<>();
         if (player != Colour.Black) {
@@ -44,7 +44,7 @@ public final class ScotlandYardState implements Cloneable {
                     if (internalPlayer.getLocation() == dest)
                         occupied = true;
                 }
-                if (!occupied && playersMap.get(player).hasTickets(move))
+                if (!occupied && view.getPlayerTickets(colour, move.ticket) > 1)
                     validMoves.add(move);
             }
             if (validMoves.isEmpty())
@@ -58,9 +58,9 @@ public final class ScotlandYardState implements Cloneable {
                         if (internalPlayer.getLocation() == dest)
                             occupied = true;
                     }
-                    if (!occupied && playersMap.get(player).hasTickets(move))
+                    if (!occupied && view.getPlayerTickets(colour, move.ticket) > 1)
                         validMoves.add(move);
-                } else if ((move instanceof MoveDouble) && playersMap.get(player).hasTickets(move)) {
+                } else if ((move instanceof MoveDouble) && view.getPlayerTickets(colour, Ticket.Double) > 1) {
                     int dest1 = ((MoveDouble) move).move1.target;
                     int dest2 = ((MoveDouble) move).move2.target;
                     boolean occupied1 = false;
@@ -68,10 +68,10 @@ public final class ScotlandYardState implements Cloneable {
                     for (PlayerData internalPlayer : players) {
                         if (internalPlayer.getLocation() == dest1)
                             occupied1 = true;
-                        if (internalPlayer.getLocation() == dest2 && dest2 != location)
+                        if (internalPlayer.getLocation() == dest2)
                             occupied2 = true;
                     }
-                    if (playersMap.get(player).hasTickets(move) && !occupied1 && !occupied2)
+                    if (view.getPlayerTickets(colour, ((MoveDouble) move).move1.ticket) && view.getPlayerTickets(colour, ((MoveDouble) move).move2.ticket) && !occupied1 && !occupied2)
                         validMoves.add(move);
                 }
             }
