@@ -137,28 +137,7 @@ public class MiniMaxPlayer implements Player {
 
         // move ai chooses
         Move aiMove = null;
-/*
-        // iterate through possible moves, calculating score for each one and
-        // adding to moveScoreMap
-        for (Move move : moves) {
 
-            double score = 0.0;
-
-            // TODO make score more complex
-            // TODO score a detective move better
-
-            // calculate score for move. A MovePass is left with score = 0;
-            if (move instanceof MoveTicket)
-                score = scoreMoveTicket((MoveTicket) move);
-            else if (move instanceof MoveDouble)
-                score = scoreMoveDouble((MoveDouble) move);
-
-            // put entry (move, score) in map
-            moveScoreMap.put(move, score);
-        }
-
-        return moveScoreMap;
-*/
         // generate the game tree
         generateTree(gameTree, depth, mrx);
 
@@ -175,6 +154,23 @@ public class MiniMaxPlayer implements Player {
 
         return aiMove;
     }
+
+    /**
+     * Assigns a score to a possible move using currentGameState, and returns
+     * that score.
+     *
+     * @param move the Move to calculate score for.
+     * @return the score for move.
+     */
+    protected double scoreMove(Move move) {
+        if (move instanceof MoveTicket)
+            return scoreMoveTicket((MoveTicket) move);
+        else if (move instanceof MoveDouble)
+            return scoreMoveDouble((MoveDouble) move);
+        else //MovePass
+            return 0;
+    }
+
 
     /**
      * Assigns a score to a possible MoveTicket using currentGameState, and
@@ -301,7 +297,7 @@ public class MiniMaxPlayer implements Player {
             // create children nodes and add to tree
             for (Move move : node.getGameState().validMoves(colour)) {
                 // make a copy of currentGameState for the next move
-                ScotlandYardState stateAfterMove = duplicateGameState(node.getGameState());
+                ScotlandYardState stateAfterMove = node.getGameState().copy();
                 stateAfterMove.playMove(move);
 
                 // create node for this game state and link to tree.
@@ -310,6 +306,7 @@ public class MiniMaxPlayer implements Player {
                 gameTree.add(child);
                 Edge<ScotlandYardState, Move> edgeToChild = new Edge<>(node, child, move);
                 gameTree.add(edgeToChild);
+                calculateScore(child);
             }
 
             // find child node with highest score
@@ -326,7 +323,7 @@ public class MiniMaxPlayer implements Player {
             // create children nodes and add to tree
             for (Move move : node.getGameState().validMoves(colour)) {
                 // make a copy of currentGameState for the next move
-                ScotlandYardState stateAfterMove = duplicateGameState(node.getGameState());
+                ScotlandYardState stateAfterMove = node.getGameState().copy();
                 stateAfterMove.playMove(move);
 
                 // create node for this game state and link to tree.
@@ -335,6 +332,7 @@ public class MiniMaxPlayer implements Player {
                 gameTree.add(child);
                 Edge<ScotlandYardState, Move> edgeToChild = new Edge<>(node, child, move);
                 gameTree.add(edgeToChild);
+                calculateScore(child);
             }
 
             // find child with lowest score
@@ -351,21 +349,20 @@ public class MiniMaxPlayer implements Player {
     }
 
 
-    //TODO fix ScotlandYardState clone() method
-    protected ScotlandYardState duplicateGameState(ScotlandYardState sy) {
-        ScotlandYardState copy = (ScotlandYardState) sy.copy();
-//        try {
-//            copy = (ScotlandYardState) sy.copy();
-//        } catch (CloneNotSupportedException e) {
-//            e.printStackTrace();
-//        }
-        return copy;
-    }
 
 
-    //TODO implement calculateScore (calls scoreMoveTicket/Double)
+    /**
+     * Calculates a score for a given node's game state, and sets said node's
+     * score.
+     *
+     * @param node the node to calculate the score for.
+     */
     protected void calculateScore(AINode node) {
-
+        // get move, which should be on edge to node. There should only be one
+        // edge to node.
+        Move moveToNode = gameTree.getEdgesTo(node).get(0).getData();
+        Double score = scoreMove(moveToNode);
+        node.setScore(score);
     }
 
 }
