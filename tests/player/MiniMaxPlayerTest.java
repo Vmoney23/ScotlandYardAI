@@ -12,6 +12,7 @@ import static org.junit.Assert.*;
  * Created by ahmerb on 24/04/16.
  */
 public class MiniMaxPlayerTest {
+    // TODO remove this test
     /**
      * Tests the lambda function used to return key associated with highest
      * value from a map.
