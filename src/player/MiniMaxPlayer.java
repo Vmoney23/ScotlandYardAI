@@ -29,11 +29,13 @@ public class MiniMaxPlayer implements Player {
 
     private int location;
     private Colour colour;
+    private ScotlandYardView view;
     private ScotlandYardState currentGameState;
     private Map<Colour, Integer> playerLocationMap;
     private ScotlandYardGraph graph;
     private ScotlandYardGameTree gameTree;
     private DijkstraCalculator dijkstraGraph;
+    private boolean firstNotify;
     protected List<Move> moves;
 
     public MiniMaxPlayer(ScotlandYardView view, String graphFilename) {
@@ -48,10 +50,13 @@ public class MiniMaxPlayer implements Player {
         }
 
         // store current game
-        this.currentGameState = new ScotlandYardState(view, graph);
+        this.view = view;
 
         // store dijkstra graph
         this.dijkstraGraph = new DijkstraCalculator(this.graph);
+
+        // set firstNotify to true, so more inits occur upon the first notify
+        firstNotify = true;
     }
 
 
@@ -70,14 +75,19 @@ public class MiniMaxPlayer implements Player {
     public void notify(int location, List<Move> moves, Integer token,
                        Receiver receiver) {
 
+        // get data for fields
         this.moves = moves;
         this.location = location;
 
+        // if this is first notify, initialise some more fields.
+        if (firstNotify) {
+            this.currentGameState = new ScotlandYardState(view, graph);
+            this.colour = currentGameState.getCurrentPlayer();
+            firstNotify = false;
+        }
+
         // store locations of other players
         playerLocationMap = currentGameState.getPlayerLocations();
-
-        // store this players colour
-        this.colour = currentGameState.getCurrentPlayer();
 
         // get ai move
         System.out.println("Getting move");
