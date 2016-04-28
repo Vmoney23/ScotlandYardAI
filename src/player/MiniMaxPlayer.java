@@ -80,13 +80,14 @@ public class MiniMaxPlayer implements Player {
         this.token = token; // TODO remove token? (if not needed for ScotlandYardState:playMove)
 
         // store locations of other players
-        playerLocationMap = new HashMap<>();
-        for (Colour player : currentGameState.view.getPlayers()) {
-            playerLocationMap.put(player, currentGameState.view.getPlayerLocation(player));
-        }
+        playerLocationMap = (HashMap) currentGameState.getPlayerLocations();
+//		new HashMap<>();
+//        for (Colour player : currentGameState.getPlayers()) {
+//            playerLocationMap.put(player, currentGameState.getPlayerLocation(player));
+//        }
 
         // store this players colour
-        this.colour = currentGameState.view.getCurrentPlayer();
+        this.colour = currentGameState.getCurrentPlayer();
 
         // get ai move
         System.out.println("Getting move");
@@ -190,7 +191,7 @@ public class MiniMaxPlayer implements Player {
 
         // loop through all other players, find 'best' route to each other
         // player from move target, score this route, add route score to total.
-        for (Colour player : currentGameState.view.getPlayers()) {
+        for (Colour player : currentGameState.getPlayers()) {
 
             // no need to calculate distance between player and himself...
             if (move.colour == player) continue;
@@ -352,12 +353,12 @@ public class MiniMaxPlayer implements Player {
 
     //TODO fix ScotlandYardState clone() method
     protected ScotlandYardState duplicateGameState(ScotlandYardState sy) {
-        ScotlandYardState copy = null;
-        try {
-            copy = (ScotlandYardState) sy.clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
+        ScotlandYardState copy = (ScotlandYardState) sy.copy();
+//        try {
+//            copy = (ScotlandYardState) sy.copy();
+//        } catch (CloneNotSupportedException e) {
+//            e.printStackTrace();
+//        }
         return copy;
     }
 
