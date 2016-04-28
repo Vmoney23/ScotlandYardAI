@@ -2,8 +2,8 @@ package aigraph;
 
 import graph.DirectedGraph;
 import graph.Edge;
-import scotlandyard.Move;
 import player.ScotlandYardState;
+import scotlandyard.Move;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,8 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYardState, Move>
     private AINode head;
 
     /**
-     * Creates a game tree with just the parent node.
+     * Creates a game tree with just the parent node. Node's score is set to a
+     * default of zero.
      *
      * @param currentGameState ScotlandYardView implementing object to be root
      *                         node of ScotlandYardGameTree.
@@ -27,14 +28,18 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYardState, Move>
         this.add(head);
     }
 
-    // TODO getFirstLevelEdges
+
     public List<Edge<ScotlandYardState, Move>> getListFirstLevelEdges() {
-        return null;
+        List<Edge<ScotlandYardState, Move>> firstLevelEdges = new ArrayList<>();
+
+        // for each edge from head node, add that edge to the return list
+        for (Edge<ScotlandYardState, Move> e : getEdgesFrom(head)) {
+            firstLevelEdges.add(e);
+        }
+
+        return firstLevelEdges;
     }
 
-    public List<Double> getFinalScoresList() {
-        return null;
-    }
 
     public AINode getHead() {
         return head;

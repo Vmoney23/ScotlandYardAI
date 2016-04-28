@@ -9,8 +9,8 @@ import prijkstra.Weighter;
 import scotlandyard.*;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A class for a player in a Scotland Yard game, implementing Player. A player
@@ -30,11 +30,10 @@ public class MiniMaxPlayer implements Player {
     private int location;
     private Colour colour;
     private ScotlandYardState currentGameState;
-    private HashMap<Colour, Integer> playerLocationMap;
+    private Map<Colour, Integer> playerLocationMap;
     private ScotlandYardGraph graph;
     private ScotlandYardGameTree gameTree;
     private DijkstraCalculator dijkstraGraph;
-    private Integer token;
     protected List<Move> moves;
 
     public MiniMaxPlayer(ScotlandYardView view, String graphFilename) {
@@ -45,14 +44,10 @@ public class MiniMaxPlayer implements Player {
             this.graph = graphReader.readGraph(graphFilename);
         } catch (IOException e) {
             System.err.println("failed to read " + graphFilename);
-            e.printStackTrace(System.err);
+            e.printStackTrace();
         }
 
         // store current game
-        // TODO remove type check?
-        if (!(view instanceof ScotlandYard))
-            throw new IllegalArgumentException("view must be " +
-                                                       "a ScotlandYard object");
         this.currentGameState = new ScotlandYardState(view, graph);
 
         // store dijkstra graph
@@ -77,14 +72,9 @@ public class MiniMaxPlayer implements Player {
 
         this.moves = moves;
         this.location = location;
-        this.token = token; // TODO remove token? (if not needed for ScotlandYardState:playMove)
 
         // store locations of other players
-        playerLocationMap = (HashMap) currentGameState.getPlayerLocations();
-//		new HashMap<>();
-//        for (Colour player : currentGameState.getPlayers()) {
-//            playerLocationMap.put(player, currentGameState.getPlayerLocation(player));
-//        }
+        playerLocationMap = currentGameState.getPlayerLocations();
 
         // store this players colour
         this.colour = currentGameState.getCurrentPlayer();
@@ -103,39 +93,28 @@ public class MiniMaxPlayer implements Player {
      *
      * @return the chosen move.
      */
+    // TODO currently always get a score for MrX.
     protected Move getAIMove() {
-        // create new game tree to specified depth, with root as current state of the game
-        //int treeDepth = 0;
-        //ScotlandYardGameTree gameTree = new ScotlandYardGameTree(currentGameState);
-        //generateTree(gameTree, treeDepth);//calls pruneTree(), score()
-        // return best moved based on MiniMax
-        //List<AINode<ScotlandYardView>> finalStates = gameTree.getFinalStatesList();
-        //return minimax(finalStates);
-
-        // initialise tree
+        // initialise tree with the current game state at root node
         gameTree = new ScotlandYardGameTree(currentGameState);
 
-        // calculate a score for each move and put this info in a map
+        // calculate a score for each move by using the MiniMax algorithm.
+        // return the move with the best score.
         int depth = 1;
-        //HashMap<Move, Double> moveScores = score(gameTree.getHead(), depth,true);
-
-        // return key associated with highest value
-        //return Collections.max(moveScores.entrySet(), (entry1, entry2) ->(entry1.getValue() > entry2.getValue()) ? 1 : -1).getKey();
-
-        return score(depth, true);
+        boolean mrx = colour == Colour.Black;
+        return score(depth, mrx);
     }
 
     /**
      * Calculates scores for all given moves.
      *
-     * @return a HashMap of each given move to its score.
+     * @return the move which results in the game state with the highest score
+     *         after looking at every possibility after {@code depth} moves are
+     *         played.
      */
     protected Move score(int depth, boolean mrx) {
 
-        // create map of moves to scores
-        // HashMap<Move, Double> moveScoreMap = new HashMap<>();
-
-        // move ai chooses
+        // initialise move ai will choose
         Move aiMove = null;
 
         // generate the game tree
@@ -146,7 +125,7 @@ public class MiniMaxPlayer implements Player {
 
         // check all first level edges to see which move gave the best score
         for (Edge<ScotlandYardState, Move> possibleBest : gameTree.getListFirstLevelEdges()) {
-            if (((AINode)possibleBest.getTarget()).getScore() == bestMoveScore) {
+            if (((AINode) possibleBest.getTarget()).getScore() == bestMoveScore) {
                 aiMove = possibleBest.getData();
                 break;
             }
@@ -154,6 +133,7 @@ public class MiniMaxPlayer implements Player {
 
         return aiMove;
     }
+
 
     /**
      * Assigns a score to a possible move using currentGameState, and returns
@@ -210,6 +190,7 @@ public class MiniMaxPlayer implements Player {
         return score;
     }
 
+
     /**
      * Assigns a score to a possible MoveDouble using currentGameState, and
      * returns that score.
@@ -222,6 +203,7 @@ public class MiniMaxPlayer implements Player {
         // account for using a valuable double move ticket
         return scoreMoveTicket(move.move2) / 2.5;
     }
+
 
     /**
      * A lambda function implements Weighter<Transport>, to be passed to
@@ -241,7 +223,7 @@ public class MiniMaxPlayer implements Player {
                 val = 4;
                 break;
             case Boat:
-                val =10;
+                val = 10;
                 break;
         }
         return val;

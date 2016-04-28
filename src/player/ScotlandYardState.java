@@ -71,7 +71,6 @@ public final class ScotlandYardState implements Cloneable {
      * @param player the player whose moves we want to see.
      * @return the list of valid moves for a given player.
      */
-    // TODO: Possible FIX: don't use playerData's? To get location, use view.getPlayerLocation(Colour player)?
     public List<Move> validMoves(Colour player) {
         int location = playerLocations.get(player);
         List<Move> moves = graph.generateMoves(player, location);
