@@ -29,7 +29,7 @@ public class MiniMaxPlayer implements Player {
 
     private int location;
     private Colour colour;
-    private ScotlandYard currentGameState;
+    private ScotlandYardState currentGameState;
     private HashMap<Colour, Integer> playerLocationMap;
     private ScotlandYardGraph graph;
     private ScotlandYardGameTree gameTree;
@@ -38,12 +38,6 @@ public class MiniMaxPlayer implements Player {
     protected List<Move> moves;
 
     public MiniMaxPlayer(ScotlandYardView view, String graphFilename) {
-        // store current game
-        if (!(view instanceof ScotlandYard))
-            throw new IllegalArgumentException("view must be " +
-                                               "a ScotlandYard object");
-        this.currentGameState = (ScotlandYard) view;
-
         // store graph
         ScotlandYardGraphReader graphReader = new ScotlandYardGraphReader();
         try {
@@ -54,9 +48,15 @@ public class MiniMaxPlayer implements Player {
             e.printStackTrace(System.err);
         }
 
+        // store current game
+        // TODO remove type check?
+        if (!(view instanceof ScotlandYard))
+            throw new IllegalArgumentException("view must be " +
+                                                       "a ScotlandYard object");
+        this.currentGameState = new ScotlandYardState(view, graph);
+
         // store dijkstra graph
         this.dijkstraGraph = new DijkstraCalculator(this.graph);
-
     }
 
 
@@ -77,16 +77,16 @@ public class MiniMaxPlayer implements Player {
 
         this.moves = moves;
         this.location = location;
-        this.token = token;
+        this.token = token; // TODO remove token? (if not needed for ScotlandYardState:playMove)
 
         // store locations of other players
         playerLocationMap = new HashMap<>();
-        for (Colour player : currentGameState.getPlayers()) {
-            playerLocationMap.put(player, currentGameState.getPlayerLocation(player));
+        for (Colour player : currentGameState.view.getPlayers()) {
+            playerLocationMap.put(player, currentGameState.view.getPlayerLocation(player));
         }
 
         // store this players colour
-        this.colour = currentGameState.getCurrentPlayer();
+        this.colour = currentGameState.view.getCurrentPlayer();
 
         // get ai move
         System.out.println("Getting move");
@@ -165,7 +165,7 @@ public class MiniMaxPlayer implements Player {
         double bestMoveScore = gameTree.getHead().getScore();
 
         // check all first level edges to see which move gave the best score
-        for (Edge<ScotlandYard, Move> possibleBest : gameTree.getListFirstLevelEdges()) {
+        for (Edge<ScotlandYardState, Move> possibleBest : gameTree.getListFirstLevelEdges()) {
             if (((AINode)possibleBest.getTarget()).getScore() == bestMoveScore) {
                 aiMove = possibleBest.getData();
                 break;
@@ -190,7 +190,7 @@ public class MiniMaxPlayer implements Player {
 
         // loop through all other players, find 'best' route to each other
         // player from move target, score this route, add route score to total.
-        for (Colour player : currentGameState.getPlayers()) {
+        for (Colour player : currentGameState.view.getPlayers()) {
 
             // no need to calculate distance between player and himself...
             if (move.colour == player) continue;
@@ -252,10 +252,14 @@ public class MiniMaxPlayer implements Player {
 
 
     /**
+     * Generates a gameTree given the head node, which should have have
+     * {@code gameTree.head} as an AINode whose index field should be a
+     * ScotlandYardState object holding the current state of the game.
      *
-     * @param gameTree
-     * @param depth
-     * @param max
+     * @param gameTree the graph containing just the head node of the MiniMax
+     *                 tree
+     * @param depth depth to which to generate the tree
+     * @param max true if this player wants to maximise the score
      */
     private void generateTree(ScotlandYardGameTree gameTree, int depth,
                                 boolean max) {
@@ -264,9 +268,8 @@ public class MiniMaxPlayer implements Player {
 
 
     /**
-     *  TODO 1) duplicateGameState.
-     *  TODO 2) don't switch max on each recurse, as could be more than 1 detective playing, who will also want to min
-     *  TODO 3) alpha-beta pruning.
+     *  TODO 1) don't switch max on each recurse, as could be more than 1 detective playing, who will also want to min
+     *  TODO 2) alpha-beta pruning.
      *
     /**
      * <p>Implements the MiniMax algorithm with alpha-beta pruning.
@@ -294,17 +297,17 @@ public class MiniMaxPlayer implements Player {
 
         // this player is maximising MrX score
         if (max) {
-            // create children nodes
+            // create children nodes and add to tree
             for (Move move : node.getGameState().validMoves(colour)) {
                 // make a copy of currentGameState for the next move
-                ScotlandYard stateAfterMove = duplicateGameState(node.getGameState());
-                stateAfterMove.playMove(move, token); // TODO will token be valid?
+                ScotlandYardState stateAfterMove = duplicateGameState(node.getGameState());
+                stateAfterMove.playMove(move);
 
-                // create node for this game state and link to tree. Give
-                // unassigned score = 0
+                // create node for this game state and link to tree.
+                // Give unassigned score = 0
                 AINode child = new AINode(stateAfterMove, 0.0);
                 gameTree.add(child);
-                Edge<ScotlandYard, Move> edgeToChild = new Edge<>(node, child, move);
+                Edge<ScotlandYardState, Move> edgeToChild = new Edge<>(node, child, move);
                 gameTree.add(edgeToChild);
             }
 
@@ -319,17 +322,17 @@ public class MiniMaxPlayer implements Player {
 
         // or player is minimising MrX score
         else {
-            // create children nodes
+            // create children nodes and add to tree
             for (Move move : node.getGameState().validMoves(colour)) {
                 // make a copy of currentGameState for the next move
-                ScotlandYard stateAfterMove = duplicateGameState(node.getGameState());
-                stateAfterMove.playMove(move, token);
+                ScotlandYardState stateAfterMove = duplicateGameState(node.getGameState());
+                stateAfterMove.playMove(move);
 
-                // create node for this game state and link to tree. Give
-                // unassigned score = 0
+                // create node for this game state and link to tree.
+                // Give unassigned score = 0
                 AINode child = new AINode(stateAfterMove, 0.0);
                 gameTree.add(child);
-                Edge<ScotlandYard, Move> edgeToChild = new Edge<>(node, child, move);
+                Edge<ScotlandYardState, Move> edgeToChild = new Edge<>(node, child, move);
                 gameTree.add(edgeToChild);
             }
 
@@ -347,17 +350,15 @@ public class MiniMaxPlayer implements Player {
     }
 
 
-    //TODO implement duplicateGameState
-    protected ScotlandYard duplicateGameState(ScotlandYard sy) {
-        // create the queue
-        ScotlandYardMapQueue<Integer, Token> queue = new ScotlandYardMapQueue<>();
-        queue.put(token, new Token(token, colour, 0));//random timestamp given
-
-        return new ScotlandYard(sy.getPlayers().size() - 1,
-                                             sy.getRounds(),
-                                             this.graph,
-                                             queue,//sy.queue is private
-                                             token);//sy.gameId is private
+    //TODO fix ScotlandYardState clone() method
+    protected ScotlandYardState duplicateGameState(ScotlandYardState sy) {
+        ScotlandYardState copy = null;
+        try {
+            copy = (ScotlandYardState) sy.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return copy;
     }
 
 

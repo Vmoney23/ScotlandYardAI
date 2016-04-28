@@ -32,7 +32,7 @@ public final class ScotlandYardState implements Cloneable {
      * @param player the player whose moves we want to see.
      * @return the list of valid moves for a given player.
      */
-    private List<Move> validMoves(Colour player) {
+    public List<Move> validMoves(Colour player) {
         int location = playersMap.get(player).getLocation();
         List<Move> moves = graph.generateMoves(player, location);
         List<Move> validMoves = new ArrayList<>();
@@ -77,6 +77,11 @@ public final class ScotlandYardState implements Cloneable {
             }
         }
         return validMoves;
+    }
+
+    // TODO: Implement playMove
+    public void playMove(Move move) {
+
     }
 
 
