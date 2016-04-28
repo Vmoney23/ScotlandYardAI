@@ -74,10 +74,6 @@ public class MiniMaxPlayer implements Player {
     @Override
     public void notify(int location, List<Move> moves, Integer token,
                        Receiver receiver) {
-        // update current game state
-        if (!(receiver instanceof ScotlandYard))
-            throw new IllegalArgumentException("Receiver must be " +
-                    "a ScotlandYard object. Passed: " + receiver.getClass());
 
         this.moves = moves;
         this.location = location;
