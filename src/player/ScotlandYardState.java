@@ -72,18 +72,20 @@ public final class ScotlandYardState implements Cloneable {
      */
     // TODO: Possible FIX: don't use playerData's? To get location, use view.getPlayerLocation(Colour player)?
     public List<Move> validMoves(Colour player) {
-        int location = view.getPlayerLocation();
+        int location = playerLocations.get(player);
         List<Move> moves = graph.generateMoves(player, location);
         List<Move> validMoves = new ArrayList<>();
+		Map<Ticket, Integer> thisPlayersTicketMap = new HashMap<>();
+		thisPlayersTicketMap = playerTickets.get(player);
         if (player != Colour.Black) {
             for (Move move : moves) {
                 int dest = ((MoveTicket) move).target;
                 boolean occupied = false;
-                for (PlayerData internalPlayer : players.subList(1, players.size())) {
-                    if (internalPlayer.getLocation() == dest)
+                for (Colour internalPlayer : players.subList(1, players.size())) {
+                    if (playerLocations.get(internalPlayer) == dest)
                         occupied = true;
                 }
-                if (!occupied && view.getPlayerTickets(colour, move.ticket) > 1)
+                if (!occupied && thisPlayersTicketMap.get(((MoveTicket) move).ticket) > 1)
                     validMoves.add(move);
             }
             if (validMoves.isEmpty())
@@ -93,24 +95,24 @@ public final class ScotlandYardState implements Cloneable {
                 if (move instanceof MoveTicket) {
                     int dest = ((MoveTicket) move).target;
                     boolean occupied = false;
-                    for (PlayerData internalPlayer : players) {
-                        if (internalPlayer.getLocation() == dest)
+                    for (Colour internalPlayer : players) {
+                        if (playerLocations.get(internalPlayer) == dest)
                             occupied = true;
                     }
-                    if (!occupied && view.getPlayerTickets(colour, move.ticket) > 1)
+                    if (!occupied && thisPlayersTicketMap.get(((MoveTicket) move).ticket) > 1)
                         validMoves.add(move);
-                } else if ((move instanceof MoveDouble) && view.getPlayerTickets(colour, Ticket.Double) > 1) {
+                } else if ((move instanceof MoveDouble) && thisPlayersTicketMap.get(Ticket.Double) > 1) {
                     int dest1 = ((MoveDouble) move).move1.target;
                     int dest2 = ((MoveDouble) move).move2.target;
                     boolean occupied1 = false;
                     boolean occupied2 = false;
-                    for (PlayerData internalPlayer : players) {
-                        if (internalPlayer.getLocation() == dest1)
+                    for (Colour internalPlayer : players) {
+                        if (playerLocations.get(internalPlayer) == dest1)
                             occupied1 = true;
-                        if (internalPlayer.getLocation() == dest2)
+                        if (playerLocations.get(internalPlayer) == dest2)
                             occupied2 = true;
                     }
-                    if (view.getPlayerTickets(colour, ((MoveDouble) move).move1.ticket) && view.getPlayerTickets(colour, ((MoveDouble) move).move2.ticket) && !occupied1 && !occupied2)
+                    if ((thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket) > 1) && (thisPlayersTicketMap.get(((MoveDouble) move).move2.ticket) > 1) && !occupied1 && !occupied2)
                         validMoves.add(move);
                 }
             }
