@@ -19,7 +19,8 @@ import java.util.List;
  * score for each possible state of the game is based on numerous factors.
  * @see Player the interface for a Player in this game.
  *
- * TODO create game tree
+ * TODO **dont score state as a ScotlandYard, create new ScotlandYardData so can be cloned
+ *
  * TODO alpha-beta pruning
  * TODO make score more complex
  * TODO Dijkstra must not let Detective-Detective journeys have boats.
@@ -47,7 +48,7 @@ public class MiniMaxPlayer implements Player {
         ScotlandYardGraphReader graphReader = new ScotlandYardGraphReader();
         try {
             // read the graph, convert it to a DijkstraCalculator and store it.
-            this.graph = graphReader.readGraph("resources/" + graphFilename);
+            this.graph = graphReader.readGraph(graphFilename);
         } catch (IOException e) {
             System.err.println("failed to read " + graphFilename);
             e.printStackTrace(System.err);
@@ -56,14 +57,6 @@ public class MiniMaxPlayer implements Player {
         // store dijkstra graph
         this.dijkstraGraph = new DijkstraCalculator(this.graph);
 
-        // store locations of other players
-        playerLocationMap = new HashMap<>();
-        for (Colour player : currentGameState.getPlayers()) {
-            playerLocationMap.put(player, currentGameState.getPlayerLocation(player));
-        }
-
-        // store this players colour
-        this.colour = currentGameState.getCurrentPlayer();
     }
 
 
@@ -84,11 +77,23 @@ public class MiniMaxPlayer implements Player {
         // update current game state
         if (!(receiver instanceof ScotlandYard))
             throw new IllegalArgumentException("Receiver must be " +
-                                               "a ScotlandYard object");
-        this.currentGameState = (ScotlandYard) receiver;
+                    "a ScotlandYard object. Passed: " + receiver.getClass());
+
+        this.currentGameState =
+                (ScotlandYard) receiver; // FAIL to cast
+
         this.moves = moves;
         this.location = location;
         this.token = token;
+
+        // store locations of other players
+        playerLocationMap = new HashMap<>();
+        for (Colour player : currentGameState.getPlayers()) {
+            playerLocationMap.put(player, currentGameState.getPlayerLocation(player));
+        }
+
+        // store this players colour
+        this.colour = currentGameState.getCurrentPlayer();
 
         // get ai move
         System.out.println("Getting move");
@@ -302,11 +307,13 @@ public class MiniMaxPlayer implements Player {
         gameTree.getHead().setScore(MiniMax(gameTree.getHead(), depth, max));
     }
 
+
     /**
      *  TODO 1) duplicateGameState.
-     *  TODO 2) dont switch max on each recurse, as could be more than 1
-     *  TODO    detective playing, who will also want to min
+     *  TODO 2) don't switch max on each recurse, as could be more than 1 detective playing, who will also want to min
      *  TODO 3) alpha-beta pruning.
+     *
+    /**
      * <p>Implements the MiniMax algorithm with alpha-beta pruning.
      *
      * @param node the AINode from which to create a tree from. node will be
@@ -323,7 +330,7 @@ public class MiniMaxPlayer implements Player {
     private Double MiniMax(AINode node, int depth, boolean max) {
         // base case
         if (depth <= 0) {
-            node.calculateScore();
+            calculateScore(node);
             return node.getScore();
         }
 
@@ -332,8 +339,6 @@ public class MiniMaxPlayer implements Player {
 
         // this player is maximising MrX score
         if (max) {
-            bestScore = Double.NEGATIVE_INFINITY;
-
             // create children nodes
             for (Move move : node.getGameState().validMoves(colour)) {
                 // make a copy of currentGameState for the next move
@@ -349,6 +354,8 @@ public class MiniMaxPlayer implements Player {
             }
 
             // find child node with highest score
+            bestScore = Double.NEGATIVE_INFINITY;
+
             for (AINode child : gameTree.getChildren(node)) {
                 Double v = MiniMax(child, depth - 1, false);
                 bestScore = bestScore > v ? bestScore : v;
@@ -357,8 +364,6 @@ public class MiniMaxPlayer implements Player {
 
         // or player is minimising MrX score
         else {
-            bestScore = Double.POSITIVE_INFINITY;
-
             // create children nodes
             for (Move move : node.getGameState().validMoves(colour)) {
                 // make a copy of currentGameState for the next move
@@ -374,6 +379,8 @@ public class MiniMaxPlayer implements Player {
             }
 
             // find child with lowest score
+            bestScore = Double.POSITIVE_INFINITY;
+
             for (AINode child : gameTree.getChildren(node)) {
                 Double v = MiniMax(child, depth - 1, true);
                 bestScore = bestScore < v ? bestScore : v;
@@ -384,14 +391,24 @@ public class MiniMaxPlayer implements Player {
         return bestScore;
     }
 
+
     //TODO implement duplicateGameState
     protected ScotlandYard duplicateGameState(ScotlandYard sy) {
-        ScotlandYard copy = new ScotlandYard(sy.getPlayers().size() - 1,
+        // create the queue
+        ScotlandYardMapQueue<Integer, Token> queue = new ScotlandYardMapQueue<>();
+        queue.put(token, new Token(token, colour, 0));//random timestamp given
+
+        return new ScotlandYard(sy.getPlayers().size() - 1,
                                              sy.getRounds(),
                                              this.graph,
-                                             null,//sy.queue is private
-                                             null);//sy.gameId is private
-        return copy;
+                                             queue,//sy.queue is private
+                                             token);//sy.gameId is private
+    }
+
+
+    //TODO implement calculateScore (calls scoreMoveTicket/Double)
+    protected void calculateScore(AINode node) {
+
     }
 
 }
