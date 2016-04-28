@@ -38,7 +38,7 @@ public class MiniMaxPlayer implements Player {
     private boolean firstNotify;
     protected List<Move> moves;
 
-    public MiniMaxPlayer(ScotlandYardView view, String graphFilename) {
+    public MiniMaxPlayer(ScotlandYardView view, String graphFilename, Colour colour) {
         // store graph
         ScotlandYardGraphReader graphReader = new ScotlandYardGraphReader();
         try {
@@ -48,6 +48,9 @@ public class MiniMaxPlayer implements Player {
             System.err.println("failed to read " + graphFilename);
             e.printStackTrace();
         }
+
+        // store player colour
+        this.colour = colour;
 
         // store current game
         this.view = view;
@@ -82,7 +85,6 @@ public class MiniMaxPlayer implements Player {
         // if this is first notify, initialise some more fields.
         if (firstNotify) {
             this.currentGameState = new ScotlandYardState(view, graph);
-            this.colour = currentGameState.getCurrentPlayer();
             firstNotify = false;
         }
 
