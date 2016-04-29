@@ -91,7 +91,8 @@ public class Edge<X, Y> {
      * @return a representation of the edge as a string.
      */
     public String toString() {
-        return "---Edge---:\nsource: " + source.toString() + ", target: " +
+        return "\n---Edge---:\nsource score: " + source.toString() + ", " +
+                "target score: " +
                 target.toString() + ", move: "  + data.toString();
     }
 

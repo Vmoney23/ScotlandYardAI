@@ -92,11 +92,11 @@ public class MiniMaxPlayer implements Player {
         playerLocationMap = currentGameState.getPlayerLocations();
 
         // get ai move
-        System.out.println("Getting move");
+        System.out.println("\n\n*********Getting move***********");
         Move aiMove = getAIMove();
 
         // play ai move
-        System.out.println("Playing move: " + aiMove);
+        System.out.println("Playing move: " + aiMove + "\n\n");
         receiver.playMove(aiMove, token);
     }
 
@@ -138,7 +138,7 @@ public class MiniMaxPlayer implements Player {
         boolean gotAMove = false;
         // check all first level edges to see which move gave the best score
         for (Edge<ScotlandYardState, Move> possibleBest : gameTree.getListFirstLevelEdges()) {
-            if (((AINode) possibleBest.getTarget()).getScore() == bestMoveScore) {
+            if (((AINode) possibleBest.getTarget()).getScore() == bestMoveScore) { // ERROR IF STATEMENT BROKEN
                 aiMove = possibleBest.getData();
                 gotAMove = true;
                 break;
@@ -311,8 +311,10 @@ public class MiniMaxPlayer implements Player {
             // find child node with highest score
             bestScore = Double.NEGATIVE_INFINITY;
 
+            System.out.println("NUMBER OF CHILDREN NODES: " + gameTree.getChildren(node).size());
             for (AINode child : gameTree.getChildren(node)) {
                 Double v = MiniMax(child, depth - 1, false);
+                // max(bestScore, v)
                 bestScore = bestScore > v ? bestScore : v;
             }
         }
@@ -337,8 +339,10 @@ public class MiniMaxPlayer implements Player {
             // find child with lowest score
             bestScore = Double.POSITIVE_INFINITY;
 
+            System.out.println("NUMBER OF CHILDREN NODES: " + gameTree.getChildren(node).size());
             for (AINode child : gameTree.getChildren(node)) {
                 Double v = MiniMax(child, depth - 1, true);
+                // min(bestScore, v)
                 bestScore = bestScore < v ? bestScore : v;
             }
         }
@@ -358,6 +362,11 @@ public class MiniMaxPlayer implements Player {
         // get move, which should be on edge to node. There should only be one
         // edge to node.
         Move moveToNode = gameTree.getEdgesTo(node).get(0).getData();
+
+        if (gameTree.getEdgesTo(node).size() != 1)
+            throw new RuntimeException("Illegal state: more than one edge to " +
+                    "AINode: " + node.getScore());
+
         Double score = scoreMove(moveToNode);
         node.setScore(score);
     }
