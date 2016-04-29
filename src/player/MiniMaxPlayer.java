@@ -105,7 +105,7 @@ public class MiniMaxPlayer implements Player {
 
         // calculate a score for each move by using the MiniMax algorithm.
         // return the move with the best score.
-        int depth = 3;
+        int depth = 4;
         boolean mrx = colour == Colour.Black;
         return score(depth, mrx);
     }
