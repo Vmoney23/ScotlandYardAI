@@ -232,7 +232,7 @@ public class MiniMaxPlayer implements Player {
                 val = 4;
                 break;
             case Boat:
-                val = 10;
+                val = 15;
                 break;
         }
         return val;

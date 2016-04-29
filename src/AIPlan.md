@@ -10,5 +10,5 @@
    - Reduce score when near corner of map.
    - Make MrX choose double move and secret when having to show location.
    - Don't let dijkstra include Boat edges when calculating shortest route
-     for a detective to get to MrX.
+     for a detective to get to MrX. DONE (massively increased Boat weight)
    - Reduce score massively if MrX loses. DONE
