@@ -342,6 +342,7 @@ public class MiniMaxPlayer implements Player {
      * @param node the node to calculate the score for.
      */
     protected void calculateScore(AINode node) {
+        // debugging check
         if (gameTree.getEdgesTo(node).size() != 1) {
             throw new RuntimeException("Illegal state: Not one edge to " +
                     "AINode: " + node.getScore());
@@ -354,7 +355,10 @@ public class MiniMaxPlayer implements Player {
         // get score based on Dijkstra
         Double score = scoreMove(moveToNode);
 
-        // increase score if game is in MrX winning state
+        // decrease score if MrX loses in this game state
+        if (!node.getGameState().getWinningPlayers().contains(Colour.Black)
+                && node.getGameState().isGameOver())
+            score /= 5;
 
 
         // set the nodes score to score
