@@ -11,4 +11,4 @@
    - Make MrX choose double move and secret when having to show location.
    - Don't let dijkstra include Boat edges when calculating shortest route
      for a detective to get to MrX.
-   -
+   - Add loads to score if MrX wins.

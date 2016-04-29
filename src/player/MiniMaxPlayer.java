@@ -351,7 +351,13 @@ public class MiniMaxPlayer implements Player {
         // edge to node.
         Move moveToNode = gameTree.getEdgesTo(node).get(0).getData();
 
+        // get score based on Dijkstra
         Double score = scoreMove(moveToNode);
+
+        // increase score if game is in MrX winning state
+
+
+        // set the nodes score to score
         node.setScore(score);
     }
 
