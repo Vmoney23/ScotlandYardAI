@@ -56,9 +56,6 @@ public class MiniMaxPlayer implements Player {
 
         // store dijkstra graph
         this.dijkstraGraph = new DijkstraCalculator(this.graph);
-
-        // set firstNotify to true, so more inits occur upon the first notify
-        firstNotify = true;
     }
 
 
