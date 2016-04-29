@@ -17,10 +17,8 @@
 	
 	- Play moves to corner or restrict MrX.  
 	- Try to keep MrX near Taxi/Bus stations only.  
-	
-## Overall ToDo	
-- Recursive Tree generator  
--  
 
-## Tree Structure
-- Node is 
+
+## calculateScore() improvements
+   - Reduce score when near corner of map.
+   - 
