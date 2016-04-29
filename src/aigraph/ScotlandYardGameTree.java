@@ -37,6 +37,9 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYardState, Move>
             firstLevelEdges.add(e);
         }
 
+
+        System.out.println(firstLevelEdges);
+
         return firstLevelEdges;
     }
 

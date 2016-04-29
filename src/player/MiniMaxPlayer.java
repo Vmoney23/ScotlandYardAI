@@ -112,7 +112,7 @@ public class MiniMaxPlayer implements Player {
 
         // calculate a score for each move by using the MiniMax algorithm.
         // return the move with the best score.
-        int depth = 1;
+        int depth = 3;
         boolean mrx = colour == Colour.Black;
         return score(depth, mrx);
     }
@@ -127,7 +127,7 @@ public class MiniMaxPlayer implements Player {
     protected Move score(int depth, boolean mrx) {
 
         // initialise move ai will choose
-        Move aiMove = null;
+        Move aiMove = moves.get(0);
 
         // generate the game tree
         generateTree(gameTree, depth, mrx);
@@ -135,13 +135,18 @@ public class MiniMaxPlayer implements Player {
         // choose the move
         double bestMoveScore = gameTree.getHead().getScore();
 
+        boolean gotAMove = false;
         // check all first level edges to see which move gave the best score
         for (Edge<ScotlandYardState, Move> possibleBest : gameTree.getListFirstLevelEdges()) {
             if (((AINode) possibleBest.getTarget()).getScore() == bestMoveScore) {
                 aiMove = possibleBest.getData();
+                gotAMove = true;
                 break;
             }
         }
+        if (!gotAMove) System.out.println("Move was not assigned from " +
+                "gameTree");
+        else System.out.println("Move was assigned from gameTree");
 
         return aiMove;
     }
