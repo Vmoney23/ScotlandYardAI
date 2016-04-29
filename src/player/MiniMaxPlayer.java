@@ -170,9 +170,7 @@ public class MiniMaxPlayer implements Player {
      */
     protected double scoreMoveTicket(MoveTicket move) {
         // upon return, score = total / routes
-        double score;
-        double total = 0;
-        int routes = 0;
+        double score = 0;
 
         // loop through all other players, find 'best' route to each other
         // player from move target, score this route, add route score to total.
@@ -188,14 +186,9 @@ public class MiniMaxPlayer implements Player {
             // add more to score if edge requires greater value transport
             // to traverse.
             for (Edge<Integer, Transport> e : route.getEdges())
-                total += TRANSPORT_WEIGHTER.toWeight(e.getData());
-
-            // increment routes, for taking mean later
-            routes++;
+                score += TRANSPORT_WEIGHTER.toWeight(e.getData());
         }
 
-        // calculate mean and return it
-        score = total / routes;
         return score;
     }
 
@@ -360,11 +353,15 @@ public class MiniMaxPlayer implements Player {
                 && node.getGameState().isGameOver())
             score /= 5;
 
-        // adjust score to be higher if degree of current node is higher.
-        // this also avoids outskirts of map
-        score *= node.getDegree();
+        // adjust score to be higher if degree of MrX's node is higher.
+        // this also avoids outskirts of map.
+        if (colour.equals(Colour.Black))
+            score *= node.getDegree(); //MrX maximises score
+        else
+            score /= node.getDegree(); //Detectives minimise score
 
-        // set the nodes score to score
+
+        // set node.score to score
         node.setScore(score);
     }
 
