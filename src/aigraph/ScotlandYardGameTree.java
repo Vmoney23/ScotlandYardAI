@@ -58,8 +58,20 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYardState, Move>
         List<AINode> children = new ArrayList<>();
         for (Edge<ScotlandYardState, Move> e : this.getEdgesFrom(node)) {
             children.add((AINode) e.getTarget());
+            System.out.println("getChildren: added a child node.");
         }
         return children;
+    }
+
+    public AINode getParent(AINode node) {
+        if (!getNodes().contains(node)) throw new RuntimeException("node not " +
+                "in tree");
+        if (getEdgesTo(node).size() == 0) throw new RuntimeException("node " +
+                "has no parents");
+        if (getEdgesTo(node).size() != 1) throw new RuntimeException("more " +
+                "than one edge to node");
+
+        return (AINode) getEdgesTo(node).get(0).getSource();
     }
 
 }

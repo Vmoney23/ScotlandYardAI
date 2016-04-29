@@ -35,7 +35,6 @@ public class MiniMaxPlayer implements Player {
     private ScotlandYardGraph graph;
     private ScotlandYardGameTree gameTree;
     private DijkstraCalculator dijkstraGraph;
-    private boolean firstNotify;
     protected List<Move> moves;
 
     public MiniMaxPlayer(ScotlandYardView view, String graphFilename, Colour colour) {
@@ -82,11 +81,8 @@ public class MiniMaxPlayer implements Player {
         this.moves = moves;
         this.location = location;
 
-        // if this is first notify, initialise some more fields.
-        if (firstNotify) {
-            this.currentGameState = new ScotlandYardState(view, location, graph);
-            firstNotify = false;
-        }
+        // create a ScotlandYardState based on view and location
+        this.currentGameState = new ScotlandYardState(view, location, graph);
 
         // store locations of other players
         playerLocationMap = currentGameState.getPlayerLocations();
@@ -144,9 +140,9 @@ public class MiniMaxPlayer implements Player {
                 break;
             }
         }
-        if (!gotAMove) System.out.println("Move was not assigned from " +
-                "gameTree");
-        else System.out.println("Move was assigned from gameTree");
+        if (!gotAMove) System.out.println("score(): Move was not assigned " +
+                "from gameTree");
+        else System.out.println("score(): Move was assigned from gameTree");
 
         return aiMove;
     }
@@ -282,8 +278,29 @@ public class MiniMaxPlayer implements Player {
      *         can get, based on a tree of {@code depth} depth.
      */
     private Double MiniMax(AINode node, int depth, boolean max) {
-        // base case
+        // base case 1 - depth is zero
         if (depth <= 0) {
+            calculateScore(node);
+            return node.getScore();
+        }
+
+        // create children nodes and add to tree
+        for (Move move : node.getGameState().validMoves(colour)) {
+            // make a copy of currentGameState for the next move
+            ScotlandYardState stateAfterMove = node.getGameState().copy();
+            stateAfterMove.playMove(move);
+
+            // create node for this game state and link to tree.
+            // Give unassigned score = 0
+            AINode child = new AINode(stateAfterMove, 0.0);
+            gameTree.add(child);
+            Edge<ScotlandYardState, Move> edgeToChild = new Edge<>(node, child, move);
+            gameTree.add(edgeToChild);
+            calculateScore(child);
+        }
+
+        // base case 2 - node is leaf (no valid moves)
+        if (gameTree.getChildren(node).size() == 0) {
             calculateScore(node);
             return node.getScore();
         }
@@ -293,25 +310,10 @@ public class MiniMaxPlayer implements Player {
 
         // this player is maximising MrX score
         if (max) {
-            // create children nodes and add to tree
-            for (Move move : node.getGameState().validMoves(colour)) {
-                // make a copy of currentGameState for the next move
-                ScotlandYardState stateAfterMove = node.getGameState().copy();
-                stateAfterMove.playMove(move);
-
-                // create node for this game state and link to tree.
-                // Give unassigned score = 0
-                AINode child = new AINode(stateAfterMove, 0.0);
-                gameTree.add(child);
-                Edge<ScotlandYardState, Move> edgeToChild = new Edge<>(node, child, move);
-                gameTree.add(edgeToChild);
-                calculateScore(child);
-            }
-
             // find child node with highest score
             bestScore = Double.NEGATIVE_INFINITY;
 
-            System.out.println("NUMBER OF CHILDREN NODES: " + gameTree.getChildren(node).size());
+            System.out.println("MiniMax: NUMBER OF CHILDREN NODES: " + gameTree.getChildren(node).size());
             for (AINode child : gameTree.getChildren(node)) {
                 Double v = MiniMax(child, depth - 1, false);
                 // max(bestScore, v)
@@ -321,25 +323,10 @@ public class MiniMaxPlayer implements Player {
 
         // or player is minimising MrX score
         else {
-            // create children nodes and add to tree
-            for (Move move : node.getGameState().validMoves(colour)) {
-                // make a copy of currentGameState for the next move
-                ScotlandYardState stateAfterMove = node.getGameState().copy();
-                stateAfterMove.playMove(move);
-
-                // create node for this game state and link to tree.
-                // Give unassigned score = 0
-                AINode child = new AINode(stateAfterMove, 0.0);
-                gameTree.add(child);
-                Edge<ScotlandYardState, Move> edgeToChild = new Edge<>(node, child, move);
-                gameTree.add(edgeToChild);
-                calculateScore(child);
-            }
-
             // find child with lowest score
             bestScore = Double.POSITIVE_INFINITY;
 
-            System.out.println("NUMBER OF CHILDREN NODES: " + gameTree.getChildren(node).size());
+            System.out.println("MiniMax: NUMBER OF CHILDREN NODES: " + gameTree.getChildren(node).size());
             for (AINode child : gameTree.getChildren(node)) {
                 Double v = MiniMax(child, depth - 1, true);
                 // min(bestScore, v)
@@ -359,13 +346,14 @@ public class MiniMaxPlayer implements Player {
      * @param node the node to calculate the score for.
      */
     protected void calculateScore(AINode node) {
+        if (gameTree.getEdgesTo(node).size() != 1) {
+            throw new RuntimeException("Illegal state: Not one edge to " +
+                    "AINode: " + node.getScore());
+        }
+
         // get move, which should be on edge to node. There should only be one
         // edge to node.
         Move moveToNode = gameTree.getEdgesTo(node).get(0).getData();
-
-        if (gameTree.getEdgesTo(node).size() != 1)
-            throw new RuntimeException("Illegal state: more than one edge to " +
-                    "AINode: " + node.getScore());
 
         Double score = scoreMove(moveToNode);
         node.setScore(score);
