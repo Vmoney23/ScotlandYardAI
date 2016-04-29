@@ -157,7 +157,7 @@ public final class ScotlandYardState {
 
 
     // playMove helpers
-    //
+    // TODO update round and notify spectators?
 
     /**
      * Passes priority onto the next player whose turn it is to play.
@@ -189,6 +189,8 @@ public final class ScotlandYardState {
         giveTicketsToMrX(move);
         updatePlayerTickets(move);
         updatePlayerLocation(move);
+        //updateRound();
+        //notifySpectators();
     }
 
     /**
@@ -200,6 +202,15 @@ public final class ScotlandYardState {
         updatePlayerTickets(move);
         play(move.move1);
         play(move.move2);
+    }
+
+    /**
+     * Plays a MovePass.
+     *
+     * @param move the MovePass to play.
+     */
+    private void play(MovePass move) {
+        //notifySpectators(move);
     }
 
 
