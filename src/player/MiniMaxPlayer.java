@@ -98,7 +98,6 @@ public class MiniMaxPlayer implements Player {
      *
      * @return the chosen move.
      */
-    // TODO currently always get a score for MrX.
     protected Move getAIMove() {
         // initialise tree with the current game state at root node
         gameTree = new ScotlandYardGameTree(currentGameState);
