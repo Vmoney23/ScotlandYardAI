@@ -84,7 +84,7 @@ public class MiniMaxPlayer implements Player {
 
         // if this is first notify, initialise some more fields.
         if (firstNotify) {
-            this.currentGameState = new ScotlandYardState(view, graph);
+            this.currentGameState = new ScotlandYardState(view, location, graph);
             firstNotify = false;
         }
 

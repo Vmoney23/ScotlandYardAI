@@ -37,13 +37,20 @@ public final class ScotlandYardState {
     }
 
 
-    public ScotlandYardState(ScotlandYardView view, ScotlandYardGraph graph) {
+    public ScotlandYardState(ScotlandYardView view, Integer
+            location, ScotlandYardGraph graph) {
         this.graph = graph;
         this.players = view.getPlayers();
 
+        this.currentPlayer = view.getCurrentPlayer();
+
         this.playerLocations = new HashMap<>();
-        for (Colour player : players)
-            playerLocations.put(player, view.getPlayerLocation(player));
+        for (Colour player : players) {
+            if (player == currentPlayer)
+                playerLocations.put(player, location);
+            else
+                playerLocations.put(player, view.getPlayerLocation(player));
+        }
 
         this.playerTickets = new HashMap<>();
         for (Colour player : players) {
@@ -56,7 +63,6 @@ public final class ScotlandYardState {
 
         this.gameOver = view.isGameOver();
         this.ready = view.isReady();
-        this.currentPlayer = view.getCurrentPlayer();
         this.round = view.getRound();
         this.rounds = view.getRounds();
     }
