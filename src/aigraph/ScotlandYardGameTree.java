@@ -29,6 +29,21 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYardState, Move>
     }
 
 
+    /**
+     * Adds an edge to the graph. Multiple edges with the same source and
+     * target nodes are allowed.
+     *
+     * @param edge the edge to add to the graph.
+     */
+    @Override
+    public void add(Edge<ScotlandYardState, Move> edge) {
+        super.add(edge);
+
+        ((AINode) edge.getSource()).incrDegree();
+        ((AINode) edge.getTarget()).incrDegree();
+    }
+
+
     public List<Edge<ScotlandYardState, Move>> getListFirstLevelEdges() {
         List<Edge<ScotlandYardState, Move>> firstLevelEdges = new ArrayList<>();
 

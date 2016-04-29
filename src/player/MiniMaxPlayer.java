@@ -360,6 +360,9 @@ public class MiniMaxPlayer implements Player {
                 && node.getGameState().isGameOver())
             score /= 5;
 
+        // adjust score to be higher if degree of current node is higher.
+        // this also avoids outskirts of map
+        score *= node.getDegree();
 
         // set the nodes score to score
         node.setScore(score);
