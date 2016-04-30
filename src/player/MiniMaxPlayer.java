@@ -21,7 +21,6 @@ import java.util.Map;
  * @see Player the interface for a Player in this game.
  *
  *
- * TODO fix alpha-beta pruning
  * TODO better order valid moves to improve alpha-beta pruning
  * TODO make score more complex
  */
