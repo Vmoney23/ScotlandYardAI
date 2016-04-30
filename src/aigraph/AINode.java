@@ -1,7 +1,6 @@
 package aigraph;
 
 import graph.Node;
-import scotlandyard.ScotlandYard;
 import player.ScotlandYardState;
 
 /**
@@ -12,15 +11,18 @@ import player.ScotlandYardState;
 public class AINode extends Node<ScotlandYardState> {
 
     private Double score;
+    private int degree = 0;
 
     public AINode(ScotlandYardState gameState, Double score) {
         super(gameState);
         this.score = score;
     }
 
+
     public ScotlandYardState getGameState() {
         return super.getIndex();
     }
+
 
     public void setGameState(ScotlandYardState gameState) {
         super.setIndex(gameState);
@@ -30,8 +32,20 @@ public class AINode extends Node<ScotlandYardState> {
         return score;
     }
 
+
     public void setScore(Double score) {
         this.score = score;
+    }
+
+
+    public int getDegree() {
+        return degree;
+    }
+
+
+    // package local
+    void incrDegree() {
+        degree++;
     }
 
 

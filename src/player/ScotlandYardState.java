@@ -12,9 +12,8 @@ import java.util.*;
 public final class ScotlandYardState {
     private final ScotlandYardGraph graph;
     private final List<Colour> players;
-
     // which of these are these needed?
-    private Set<Colour> winningPlayers; // removed
+    private Set<Colour> winningPlayers;
     private Map<Colour, Integer> playerLocations;
     private Map<Colour, Map<Ticket, Integer>> playerTickets;
     private boolean gameOver;
@@ -24,9 +23,10 @@ public final class ScotlandYardState {
     private List<Boolean> rounds;
 
 
-    private ScotlandYardState(ScotlandYardGraph graph, List<Colour> players, Map<Colour, Integer> playerLocations, Map<Colour, Map<Ticket, Integer>> playerTickets, boolean gameOver, boolean ready, Colour currentPlayer, int round, List<Boolean> rounds) {
+    private ScotlandYardState(ScotlandYardGraph graph, List<Colour> players, Map<Colour, Integer> playerLocations, Map<Colour, Map<Ticket, Integer>> playerTickets, Set<Colour> winningPlayers, boolean gameOver, boolean ready, Colour currentPlayer, int round, List<Boolean> rounds) {
         this.graph = graph;
         this.players = players;
+        this.winningPlayers = new HashSet<>(winningPlayers);
         this.playerLocations = new HashMap<>(playerLocations);
         this.playerTickets = new HashMap<>(playerTickets);
         this.gameOver = gameOver;
@@ -41,6 +41,8 @@ public final class ScotlandYardState {
             location, ScotlandYardGraph graph) {
         this.graph = graph;
         this.players = view.getPlayers();
+
+        this.winningPlayers = view.getWinningPlayers(); // NEW
 
         this.currentPlayer = view.getCurrentPlayer();
 
@@ -78,6 +80,7 @@ public final class ScotlandYardState {
                                      players,
                                      playerLocations,
                                      playerTickets,
+                                     winningPlayers,
                                      gameOver,
                                      ready,
                                      currentPlayer,
@@ -156,7 +159,7 @@ public final class ScotlandYardState {
 
 
     // playMove helpers
-    //
+    // TODO update round and notify spectators?
 
     /**
      * Passes priority onto the next player whose turn it is to play.
@@ -188,6 +191,8 @@ public final class ScotlandYardState {
         giveTicketsToMrX(move);
         updatePlayerTickets(move);
         updatePlayerLocation(move);
+        //updateRound();
+        //notifySpectators();
     }
 
     /**
@@ -199,6 +204,15 @@ public final class ScotlandYardState {
         updatePlayerTickets(move);
         play(move.move1);
         play(move.move2);
+    }
+
+    /**
+     * Plays a MovePass.
+     *
+     * @param move the MovePass to play.
+     */
+    private void play(MovePass move) {
+        //notifySpectators(move);
     }
 
 
@@ -252,6 +266,10 @@ public final class ScotlandYardState {
 
     public Map<Colour, Map<Ticket, Integer>> getPlayerTickets() {
         return playerTickets;
+    }
+
+    public Set<Colour> getWinningPlayers() {
+        return winningPlayers;
     }
 
     public boolean isGameOver() {
