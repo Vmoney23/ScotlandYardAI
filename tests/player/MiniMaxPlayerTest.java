@@ -42,7 +42,7 @@ public class MiniMaxPlayerTest {
         // instantiate a game with MrX as MiniMax player
         ScotlandYard game = TestHelper.getStoppedGame(1, "test_resources/graph.txt");
         MiniMaxPlayer mrx = new TestHelper.MrXMiniMaxTestPlayer(game, "graph" +
-                ".txt", colour);
+                ".txt", Colour.Black);
         TestHelper.addMrxToGame(game, mrx, 1);
 
         // TODO get a weaker and a stronger move.

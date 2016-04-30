@@ -6,7 +6,9 @@ import player.ScotlandYardState;
 import scotlandyard.Move;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.PriorityQueue;
 
 /**
  *
@@ -86,6 +88,23 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYardState, Move>
         for (Edge<ScotlandYardState, Move> e : this.getEdgesFrom(node)) {
             children.add((AINode) e.getTarget());
             //System.out.println("getChildren: added a child node.");
+        }
+        return children;
+    }
+
+    /**
+     * Returns the children of node in a tree as a PriorityQueue.
+     * Must pass in comparator to give AINode's an ordering.
+     *
+     * @param node the node to get the children of.
+     * @param comp the comparator of AINode's to determine their order.
+     * @return a PriorityQueue with the children of node.
+     */
+    public PriorityQueue<AINode> getChildrenQueue(AINode node,
+                                                  Comparator<AINode> comp) {
+        PriorityQueue<AINode> children = new PriorityQueue<>(comp);
+        for (Edge<ScotlandYardState, Move> e : this.getEdgesFrom(node)) {
+            children.add((AINode) e.getTarget());
         }
         return children;
     }

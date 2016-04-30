@@ -10,6 +10,7 @@ import scotlandyard.*;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +36,7 @@ public class MiniMaxPlayer implements Player {
     private ScotlandYardGameTree gameTree;
     private DijkstraCalculator dijkstraGraph;
     protected List<Move> moves;
+
 
     public MiniMaxPlayer(ScotlandYardView view, String graphFilename, Colour colour) {
         // store graph
@@ -92,6 +94,7 @@ public class MiniMaxPlayer implements Player {
         receiver.playMove(aiMove, token);
     }
 
+
     /**
      * Chooses a move.
      *
@@ -107,6 +110,7 @@ public class MiniMaxPlayer implements Player {
         boolean mrx = colour.equals(Colour.Black);
         return score(depth, mrx);
     }
+
 
     /**
      * Calculates scores for all given moves.
@@ -279,6 +283,7 @@ public class MiniMaxPlayer implements Player {
         // create children nodes and add to tree
         //System.out.println("number of valid moves: " + node.getGameState().validMoves(node.getGameState().getCurrentPlayer()).size());
         System.out.println(node.getGameState().getCurrentPlayer());
+
         for (Move move : node.getGameState().validMoves(node.getGameState().getCurrentPlayer())) {
             // make a copy of currentGameState for the next move
             ScotlandYardState stateAfterMove = node.getGameState().copy();
@@ -378,4 +383,11 @@ public class MiniMaxPlayer implements Player {
         node.setScore(score);
     }
 
+
+    /**
+     * A comparator for AINode that ranks AINodes with a bigger score field as
+     * higher.
+     */
+    private static final Comparator<AINode> NODE_COMPARATOR =
+           (node1, node2) -> node1.getScore().intValue() - node2.getScore().intValue();
 }
