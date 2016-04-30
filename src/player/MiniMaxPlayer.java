@@ -365,7 +365,7 @@ public class MiniMaxPlayer implements Player {
         // decrease score if MrX loses in this game state
         if (!node.getGameState().getWinningPlayers().contains(Colour.Black)
                 && node.getGameState().isGameOver())
-            score /= 5;
+            score = 0.0;
 
         // adjust score to be higher if degree of MrX's node is higher.
         // this also avoids outskirts of map.
