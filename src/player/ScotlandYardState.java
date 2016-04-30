@@ -111,7 +111,7 @@ public final class ScotlandYardState {
                     if (playerLocations.get(internalPlayer) == dest)
                         occupied = true;
                 }
-                if (!occupied && thisPlayersTicketMap.get(((MoveTicket) move).ticket) > 1)
+                if (!occupied && thisPlayersTicketMap.get(((MoveTicket) move).ticket) > 0)
                     validMoves.add(move);
             }
             if (validMoves.isEmpty())
@@ -125,9 +125,9 @@ public final class ScotlandYardState {
                         if (playerLocations.get(internalPlayer) == dest)
                             occupied = true;
                     }
-                    if (!occupied && thisPlayersTicketMap.get(((MoveTicket) move).ticket) > 1)
+                    if (!occupied && thisPlayersTicketMap.get(((MoveTicket) move).ticket) > 0)
                         validMoves.add(move);
-                } else if ((move instanceof MoveDouble) && thisPlayersTicketMap.get(Ticket.Double) > 1) {
+                } else if ((move instanceof MoveDouble) && thisPlayersTicketMap.get(Ticket.Double) > 0) {
                     int dest1 = ((MoveDouble) move).move1.target;
                     int dest2 = ((MoveDouble) move).move2.target;
                     boolean occupied1 = false;
@@ -138,8 +138,10 @@ public final class ScotlandYardState {
                         if (playerLocations.get(internalPlayer) == dest2)
                             occupied2 = true;
                     }
-                    if ((thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket) > 1) && (thisPlayersTicketMap.get(((MoveDouble) move).move2.ticket) > 1) && !occupied1 && !occupied2)
+                    if (((thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket)) != (thisPlayersTicketMap.get(((MoveDouble) move).move2.ticket))) &&(thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket) > 0) && (thisPlayersTicketMap.get(((MoveDouble) move).move2.ticket) > 0) && !occupied1 && !occupied2)
                         validMoves.add(move);
+					else if (((thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket)) == (thisPlayersTicketMap.get(((MoveDouble) move).move2.ticket))) &&(thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket) > 1) && !occupied1 && !occupied2)
+						validMoves.add(move);
                 }
             }
         }
