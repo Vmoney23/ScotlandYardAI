@@ -150,69 +150,6 @@ public class MiniMaxPlayer implements Player {
 
 
     /**
-     * Assigns a score to a possible move using currentGameState, and returns
-     * that score.
-     *
-     * @param move the Move to calculate score for.
-     * @return the score for move.
-     */
-    protected double scoreMove(Move move) {
-        if (move instanceof MoveTicket)
-            return scoreMoveTicket((MoveTicket) move);
-        else if (move instanceof MoveDouble)
-            return scoreMoveDouble((MoveDouble) move);
-        else //MovePass
-            return 0;
-    }
-
-
-    /**
-     * Assigns a score to a possible MoveTicket using currentGameState, and
-     * returns that score.
-     *
-     * @param move the MoveTicket to calculate score for.
-     * @return the score for move.
-     */
-    protected double scoreMoveTicket(MoveTicket move) {
-        // upon return, score = total / routes
-        double score = 0;
-
-        // loop through all other players, find 'best' route to each other
-        // player from move target, score this route, add route score to total.
-        for (Colour player : currentGameState.getPlayers()) {
-
-            // no need to calculate distance between player and himself...
-            if (move.colour == player) continue;
-
-            // calculate shortest route from MiniMax player to other player
-            Graph<Integer, Transport> route = dijkstraGraph.getResult(move.target, playerLocationMap.get(player), TRANSPORT_WEIGHTER);
-
-            // add weight of each edge in route to score.
-            // add more to score if edge requires greater value transport
-            // to traverse.
-            for (Edge<Integer, Transport> e : route.getEdges())
-                score += TRANSPORT_WEIGHTER.toWeight(e.getData());
-        }
-
-        return score;
-    }
-
-
-    /**
-     * Assigns a score to a possible MoveDouble using currentGameState, and
-     * returns that score.
-     *
-     * @param move the MoveTicket to calculate score for.
-     * @return the score for move.
-     */
-    protected double scoreMoveDouble(MoveDouble move) {
-        // score the move as if single move, then divide by some factor to
-        // account for using a valuable double move ticket
-        return scoreMoveTicket(move.move2) / 2;
-    }
-
-
-    /**
      * A lambda function implements Weighter<Transport>, to be passed to
      * Dijkstra's. This Weighter assigns a higher weight to transports with
      * which players start with less tickets for.
@@ -353,34 +290,58 @@ public class MiniMaxPlayer implements Player {
      * @param node the node to calculate the score for.
      */
     protected void calculateScore(AINode node) {
-        // debugging check
-        if (gameTree.getEdgesTo(node).size() != 1 && node != gameTree.getHead()) {
-            throw new RuntimeException("Illegal state: Not one edge to " +
-                    "AINode: " + node.getScore());
-        }
+        Double score = 0.0;
 
-        // get move, which should be on edge to node. There should only be one
-        // edge to node.
-        Move moveToNode = gameTree.getEdgesTo(node).get(0).getData();
-
-        // get score based on Dijkstra
-        Double score = scoreMove(moveToNode);
-
-        // decrease score if MrX loses in this game state
+        // if MrX loses in this game state, leave score as zero
         if (!node.getGameState().getWinningPlayers().contains(Colour.Black)
-                && node.getGameState().isGameOver())
-            score = 0.0;
+                    && node.getGameState().isGameOver()) {
 
-        // adjust score to be higher if degree of MrX's node is higher.
-        // this also avoids outskirts of map.
-        if (colour.equals(Colour.Black))
-            score *= node.getDegree(); //MrX maximises score
-        else
-            score /= node.getDegree(); //Detectives minimise score
+            // use Dijkstra's and Weighter to assign a score based on distance
+            // MrX is from each detective
+            score += scoreDistancesState(node.getGameState());
 
+
+            // adjust score to be higher if degree of MrX's node is higher.
+            // this also avoids outskirts of map.
+            if (colour.equals(Colour.Black))
+                score *= node.getDegree(); //MrX maximises score
+            else
+                score /= node.getDegree(); //Detectives minimise score
+
+        }
 
         // set node.score to score
         node.setScore(score);
+    }
+
+
+    /**
+     * Returns a score for a state, based on how far away MrX is from each
+     * detective.
+     *
+     * @param state the state to score.
+     * @return the calculated score for the state, based only on how far MrX is
+     *         from the detectives.
+     */
+    private Double scoreDistancesState(ScotlandYardState state) {
+        Double score = 0.0;
+
+        for (Colour detective : state.getPlayers()) {
+            // don't find distance between MrX and himself
+            if (detective == Colour.Black) continue;
+
+            // calculate shortest route between detective and MrX
+            Graph<Integer, Transport> route =
+                    dijkstraGraph.getResult(playerLocationMap.get(detective), playerLocationMap.get(Colour.Black), TRANSPORT_WEIGHTER);
+
+            // add weight of each edge in route to score.
+            // add more to score if edge requires greater value transport
+            // to traverse.
+            for (Edge<Integer, Transport> e : route.getEdges())
+                score += TRANSPORT_WEIGHTER.toWeight(e.getData());
+        }
+
+        return score;
     }
 
 
@@ -398,4 +359,71 @@ public class MiniMaxPlayer implements Player {
      */
     private static final Comparator<AINode> AINODE_INV_COMPARATOR =
            (node1, node2) -> node2.getScore().intValue() - node1.getScore().intValue();
+
+
+
+
+
+    //-----------------old--------------------------
+    /**
+     * Assigns a score to a possible move using currentGameState, and returns
+     * that score.
+     *
+     * @param move the Move to calculate score for.
+     * @return the score for move.
+     */
+    protected double scoreMove(Move move) {
+        if (move instanceof MoveTicket)
+            return scoreMoveTicket((MoveTicket) move);
+        else if (move instanceof MoveDouble)
+            return scoreMoveDouble((MoveDouble) move);
+        else //MovePass
+            return 0;
+    }
+
+
+    /**
+     * Assigns a score to a possible MoveTicket using currentGameState, and
+     * returns that score.
+     *
+     * @param move the MoveTicket to calculate score for.
+     * @return the score for move.
+     */
+    protected double scoreMoveTicket(MoveTicket move) {
+        // upon return, score
+        double score = 0;
+
+        // loop through all other players, find 'best' route to each other
+        // player from move target, score this route, add route score to total.
+        for (Colour player : currentGameState.getPlayers()) {
+
+            // no need to calculate distance between player and himself...
+            if (move.colour == player) continue;
+
+            // calculate shortest route from MiniMax player to other player
+            Graph<Integer, Transport> route = dijkstraGraph.getResult(move.target, playerLocationMap.get(player), TRANSPORT_WEIGHTER);
+
+            // add weight of each edge in route to score.
+            // add more to score if edge requires greater value transport
+            // to traverse.
+            for (Edge<Integer, Transport> e : route.getEdges())
+                score += TRANSPORT_WEIGHTER.toWeight(e.getData());
+        }
+
+        return score;
+    }
+
+
+    /**
+     * Assigns a score to a possible MoveDouble using currentGameState, and
+     * returns that score.
+     *
+     * @param move the MoveTicket to calculate score for.
+     * @return the score for move.
+     */
+    protected double scoreMoveDouble(MoveDouble move) {
+        // score the move as if single move, then divide by some factor to
+        // account for using a valuable double move ticket
+        return scoreMoveTicket(move.move2) / 2;
+    }
 }
