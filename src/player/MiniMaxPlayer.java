@@ -300,7 +300,7 @@ public class MiniMaxPlayer implements Player {
 
         // base case 2 - node is leaf (no valid moves)
         if (gameTree.getChildren(node).size() == 0) {
-            calculateScore(node);
+            //calculateScore(node);
             return node.getScore();
         }
 
