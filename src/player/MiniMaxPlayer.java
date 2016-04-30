@@ -313,7 +313,7 @@ public class MiniMaxPlayer implements Player {
             v = Double.NEGATIVE_INFINITY;
 
             //System.out.println("MiniMax: NUMBER OF CHILDREN NODES: " + gameTree.getChildren(node).size());
-            for (AINode child : gameTree.getChildren(node)) {
+            for (AINode child : gameTree.getChildrenQueue(node, AINODE_COMPARATOR)) {
                 // see if next player is maximising or minimising
                 boolean isMax = child.getGameState().getCurrentPlayer().equals(Colour.Black);
 
@@ -330,7 +330,7 @@ public class MiniMaxPlayer implements Player {
             v = Double.POSITIVE_INFINITY;
 
             //System.out.println("MiniMax: NUMBER OF CHILDREN NODES: " + gameTree.getChildren(node).size());
-            for (AINode child : gameTree.getChildren(node)) {
+            for (AINode child : gameTree.getChildrenQueue(node, AINODE_INV_COMPARATOR)) {
                 // see if next player is maximising or minimising
                 boolean isMax = child.getGameState().getCurrentPlayer().equals(Colour.Black);
 
@@ -385,9 +385,17 @@ public class MiniMaxPlayer implements Player {
 
 
     /**
-     * A comparator for AINode that ranks AINodes with a bigger score field as
+     * A comparator for AINode that ranks AINodes with a greater score field as
      * higher.
      */
-    private static final Comparator<AINode> NODE_COMPARATOR =
+    private static final Comparator<AINode> AINODE_COMPARATOR =
            (node1, node2) -> node1.getScore().intValue() - node2.getScore().intValue();
+
+
+    /**
+     * A comparator for AINode that ranks AINodes with a smaller score field as
+     * higher.
+     */
+    private static final Comparator<AINode> AINODE_INV_COMPARATOR =
+           (node1, node2) -> node2.getScore().intValue() - node1.getScore().intValue();
 }
