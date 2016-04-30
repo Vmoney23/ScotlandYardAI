@@ -5,11 +5,13 @@ import scotlandyard.*;
 import java.util.*;
 
 /**
- * A class to store the state of a Scotland Yard game at some fixed point duing
+ * A class to store the state of a Scotland Yard game at some fixed point during
  * the game. An object of this type can be cloned.
  */
+// TODO TEST VALID MOVES
 // TODO if playMove returns the cloned object, fields can be made final as the updated fields can be calculated before creating new instance of object.
 public final class ScotlandYardState {
+
     private final ScotlandYardGraph graph;
     private final List<Colour> players;
     // which of these are these needed?
@@ -19,7 +21,7 @@ public final class ScotlandYardState {
     private boolean gameOver;
     private boolean ready;
     private Colour currentPlayer;
-    int round;
+    private int round;
     private List<Boolean> rounds;
 
 
@@ -152,12 +154,12 @@ public final class ScotlandYardState {
      */
     public void playMove(Move move) {
         play(move);
-        nextPlayer(); // TODO is this needed?
+        nextPlayer();
     }
 
 
     // playMove helpers
-    // TODO update round and notify spectators?
+    // TODO notify spectators?
 
     /**
      * Passes priority onto the next player whose turn it is to play.
@@ -177,7 +179,8 @@ public final class ScotlandYardState {
             play((MoveTicket) move);
         else if (move instanceof MoveDouble)
             play((MoveDouble) move);
-        // if MovePass game state doesn't change
+        else if (move instanceof MovePass)
+            play((MovePass) move);
     }
 
     /**
@@ -189,7 +192,7 @@ public final class ScotlandYardState {
         giveTicketsToMrX(move);
         updatePlayerTickets(move);
         updatePlayerLocation(move);
-        //updateRound();
+        updateRoundIfBlack();
         //notifySpectators();
     }
 
@@ -213,6 +216,13 @@ public final class ScotlandYardState {
         //notifySpectators(move);
     }
 
+    /**
+     * Increments current round if it is mrX's turn
+     */
+    private void updateRoundIfBlack() {
+        if (currentPlayer.equals(Colour.Black))
+            round++;
+    }
 
     /**
      * Gives the ticket(s) a detective uses when playing a move to mrX
