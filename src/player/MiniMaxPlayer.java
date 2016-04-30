@@ -134,7 +134,6 @@ public class MiniMaxPlayer implements Player {
         boolean gotAMove = false;
         // check all first level edges to see which move gave the best score
         for (Edge<ScotlandYardState, Move> possibleBest : gameTree.getListFirstLevelEdges()) {
-            System.out.println("score at child of move : " + possibleBest);
             if (((AINode) possibleBest.getTarget()).getScore() == bestMoveScore) { // ERROR IF STATEMENT BROKEN
                 aiMove = possibleBest.getData();
                 gotAMove = true;
@@ -219,7 +218,7 @@ public class MiniMaxPlayer implements Player {
 
         // create children nodes and add to tree
         //System.out.println("number of valid moves: " + node.getGameState().validMoves(node.getGameState().getCurrentPlayer()).size());
-        System.out.println(node.getGameState().getCurrentPlayer());
+        //System.out.println(node.getGameState().getCurrentPlayer());
 
         for (Move move : node.getGameState().validMoves(node.getGameState().getCurrentPlayer())) {
             // make a copy of currentGameState for the next move
@@ -293,8 +292,8 @@ public class MiniMaxPlayer implements Player {
         Double score = 0.0;
 
         // if MrX loses in this game state, leave score as zero
-        if (!node.getGameState().getWinningPlayers().contains(Colour.Black)
-                    && node.getGameState().isGameOver()) {
+        if (!(!node.getGameState().getWinningPlayers().contains(Colour.Black)
+                    && node.getGameState().isGameOver())) {
 
             // use Dijkstra's and Weighter to assign a score based on distance
             // MrX is from each detective
@@ -309,6 +308,7 @@ public class MiniMaxPlayer implements Player {
                 score /= node.getDegree(); //Detectives minimise score
 
         }
+        else System.out.println("black lost.");
 
         // set node.score to score
         node.setScore(score);
