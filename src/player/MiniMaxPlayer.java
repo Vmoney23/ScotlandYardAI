@@ -161,16 +161,15 @@ public class MiniMaxPlayer implements Player {
     }
 
 
-    /**
-     * Assigns a score to a possible MoveTicket using currentGameState, and
-     * returns that score.
-     *
-     * @param move the MoveTicket to calculate score for.
-     * @return the score for move.
-     */
-    protected double scoreMoveTicket(MoveTicket move) {
-        // upon return, score = total / routes
-        double score = 0;
+	/**
+	 * Assigns a score to a possible MoveTicket using currentGameState, and
+	 * returns that score.
+	 *
+	 * @param move the MoveTicket to calculate score for.
+	 * @return the score for move.
+	 */
+	protected double scoreMoveTicket(MoveTicket move) {
+        double total = 0;
 
         // loop through all other players, find 'best' route to each other
         // player from move target, score this route, add route score to total.
@@ -185,11 +184,17 @@ public class MiniMaxPlayer implements Player {
             // add weight of each edge in route to score.
             // add more to score if edge requires greater value transport
             // to traverse.
-            for (Edge<Integer, Transport> e : route.getEdges())
-                score += TRANSPORT_WEIGHTER.toWeight(e.getData());
-        }
-
-        return score;
+			boolean edgesLessThan3 = false;
+			if (route.getEdges().size() < 3)
+				edgesLessThan3 = true;
+			for (Edge<Integer, Transport> e : route.getEdges()) {
+				double temp = TRANSPORT_WEIGHTER.toWeight(e.getData());
+				if (edgesLessThan3)
+					temp = -20;
+				total += temp;
+			}
+		}
+        return total;
     }
 
 
@@ -203,7 +208,17 @@ public class MiniMaxPlayer implements Player {
     protected double scoreMoveDouble(MoveDouble move) {
         // score the move as if single move, then divide by some factor to
         // account for using a valuable double move ticket
-        return scoreMoveTicket(move.move2) / 2.5;
+		double addOn = 0;
+		int round = view.getRound();
+		System.out.println("Round: " + round);
+		if (round != 0 && view.getRounds().get(round)){
+			addOn += 20;
+			if (move.move2.ticket == Ticket.Secret)
+			addOn += 2.5;
+		}
+		else
+			addOn += -20;
+		return (scoreMoveTicket(move.move2) + addOn);
     }
 
 
