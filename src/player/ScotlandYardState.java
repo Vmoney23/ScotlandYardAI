@@ -92,6 +92,17 @@ public final class ScotlandYardState {
 
 
     /**
+     * Evaluates whether the next player to play is MrX.
+     *
+     * @return true is next player is MrX.
+     */
+    public boolean isNextPlayerMrX() {
+        int currentIx = players.lastIndexOf(currentPlayer) + 1;
+        int playersSize = players.size();
+        return players.get(currentIx + 1 % playersSize).equals(Colour.Black);
+    }
+
+    /**
      * Returns the list of valid moves for a given player.
      *
      * @param player the player whose moves we want to see.

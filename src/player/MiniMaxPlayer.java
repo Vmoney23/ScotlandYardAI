@@ -9,6 +9,7 @@ import prijkstra.Weighter;
 import scotlandyard.*;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -103,7 +104,7 @@ public class MiniMaxPlayer implements Player {
 
         // calculate a score for each move by using the MiniMax algorithm.
         // return the move with the best score.
-        int depth = 3;
+        int depth = 6;
         boolean mrx = colour.equals(Colour.Black);
         return score(depth, mrx);
     }
@@ -125,11 +126,13 @@ public class MiniMaxPlayer implements Player {
 
         // choose the move
         double bestMoveScore = gameTree.getHead().getScore();
+        System.out.println("score at head: " + bestMoveScore);
 
         boolean gotAMove = false;
         // check all first level edges to see which move gave the best score
         for (Edge<ScotlandYardState, Move> possibleBest : gameTree.getListFirstLevelEdges()) {
-            if (((AINode) possibleBest.getTarget()).getScore().doubleValue() == bestMoveScore) { // ERROR IF STATEMENT BROKEN
+            System.out.println("score at child of move : " + possibleBest);
+            if (((AINode) possibleBest.getTarget()).getScore() == bestMoveScore) { // ERROR IF STATEMENT BROKEN
                 aiMove = possibleBest.getData();
                 gotAMove = true;
                 break;
@@ -241,10 +244,13 @@ public class MiniMaxPlayer implements Player {
      * @param depth depth to which to generate the tree
      * @param max true if this player wants to maximise the score
      */
-    private void generateTree(ScotlandYardGameTree gameTree, int depth,
-                                boolean max) {
-        gameTree.getHead().setScore(MiniMax(gameTree.getHead(), depth,
-                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, max));
+    private void generateTree(ScotlandYardGameTree gameTree, int depth, boolean max) {
+
+        // generate the tree
+        MiniMax(gameTree.getHead(), depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, max);
+
+        // set the score for game tree head
+        gameTree.getHead().setScore(Collections.max(gameTree.getFirstLevelScores()));
     }
 
 
@@ -267,14 +273,14 @@ public class MiniMaxPlayer implements Player {
     private Double MiniMax(AINode node, int depth, double alpha, double beta, boolean max) {
         // base case 1 - depth is zero
         if (depth <= 0) {
-            calculateScore(node);
+            //calculateScore(node);
             return node.getScore();
         }
 
         // create children nodes and add to tree
         //System.out.println("number of valid moves: " + node.getGameState().validMoves(node.getGameState().getCurrentPlayer()).size());
-        //TODO - for (Move move : node.getGameState().validMoves(node.getGameState().getCurrentPlayer())) {
-        for (Move move : node.getGameState().validMoves(colour)) {
+        System.out.println(node.getGameState().getCurrentPlayer());
+        for (Move move : node.getGameState().validMoves(node.getGameState().getCurrentPlayer())) {
             // make a copy of currentGameState for the next move
             ScotlandYardState stateAfterMove = node.getGameState().copy();
             stateAfterMove.playMove(move);
@@ -344,7 +350,7 @@ public class MiniMaxPlayer implements Player {
      */
     protected void calculateScore(AINode node) {
         // debugging check
-        if (gameTree.getEdgesTo(node).size() != 1) {
+        if (gameTree.getEdgesTo(node).size() != 1 && node != gameTree.getHead()) {
             throw new RuntimeException("Illegal state: Not one edge to " +
                     "AINode: " + node.getScore());
         }

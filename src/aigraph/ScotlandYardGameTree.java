@@ -59,6 +59,18 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYardState, Move>
     }
 
 
+    public List<Double> getFirstLevelScores() {
+
+        List<Double> firstLevelScores = new ArrayList<>();
+
+        for (Edge<ScotlandYardState, Move> e : getListFirstLevelEdges()) {
+            firstLevelScores.add(((AINode) e.getTarget()).getScore());
+        }
+
+        return firstLevelScores;
+    }
+
+
     public AINode getHead() {
         return head;
     }
