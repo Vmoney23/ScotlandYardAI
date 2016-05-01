@@ -125,12 +125,12 @@ public class MiniMaxPlayer implements Player {
 
         // choose the move
         double bestMoveScore = gameTree.getHead().getScore();
-        System.out.println("score at head: " + bestMoveScore);
+//        System.out.println("score at head: " + bestMoveScore);
 
         boolean gotAMove = false;
         // check all first level edges to see which move gave the best score
         for (Edge<ScotlandYardState, Move> possibleBest : gameTree.getListFirstLevelEdges()) {
-            System.out.println("score at child of move : " + possibleBest);
+//            System.out.println("score at child of move : " + possibleBest);
             if (((AINode) possibleBest.getTarget()).getScore() == bestMoveScore) { // ERROR IF STATEMENT BROKEN
                 aiMove = possibleBest.getData();
                 gotAMove = true;
@@ -171,6 +171,7 @@ public class MiniMaxPlayer implements Player {
 	 */
 	protected double scoreMoveTicket(MoveTicket move) {
         double total = 0;
+		double addOn = 0;
 
         // loop through all other players, find 'best' route to each other
         // player from move target, score this route, add route score to total.
@@ -185,17 +186,34 @@ public class MiniMaxPlayer implements Player {
             // add weight of each edge in route to score.
             // add more to score if edge requires greater value transport
             // to traverse.
+
 			boolean edgesLessThan3 = false;
-			if (route.getEdges().size() < 3)
+			if (route.getEdges().size() < 3) {
 				edgesLessThan3 = true;
-			for (Edge<Integer, Transport> e : route.getEdges()) {
-				double temp = TRANSPORT_WEIGHTER.toWeight(e.getData());
-				if (edgesLessThan3)
-					temp = -20;
-				total += temp;
+				addOn += -10;
+				}
+			else {
+				addOn += route.getEdges().size();
 			}
+
+//			for (Edge<Integer, Transport> e : route.getEdges()) {
+//				double temp = TRANSPORT_WEIGHTER.toWeight(e.getData());
+////				double temp = e.size();
+//				if (edgesLessThan3)
+//					temp = -temp;
+//				addOn += temp;
+//			}
 		}
-        return total;
+
+		double ticketValue = 0;
+		if (move.colour == Colour.Black)
+			ticketValue = TICKET_WEIGHTER_X.toWeight(move.ticket);
+		else
+			ticketValue = TICKET_WEIGHTER.toWeight(move.ticket);
+
+		addOn += ticketValue;
+
+        return (total + addOn);
     }
 
 
@@ -206,29 +224,64 @@ public class MiniMaxPlayer implements Player {
      * @param move the MoveTicket to calculate score for.
      * @return the score for move.
      */
-    protected double scoreMoveDouble(MoveDouble move) {
+	protected double scoreMoveDouble(MoveDouble move) {
         // score the move as if single move, then divide by some factor to
         // account for using a valuable double move ticket
 		double addOn = 0;
 		int round = view.getRound();
 		System.out.println("Round: " + round);
 		if (round != 0 && view.getRounds().get(round)){
-			addOn += 20;
+			addOn += 100;
 			if (move.move2.ticket == Ticket.Secret)
-			addOn += 2.5;
+			addOn += 20;
 		}
 		else
-			addOn += -20;
+			addOn += -40;
 		return (scoreMoveTicket(move.move2) + addOn);
     }
 
 
     /**
-     * A lambda function implements Weighter<Transport>, to be passed to
-     * Dijkstra's. This Weighter assigns a higher weight to transports with
-     * which players start with less tickets for.
+     * A lambda function implements Weighter<Ticket>. This Weighter assigns a higher
+	 * weight to transports with which players start with less tickets for.
      */
-    protected static final Weighter<Transport> TRANSPORT_WEIGHTER = t -> {
+    protected static final Weighter<Ticket> TICKET_WEIGHTER_X = t -> {
+        int val = 0;
+        switch (t) {
+            case Taxi:
+                val = 5;
+                break;
+            case Bus:
+                val = 10;
+                break;
+            case Underground:
+                val = 15;
+                break;
+        }
+        return val;
+    };
+
+	/**
+     * A lambda function implements Weighter<Ticket>. This Weighter assigns a higher
+	 * weight to transports with which players start with less tickets for.
+     */
+    protected static final Weighter<Ticket> TICKET_WEIGHTER = t -> {
+        int val = 0;
+        switch (t) {
+            case Taxi:
+                val = 15;
+                break;
+            case Bus:
+                val = 10;
+                break;
+            case Underground:
+                val = 5;
+                break;
+        }
+        return val;
+    };
+
+	protected static final Weighter<Transport> TRANSPORT_WEIGHTER = t -> {
         int val = 0;
         switch (t) {
             case Taxi:
@@ -240,9 +293,9 @@ public class MiniMaxPlayer implements Player {
             case Underground:
                 val = 4;
                 break;
-            case Boat:
-                val = 15;
-                break;
+			case Boat:
+				val = 10;
+				break;
         }
         return val;
     };
@@ -293,7 +346,7 @@ public class MiniMaxPlayer implements Player {
 
         // create children nodes and add to tree
         //System.out.println("number of valid moves: " + node.getGameState().validMoves(node.getGameState().getCurrentPlayer()).size());
-        System.out.println(node.getGameState().getCurrentPlayer());
+//        System.out.println(node.getGameState().getCurrentPlayer());
         for (Move move : node.getGameState().validMoves(node.getGameState().getCurrentPlayer())) {
             // make a copy of currentGameState for the next move
             ScotlandYardState stateAfterMove = node.getGameState().copy();
@@ -387,7 +440,6 @@ public class MiniMaxPlayer implements Player {
             score *= node.getDegree(); //MrX maximises score
         else
             score /= node.getDegree(); //Detectives minimise score
-
 
         // set node.score to score
         node.setScore(score);
