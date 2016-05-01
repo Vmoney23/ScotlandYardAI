@@ -174,8 +174,8 @@ public class MiniMaxPlayer implements Player {
      * @return the score for move.
      */
     protected double scoreMoveTicket(MoveTicket move) {
-        // upon return, score = total / routes
-        double score = 0;
+        double total = 0;
+		double addOn = 0;
 
         // loop through all other players, find 'best' route to each other
         // player from move target, score this route, add route score to total.
@@ -190,11 +190,34 @@ public class MiniMaxPlayer implements Player {
             // add weight of each edge in route to score.
             // add more to score if edge requires greater value transport
             // to traverse.
-            for (Edge<Integer, Transport> e : route.getEdges())
-                score += TRANSPORT_WEIGHTER.toWeight(e.getData());
-        }
 
-        return score;
+			boolean edgesLessThan3 = false;
+			if (route.getEdges().size() < 3) {
+				edgesLessThan3 = true;
+				addOn += -10;
+				}
+			else {
+				addOn += route.getEdges().size();
+			}
+
+//			for (Edge<Integer, Transport> e : route.getEdges()) {
+//				double temp = TRANSPORT_WEIGHTER.toWeight(e.getData());
+////				double temp = e.size();
+//				if (edgesLessThan3)
+//					temp = -temp;
+//				addOn += temp;
+//			}
+		}
+
+		double ticketValue = 0;
+		if (move.colour == Colour.Black)
+			ticketValue = TICKET_WEIGHTER_X.toWeight(move.ticket);
+		else
+			ticketValue = TICKET_WEIGHTER.toWeight(move.ticket);
+
+		addOn += ticketValue;
+
+        return (total + addOn);
     }
 
 
@@ -208,16 +231,61 @@ public class MiniMaxPlayer implements Player {
     protected double scoreMoveDouble(MoveDouble move) {
         // score the move as if single move, then divide by some factor to
         // account for using a valuable double move ticket
-        return scoreMoveTicket(move.move2) / 2;
+		double addOn = 0;
+		int round = view.getRound();
+		System.out.println("Round: " + round);
+		if (round != 0 && view.getRounds().get(round)){
+			addOn += 100;
+			if (move.move2.ticket == Ticket.Secret)
+			addOn += 20;
+		}
+		else
+			addOn += -40;
+		return (scoreMoveTicket(move.move2) + addOn);
     }
 
 
     /**
-     * A lambda function implements Weighter<Transport>, to be passed to
-     * Dijkstra's. This Weighter assigns a higher weight to transports with
-     * which players start with less tickets for.
+     * A lambda function implements Weighter<Ticket>. This Weighter assigns a higher
+	 * weight to transports with which players start with less tickets for.
      */
-    protected static final Weighter<Transport> TRANSPORT_WEIGHTER = t -> {
+    protected static final Weighter<Ticket> TICKET_WEIGHTER_X = t -> {
+        int val = 0;
+        switch (t) {
+            case Taxi:
+                val = 5;
+                break;
+            case Bus:
+                val = 10;
+                break;
+            case Underground:
+                val = 15;
+                break;
+        }
+        return val;
+    };
+
+	/**
+     * A lambda function implements Weighter<Ticket>. This Weighter assigns a higher
+	 * weight to transports with which players start with less tickets for.
+     */
+    protected static final Weighter<Ticket> TICKET_WEIGHTER = t -> {
+        int val = 0;
+        switch (t) {
+            case Taxi:
+                val = 15;
+                break;
+            case Bus:
+                val = 10;
+                break;
+            case Underground:
+                val = 5;
+                break;
+        }
+        return val;
+    };
+
+	protected static final Weighter<Transport> TRANSPORT_WEIGHTER = t -> {
         int val = 0;
         switch (t) {
             case Taxi:
@@ -229,9 +297,9 @@ public class MiniMaxPlayer implements Player {
             case Underground:
                 val = 4;
                 break;
-            case Boat:
-                val = 15;
-                break;
+			case Boat:
+				val = 10;
+				break;
         }
         return val;
     };
