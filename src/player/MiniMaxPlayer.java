@@ -191,11 +191,11 @@ public class MiniMaxPlayer implements Player {
             // add more to score if edge requires greater value transport
             // to traverse.
 
-			boolean edgesLessThan3 = false;
+//			boolean edgesLessThan3 = false;
 			if (route.getEdges().size() < 3) {
-				edgesLessThan3 = true;
-				addOn += -10;
-				}
+//				edgesLessThan3 = true;
+				addOn += -15;
+			}
 			else {
 				addOn += route.getEdges().size();
 			}
@@ -209,12 +209,17 @@ public class MiniMaxPlayer implements Player {
 //			}
 		}
 
+		int round = view.getRound();
+		if (round != 0 && view.getRounds().get(round-1) && move.ticket == Ticket.Secret){
+			addOn += 10;
+		}
+
 		double ticketValue = 0;
 		if (move.colour == Colour.Black)
 			ticketValue = TICKET_WEIGHTER_X.toWeight(move.ticket);
 		else
 			ticketValue = TICKET_WEIGHTER.toWeight(move.ticket);
-
+		System.out.println("Ticket Value = " + ticketValue);
 		addOn += ticketValue;
 
         return (total + addOn);
@@ -234,13 +239,13 @@ public class MiniMaxPlayer implements Player {
 		double addOn = 0;
 		int round = view.getRound();
 		System.out.println("Round: " + round);
-		if (round != 0 && view.getRounds().get(round)){
+		if (round != 0 && view.getRounds().get(round+1)){
 			addOn += 100;
 			if (move.move2.ticket == Ticket.Secret)
 			addOn += 20;
 		}
 		else
-			addOn += -40;
+			addOn += -50;
 		return (scoreMoveTicket(move.move2) + addOn);
     }
 
