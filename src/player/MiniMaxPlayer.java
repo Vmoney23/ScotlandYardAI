@@ -425,7 +425,7 @@ public class MiniMaxPlayer implements Player {
      *
      * @param node the node to calculate the score for.
      */
-    protected void calculateScore(AINode node) {
+    protected void calculateScoreOld(AINode node) {
         // debugging check
         if (gameTree.getEdgesTo(node).size() != 1 && node != gameTree.getHead()) {
             throw new RuntimeException("Illegal state: Not one edge to " +
@@ -454,6 +454,69 @@ public class MiniMaxPlayer implements Player {
 
         // set node.score to score
         node.setScore(score);
+    }
+
+
+    /**
+     * Calculates a score for a given node's game state, and sets said node's
+     * score.
+     *
+     * @param node the node to calculate the score for.
+     */
+    protected void calculateScore(AINode node) {
+        Double score = 0.0;
+
+        // if MrX loses in this game state, leave score as zero
+        if (!(!node.getGameState().getWinningPlayers().contains(Colour.Black)
+                      && node.getGameState().isGameOver())) {
+
+            // use Dijkstra's and Weighter to assign a score based on distance
+            // MrX is from each detective
+            score += scoreDistancesState(node.getGameState());
+
+
+            // adjust score to be higher if degree of MrX's node is higher.
+            // this also avoids outskirts of map.
+            if (colour.equals(Colour.Black))
+                score *= node.getDegree(); //MrX maximises score
+            else
+                score /= node.getDegree(); //Detectives minimise score
+
+        }
+        else System.out.println("black lost.");
+
+        // set node.score to score
+        node.setScore(score);
+    }
+
+
+    /**
+     * Returns a score for a state, based on how far away MrX is from each
+     * detective.
+     *
+     * @param state the state to score.
+     * @return the calculated score for the state, based only on how far MrX is
+     *         from the detectives.
+     */
+    private Double scoreDistancesState(ScotlandYardState state) {
+        Double score = 0.0;
+
+        for (Colour detective : state.getPlayers()) {
+            // don't find distance between MrX and himself
+            if (detective == Colour.Black) continue;
+
+            // calculate shortest route between detective and MrX
+            Graph<Integer, Transport> route =
+                    dijkstraGraph.getResult(playerLocationMap.get(detective), playerLocationMap.get(Colour.Black), TRANSPORT_WEIGHTER);
+
+            // add weight of each edge in route to score.
+            // add more to score if edge requires greater value transport
+            // to traverse.
+            for (Edge<Integer, Transport> e : route.getEdges())
+                score += TRANSPORT_WEIGHTER.toWeight(e.getData());
+        }
+
+        return score;
     }
 
 
