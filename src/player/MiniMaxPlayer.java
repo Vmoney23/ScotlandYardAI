@@ -150,83 +150,6 @@ public class MiniMaxPlayer implements Player {
 
 
     /**
-     * Assigns a score to a possible move using currentGameState, and returns
-     * that score.
-     *
-     * @param move the Move to calculate score for.
-     * @return the score for move.
-     */
-    protected double scoreMove(Move move, ScotlandYardState state) {
-        if (move instanceof MoveTicket)
-            return scoreMoveTicket((MoveTicket) move, state);
-        else if (move instanceof MoveDouble)
-            return scoreMoveDouble((MoveDouble) move, state);
-        else //MovePass
-            return 0;
-    }
-
-
-    /**
-     * A lambda function implements Weighter<Ticket>. This Weighter assigns a higher
-	 * weight to transports with which players start with less tickets for.
-     */
-    protected static final Weighter<Ticket> TICKET_WEIGHTER_X = t -> {
-        int val = 0;
-        switch (t) {
-            case Taxi:
-                val = 5;
-                break;
-            case Bus:
-                val = 10;
-                break;
-            case Underground:
-                val = 15;
-                break;
-        }
-        return val;
-    };
-
-	/**
-     * A lambda function implements Weighter<Ticket>. This Weighter assigns a higher
-	 * weight to transports with which players start with less tickets for.
-     */
-    protected static final Weighter<Ticket> TICKET_WEIGHTER = t -> {
-        int val = 0;
-        switch (t) {
-            case Taxi:
-                val = 15;
-                break;
-            case Bus:
-                val = 10;
-                break;
-            case Underground:
-                val = 5;
-                break;
-        }
-        return val;
-    };
-
-	protected static final Weighter<Transport> TRANSPORT_WEIGHTER = t -> {
-        int val = 0;
-        switch (t) {
-            case Taxi:
-                val = 1;
-                break;
-            case Bus:
-                val = 2;
-                break;
-            case Underground:
-                val = 4;
-                break;
-			case Boat:
-				val = 10;
-				break;
-        }
-        return val;
-    };
-
-
-    /**
      * Generates a gameTree given the head node, which should have have
      * {@code gameTree.head} as an AINode whose index field should be a
      * ScotlandYardState object holding the current state of the game.
@@ -379,36 +302,59 @@ public class MiniMaxPlayer implements Player {
     }
 
 
-    private Double increaseSecretTicketScoreIfBeforeShowRound
-            (ScotlandYardState state, MoveTicket move) {
-
+    /**
+     * Returns a score for a state, based on how far away MrX is from each
+     * detective.
+     *
+     * @param state the state to score.
+     * @return the calculated score for the state, based only on how far MrX is
+     *         from the detectives.
+     */
+    private Double scoreDistancesState(ScotlandYardState state) {
         Double score = 0.0;
 
-        int round = state.getRound();
-        if (move.colour == Colour.Black // new condition
-                && round != 0
-                && state.getRounds().get(round-1)
-                && move.ticket == Ticket.Secret) {
-            // increase score if all conditions true
-            score += 10;
+        for (Colour detective : state.getPlayers()) {
+            // don't find distance between MrX and himself
+            if (detective == Colour.Black) continue;
+
+            // calculate shortest route between detective and MrX
+            Graph<Integer, Transport> route =
+                    dijkstraGraph.getResult(playerLocationMap.get(detective), playerLocationMap.get(Colour.Black), TRANSPORT_WEIGHTER);
+
+            // add weight of each edge in route to score.
+            // add more to score if edge requires greater value transport
+            // to traverse.
+            for (Edge<Integer, Transport> e : route.getEdges())
+                score += TRANSPORT_WEIGHTER.toWeight(e.getData());
+
+            // if the route is small, decrease score regardless of transport
+            // weightings.
+            if (route.getEdges().size() < 3) {
+                score += -15;
+            }
+            else {
+                score += route.getEdges().size();
+            }
         }
 
         return score;
     }
 
 
-    private Double adjustScoreBasedOnTicketType(MoveTicket move) {
-        Double score = 0.0;
-
-        // get move ticket
-
-        if (move.colour == Colour.Black)
-            score += TICKET_WEIGHTER_X.toWeight(move.ticket);
-        else
-            score += TICKET_WEIGHTER.toWeight(move.ticket);
-
-        System.out.println("Ticket Value = " + ticketValue);
-        return score;
+    /**
+     * Assigns a score to a possible move using currentGameState, and returns
+     * that score.
+     *
+     * @param move the Move to calculate score for.
+     * @return the score for move.
+     */
+    protected double scoreMove(Move move, ScotlandYardState state) {
+        if (move instanceof MoveTicket)
+            return scoreMoveTicket((MoveTicket) move, state);
+        else if (move instanceof MoveDouble)
+            return scoreMoveDouble((MoveDouble) move, state);
+        else //MovePass
+            return 0;
     }
 
 
@@ -457,41 +403,35 @@ public class MiniMaxPlayer implements Player {
     }
 
 
-    /**
-     * Returns a score for a state, based on how far away MrX is from each
-     * detective.
-     *
-     * @param state the state to score.
-     * @return the calculated score for the state, based only on how far MrX is
-     *         from the detectives.
-     */
-    private Double scoreDistancesState(ScotlandYardState state) {
+    private Double increaseSecretTicketScoreIfBeforeShowRound
+            (ScotlandYardState state, MoveTicket move) {
+
         Double score = 0.0;
 
-        for (Colour detective : state.getPlayers()) {
-            // don't find distance between MrX and himself
-            if (detective == Colour.Black) continue;
-
-            // calculate shortest route between detective and MrX
-            Graph<Integer, Transport> route =
-                    dijkstraGraph.getResult(playerLocationMap.get(detective), playerLocationMap.get(Colour.Black), TRANSPORT_WEIGHTER);
-
-            // add weight of each edge in route to score.
-            // add more to score if edge requires greater value transport
-            // to traverse.
-            for (Edge<Integer, Transport> e : route.getEdges())
-                score += TRANSPORT_WEIGHTER.toWeight(e.getData());
-
-            // if the route is small, decrease score regardless of transport
-            // weightings.
-            if (route.getEdges().size() < 3) {
-                score += -15;
-            }
-            else {
-                score += route.getEdges().size();
-            }
+        int round = state.getRound();
+        if (move.colour == Colour.Black // new condition
+                && round != 0
+                && state.getRounds().get(round-1)
+                && move.ticket == Ticket.Secret) {
+            // increase score if all conditions true
+            score += 10;
         }
 
+        return score;
+    }
+
+
+    private Double adjustScoreBasedOnTicketType(MoveTicket move) {
+        Double score = 0.0;
+
+        // get move ticket
+
+        if (move.colour == Colour.Black)
+            score += TICKET_WEIGHTER_X.toWeight(move.ticket);
+        else
+            score += TICKET_WEIGHTER.toWeight(move.ticket);
+
+        System.out.println("Ticket Value = " + ticketValue);
         return score;
     }
 
@@ -510,4 +450,64 @@ public class MiniMaxPlayer implements Player {
      */
     private static final Comparator<AINode> AINODE_INV_COMPARATOR =
            (node1, node2) -> node2.getScore().intValue() - node1.getScore().intValue();
+
+
+    /**
+     * A lambda function implements Weighter<Ticket>. This Weighter assigns a higher
+     * weight to transports with which players start with less tickets for.
+     */
+    protected static final Weighter<Ticket> TICKET_WEIGHTER_X = t -> {
+        int val = 0;
+        switch (t) {
+            case Taxi:
+                val = 5;
+                break;
+            case Bus:
+                val = 10;
+                break;
+            case Underground:
+                val = 15;
+                break;
+        }
+        return val;
+    };
+
+    /**
+     * A lambda function implements Weighter<Ticket>. This Weighter assigns a higher
+     * weight to transports with which players start with less tickets for.
+     */
+    protected static final Weighter<Ticket> TICKET_WEIGHTER = t -> {
+        int val = 0;
+        switch (t) {
+            case Taxi:
+                val = 15;
+                break;
+            case Bus:
+                val = 10;
+                break;
+            case Underground:
+                val = 5;
+                break;
+        }
+        return val;
+    };
+
+    protected static final Weighter<Transport> TRANSPORT_WEIGHTER = t -> {
+        int val = 0;
+        switch (t) {
+            case Taxi:
+                val = 1;
+                break;
+            case Bus:
+                val = 2;
+                break;
+            case Underground:
+                val = 4;
+                break;
+            case Boat:
+                val = 10;
+                break;
+        }
+        return val;
+    };
 }
