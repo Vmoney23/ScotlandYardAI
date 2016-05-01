@@ -38,6 +38,7 @@ public class AINode extends Node<ScotlandYardState> {
     }
 
 
+    // TODO THIS SHOULD NOT BE HERE, degree should be counted for nodes in the game map, not the minimax tree
     public int getDegree() {
         return degree;
     }

@@ -46,6 +46,11 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYardState, Move>
     }
 
 
+    /**
+     * Returns a list with the edges from head to it's direct child nodes.
+     *
+     * @return a list of edges from head node to it's children.
+     */
     public List<Edge<ScotlandYardState, Move>> getListFirstLevelEdges() {
         List<Edge<ScotlandYardState, Move>> firstLevelEdges = new ArrayList<>();
 
@@ -61,6 +66,13 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYardState, Move>
     }
 
 
+    /**
+     * Returns a list with the scores associated with each direct child of the
+     * head node.
+     *
+     * @return a list with the scores associated with each direct child of the
+     *         head node.
+     */
     public List<Double> getFirstLevelScores() {
 
         List<Double> firstLevelScores = new ArrayList<>();
@@ -73,9 +85,15 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYardState, Move>
     }
 
 
+    /**
+     * Gets the head of the tree.
+     *
+     * @return the AINode which is the head of the tree.
+     */
     public AINode getHead() {
         return head;
     }
+
 
     /**
      * Returns children of node in a tree as a List.
@@ -91,6 +109,7 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYardState, Move>
         }
         return children;
     }
+
 
     /**
      * Returns the children of node in a tree as a PriorityQueue.
@@ -109,11 +128,21 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYardState, Move>
         return children;
     }
 
+    /**
+     * Returns the parent node of an AINode in a tree.
+     *
+     * @param node the node to find the parent for.
+     * @return the parent node.
+     * @throws RuntimeException if for whatever reason node does not have a
+     *                          single parent.
+     */
     public AINode getParent(AINode node) {
         if (!getNodes().contains(node)) throw new RuntimeException("node not " +
                 "in tree");
         if (getEdgesTo(node).size() == 0) throw new RuntimeException("node " +
-                "has no parents");
+                "has no parent");
+        if (node.equals(head)) throw new RuntimeException("node is head so" +
+                "has no parent");
         if (getEdgesTo(node).size() != 1) throw new RuntimeException("more " +
                 "than one edge to node");
 
