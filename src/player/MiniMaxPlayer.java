@@ -156,97 +156,13 @@ public class MiniMaxPlayer implements Player {
      * @param move the Move to calculate score for.
      * @return the score for move.
      */
-    protected double scoreMove(Move move) {
+    protected double scoreMove(Move move, ScotlandYardState state) {
         if (move instanceof MoveTicket)
-            return scoreMoveTicket((MoveTicket) move);
+            return scoreMoveTicket((MoveTicket) move, state);
         else if (move instanceof MoveDouble)
-            return scoreMoveDouble((MoveDouble) move);
+            return scoreMoveDouble((MoveDouble) move, state);
         else //MovePass
             return 0;
-    }
-
-
-    /**
-     * Assigns a score to a possible MoveTicket using currentGameState, and
-     * returns that score.
-     *
-     * @param move the MoveTicket to calculate score for.
-     * @return the score for move.
-     */
-    protected double scoreMoveTicket(MoveTicket move) {
-        double total = 0;
-		double addOn = 0;
-
-        // loop through all other players, find 'best' route to each other
-        // player from move target, score this route, add route score to total.
-        for (Colour player : currentGameState.getPlayers()) {
-
-            // no need to calculate distance between player and himself...
-            if (move.colour == player) continue;
-
-            // calculate shortest route from MiniMax player to other player
-            Graph<Integer, Transport> route = dijkstraGraph.getResult(move.target, playerLocationMap.get(player), TRANSPORT_WEIGHTER);
-
-            // add weight of each edge in route to score.
-            // add more to score if edge requires greater value transport
-            // to traverse.
-
-//			boolean edgesLessThan3 = false;
-			if (route.getEdges().size() < 3) {
-//				edgesLessThan3 = true;
-				addOn += -15;
-			}
-			else {
-				addOn += route.getEdges().size();
-			}
-
-//			for (Edge<Integer, Transport> e : route.getEdges()) {
-//				double temp = TRANSPORT_WEIGHTER.toWeight(e.getData());
-////				double temp = e.size();
-//				if (edgesLessThan3)
-//					temp = -temp;
-//				addOn += temp;
-//			}
-		}
-
-		int round = view.getRound();
-		if (round != 0 && view.getRounds().get(round-1) && move.ticket == Ticket.Secret){
-			addOn += 10;
-		}
-
-		double ticketValue = 0;
-		if (move.colour == Colour.Black)
-			ticketValue = TICKET_WEIGHTER_X.toWeight(move.ticket);
-		else
-			ticketValue = TICKET_WEIGHTER.toWeight(move.ticket);
-		System.out.println("Ticket Value = " + ticketValue);
-		addOn += ticketValue;
-
-        return (total + addOn);
-    }
-
-
-    /**
-     * Assigns a score to a possible MoveDouble using currentGameState, and
-     * returns that score.
-     *
-     * @param move the MoveTicket to calculate score for.
-     * @return the score for move.
-     */
-    protected double scoreMoveDouble(MoveDouble move) {
-        // score the move as if single move, then divide by some factor to
-        // account for using a valuable double move ticket
-		double addOn = 0;
-		int round = view.getRound();
-		System.out.println("Round: " + round);
-		if (round != 0 && view.getRounds().get(round+1)){
-			addOn += 100;
-			if (move.move2.ticket == Ticket.Secret)
-			addOn += 20;
-		}
-		else
-			addOn += -50;
-		return (scoreMoveTicket(move.move2) + addOn);
     }
 
 
@@ -425,50 +341,18 @@ public class MiniMaxPlayer implements Player {
      *
      * @param node the node to calculate the score for.
      */
-    protected void calculateScoreOld(AINode node) {
-        // debugging check
-        if (gameTree.getEdgesTo(node).size() != 1 && node != gameTree.getHead()) {
-            throw new RuntimeException("Illegal state: Not one edge to " +
-                    "AINode: " + node.getScore());
-        }
+    protected void calculateScore(AINode node) {
+        // init score
+        Double score = 0.0;
 
         // get move, which should be on edge to node. There should only be one
         // edge to node.
         Move moveToNode = gameTree.getEdgesTo(node).get(0).getData();
 
-        // get score based on Dijkstra
-        Double score = scoreMove(moveToNode);
-
-        // decrease score if MrX loses in this game state
-        if (!node.getGameState().getWinningPlayers().contains(Colour.Black)
-                && node.getGameState().isGameOver())
-            score = 0.0;
-
-        // adjust score to be higher if degree of MrX's node is higher.
-        // this also avoids outskirts of map.
-        if (colour.equals(Colour.Black))
-            score *= node.getDegree(); //MrX maximises score
-        else
-            score /= node.getDegree(); //Detectives minimise score
-
-
-        // set node.score to score
-        node.setScore(score);
-    }
-
-
-    /**
-     * Calculates a score for a given node's game state, and sets said node's
-     * score.
-     *
-     * @param node the node to calculate the score for.
-     */
-    protected void calculateScore(AINode node) {
-        Double score = 0.0;
-
         // if MrX loses in this game state, leave score as zero
         if (!(!node.getGameState().getWinningPlayers().contains(Colour.Black)
                       && node.getGameState().isGameOver())) {
+
 
             // use Dijkstra's and Weighter to assign a score based on distance
             // MrX is from each detective
@@ -477,16 +361,99 @@ public class MiniMaxPlayer implements Player {
 
             // adjust score to be higher if degree of MrX's node is higher.
             // this also avoids outskirts of map.
+            // TODO FIX
             if (colour.equals(Colour.Black))
                 score *= node.getDegree(); //MrX maximises score
             else
                 score /= node.getDegree(); //Detectives minimise score
 
+
+            // adjust score for factors related to last move played
+            score += scoreMove(moveToNode, node.getGameState());
         }
-        else System.out.println("black lost.");
+        else
+            System.out.println("black lost.");
 
         // set node.score to score
         node.setScore(score);
+    }
+
+
+    private Double increaseSecretTicketScoreIfBeforeShowRound
+            (ScotlandYardState state, MoveTicket move) {
+
+        Double score = 0.0;
+
+        int round = state.getRound();
+        if (move.colour == Colour.Black // new condition
+                && round != 0
+                && state.getRounds().get(round-1)
+                && move.ticket == Ticket.Secret) {
+            // increase score if all conditions true
+            score += 10;
+        }
+
+        return score;
+    }
+
+
+    private Double adjustScoreBasedOnTicketType(MoveTicket move) {
+        Double score = 0.0;
+
+        // get move ticket
+
+        if (move.colour == Colour.Black)
+            score += TICKET_WEIGHTER_X.toWeight(move.ticket);
+        else
+            score += TICKET_WEIGHTER.toWeight(move.ticket);
+
+        System.out.println("Ticket Value = " + ticketValue);
+        return score;
+    }
+
+
+    /**
+     * Assigns a score to a possible MoveTicket using currentGameState, and
+     * returns that score.
+     *
+     * @param move the MoveTicket to calculate score for.
+     * @return the score for move.
+     */
+    protected double scoreMoveTicket(MoveTicket move, ScotlandYardState state) {
+        double score = 0;
+
+        // increase score for a secret ticket if it is before MrX has to
+        // show his location.
+        score += increaseSecretTicketScoreIfBeforeShowRound(state, move);
+
+        // adjust score based on ticket type
+        score += adjustScoreBasedOnTicketType(move);
+
+        return score;
+    }
+
+
+    /**
+     * Assigns a score to a possible MoveDouble using currentGameState, and
+     * returns that score.
+     *
+     * @param move the MoveTicket to calculate score for.
+     * @return the score for move.
+     */
+    protected double scoreMoveDouble(MoveDouble move, ScotlandYardState state) {
+        // score the move as if single move, then divide by some factor to
+        // account for using a valuable double move ticket
+        double addOn = 0;
+        int round = view.getRound();
+        System.out.println("Round: " + round);
+        if (round != 0 && view.getRounds().get(round+1)){
+            addOn += 100;
+            if (move.move2.ticket == Ticket.Secret)
+                addOn += 20;
+        }
+        else
+            addOn += -50;
+        return (scoreMoveTicket(move.move2, state) + addOn);
     }
 
 
@@ -514,6 +481,15 @@ public class MiniMaxPlayer implements Player {
             // to traverse.
             for (Edge<Integer, Transport> e : route.getEdges())
                 score += TRANSPORT_WEIGHTER.toWeight(e.getData());
+
+            // if the route is small, decrease score regardless of transport
+            // weightings.
+            if (route.getEdges().size() < 3) {
+                score += -15;
+            }
+            else {
+                score += route.getEdges().size();
+            }
         }
 
         return score;
