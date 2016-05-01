@@ -436,6 +436,10 @@ public class MiniMaxPlayer implements Player {
     }
 
 
+
+
+    // Comparator and Weighter objects
+
     /**
      * A comparator for AINode that ranks AINodes with a greater score field as
      * higher.
