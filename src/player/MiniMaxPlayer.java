@@ -186,7 +186,7 @@ public class MiniMaxPlayer implements Player {
     private void generateTree(ScotlandYardGameTree gameTree, int depth, boolean max) {
 
         // generate the tree
-        MiniMax(gameTree.getHead(), depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, max);
+        MiniMax(gameTree.getHead(), depth, max);
 
         // set the score for game tree head
         gameTree.getHead().setScore(Collections.max(gameTree.getFirstLevelScores()));
@@ -199,8 +199,8 @@ public class MiniMaxPlayer implements Player {
      * @param node the AINode from which to create a tree from. node will be
      *             head of the (sub)tree.
      * @param depth the number of lays to generate for the tree.
-     * @param alpha should be set to initial value Double.NEGATIVE_INFINITY.
-     * @param beta should be set to initial value Double.POSITIVE_INFINITY.
+     * param alpha should be set to initial value Double.NEGATIVE_INFINITY.
+     * param beta should be set to initial value Double.POSITIVE_INFINITY.
      * @param max If true, the player who's turn it is in
      *            {@code node.getGameState()}
      *            should be a maximising player, else minimising player.
@@ -209,7 +209,7 @@ public class MiniMaxPlayer implements Player {
      *         {@code node.getGameState().getCurrentPlayer()}
      *         can get, based on a tree of {@code depth} depth.
      */
-    private Double MiniMax(AINode node, int depth, double alpha, double beta, boolean max) {
+    private Double MiniMax(AINode node, int depth, boolean max) {
         // base case 1 - depth is zero
         if (depth <= 0) {
             //calculateScore(node);
@@ -241,44 +241,40 @@ public class MiniMaxPlayer implements Player {
         }
 
         // store the score for the best move
-        Double v;
+        Double bestScore;
 
         // this player is maximising MrX score
         if (max) {
             // find child node with highest score
-            v = Double.NEGATIVE_INFINITY;
+            bestScore = Double.NEGATIVE_INFINITY;
 
             //System.out.println("MiniMax: NUMBER OF CHILDREN NODES: " + gameTree.getChildren(node).size());
             for (AINode child : gameTree.getChildrenQueue(node, AINODE_COMPARATOR)) {
                 // see if next player is maximising or minimising
                 boolean isMax = child.getGameState().getCurrentPlayer().equals(Colour.Black);
 
-                v = Math.max(v, MiniMax(child, depth - 1, alpha, beta, isMax));
-                alpha = Math.max(alpha, v);
-                if (beta <= alpha)
-                    break; // beta cut off
+                Double v = MiniMax(child, depth - 1, isMax);
+                bestScore = Math.max(bestScore, v);
             }
         }
 
         // or player is minimising MrX score
         else {
             // find child with lowest score
-            v = Double.POSITIVE_INFINITY;
+            bestScore = Double.POSITIVE_INFINITY;
 
             //System.out.println("MiniMax: NUMBER OF CHILDREN NODES: " + gameTree.getChildren(node).size());
             for (AINode child : gameTree.getChildrenQueue(node, AINODE_INV_COMPARATOR)) {
                 // see if next player is maximising or minimising
                 boolean isMax = child.getGameState().getCurrentPlayer().equals(Colour.Black);
 
-                v = Math.min(v, MiniMax(child, depth - 1, alpha, beta, isMax));
-                beta = Math.min(beta, v);
-                if (beta <= alpha)
-                    break; // alpha cut off
+                Double v = MiniMax(child, depth - 1, isMax);
+                bestScore = Math.min(bestScore, v);
             }
         }
 
         // return the best score
-        return v;
+        return bestScore;
     }
 
 
