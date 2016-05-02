@@ -280,7 +280,10 @@ public class MiniMaxPlayer implements Player {
 
             // use Dijkstra's and Weighter to assign a score based on distance
             // MrX is from each detective
-            score += scoreDistancesState(gameState);
+            Double x = scoreDistancesState(gameState);
+            score += x;
+            System.out.println("\n***NEW SCORE CALCULATION***");
+            System.out.println("scoreDistancesState returned = " + x);
 
             // adjust score based on degree of node MrX is at
 //            score += scoreNodeDegree(gameState); now called by scoreDistancesState
@@ -288,9 +291,12 @@ public class MiniMaxPlayer implements Player {
             // adjust score based on factors related to last move played.
             // these should only affect score if MrX played moveToNode
             Move moveToNode = gameTree.getEdgesTo(node).get(0).getData();
-            score += scoreMove(moveToNode, gameState);
+            Double y = scoreMove(moveToNode, gameState);
+            score += y;
+            System.out.println("scoreMove returned = " + y);
         }
 
+        System.out.println("total score = " + score);
         // set node.score to score
         node.setScore(score);
     }
@@ -320,20 +326,21 @@ public class MiniMaxPlayer implements Player {
             // to traverse.
             for (Edge<Integer, Transport> e : route.getEdges())
                 score += TRANSPORT_WEIGHTER.toWeight(e.getData());
+            System.out.println("scoreDistancesState: score based on Dijkstra: " + score);
 
             // if the route is small, decrease score regardless of transport
             // weightings.
             if (route.getEdges().size() < 2) {
-                score += -100; // MrX can lose on detective's next go
+                score += -150; // MrX can lose on detective's next go
                 if (detective == state.getNextPlayer())
-                    score += -100; // The next player to play can capture MrX
+                    score += -200; // The next player to play can capture MrX
             }
             else if (route.getEdges().size() < 4) {
                 score += -30; // MrX can lose on two goes for detective
 				score += scoreNodeDegree(state);
             }
 			else if (route.getEdges().size() > 5) {
-				score += 60; // Increase score if Mr X is reasonably far away from detectives
+				score += 60; // Increase score if Mr X is a high number of moves from detective
 				score += scoreNodeDegree(state);
 			}
 
@@ -360,14 +367,15 @@ public class MiniMaxPlayer implements Player {
         degree = graph.getUniqueDegree(graph.getNode(mrxLocation));
         score += degree;
 
-        System.out.println("MrX is at node: " + mrxLocation + ". It has " +
-                                   "degree: " + degree);
+        //System.out.println("MrX is at node: " + mrxLocation + ". It has " +
+        //                           "degree: " + degree);
 
         // assign a score based on this degree
         if (degree < 4)
-            score += -10 * (4 - degree);
+            score += -8 * (4 - degree);
         else
-            score += 5 * degree;
+            score += 3 * degree;
+        System.out.println("scoreDistancesState: scoreNodeDegree returned: " + score);
 
         return score;
     }
@@ -447,16 +455,16 @@ public class MiniMaxPlayer implements Player {
         int val = 0;
         switch (t) {
             case Taxi:
-                val = 9;
+                val = 5;
                 break;
             case Bus:
-                val = 10;
+                val = 6;
                 break;
             case Underground:
-                val = 12;
+                val = 15;
                 break;
             case Boat:
-                val = 20; // Really high as detective can't use a boat
+                val = 40; // Really high as detective can't use a boat
                 break;
         }
         return val;
