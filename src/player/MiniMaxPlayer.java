@@ -426,8 +426,7 @@ public class MiniMaxPlayer implements Player {
         // if in next round MrX shows, and in this part of tree MrX shows next
         // too, increase score as double move preferred.
         // increase even more if move.move2 uses secret ticket
-        if (currentGameState.getRound() != 0 && currentGameState.getRounds().get(round+1)
-                && state.getRound() != 0 && state.getRounds().get(state.getRound()+1)) {
+        if (currentGameState.getRound() != 0 && currentGameState.getRounds().get(round+1)) {
             score += 40;
             if (move.move2.ticket == Ticket.Secret)
                 score += 20; // double move when having to show even better
