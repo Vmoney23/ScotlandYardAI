@@ -106,7 +106,7 @@ public class MiniMaxPlayer implements Player {
 
         // calculate a score for each move by using the MiniMax algorithm.
         // return the move with the best score.
-        int depth = 6;
+        int depth = 12;
         boolean mrx = colour.equals(Colour.Black);
         return score(depth, mrx);
     }
@@ -188,15 +188,16 @@ public class MiniMaxPlayer implements Player {
     private Double MiniMax(AINode node, int depth, double alpha, double beta, boolean max) {
         // base case 1 - depth is zero
         if (depth <= 0) {
-            //calculateScore(node);
+            calculateScore(node);
             return node.getScore();
         }
 
         // create children nodes and add to tree
         //System.out.println("number of valid moves: " + node.getGameState().validMoves(node.getGameState().getCurrentPlayer()).size());
-        System.out.println(node.getGameState().getCurrentPlayer());
+//        System.out.println(node.getGameState().getCurrentPlayer());
 
         for (Move move : node.getGameState().validMoves(node.getGameState().getCurrentPlayer())) {
+			System.out.print("Move: " + move + ", ");
             // make a copy of currentGameState for the next move
             ScotlandYardState stateAfterMove = node.getGameState().copy();
             stateAfterMove.playMove(move);
@@ -282,10 +283,10 @@ public class MiniMaxPlayer implements Player {
 
             // use Dijkstra's and Weighter to assign a score based on distance
             // MrX is from each detective
-            score += scoreDistancesState(gameState);
+            score += scoreDistancesState(moveToNode, gameState);
 
             // adjust score based on degree of node MrX is at
-//            score += scoreNodeDegree(gameState);
+            score += scoreNodeDegree(gameState);
 
             // adjust score based on factors related to last move played.
             // these should only affect score if MrX played moveToNode
@@ -293,7 +294,7 @@ public class MiniMaxPlayer implements Player {
         }
 
         // set node.score to score
-		System.out.println("Move: " + moveToNode + ", Score: " + score);
+//		System.out.println("Move: " + moveToNode + ", Score: " + score);
         node.setScore(score);
     }
 
@@ -306,8 +307,14 @@ public class MiniMaxPlayer implements Player {
      * @return the calculated score for the state, based only on how far MrX is
      *         from the detectives.
      */
-    private Double scoreDistancesState(ScotlandYardState state) {
+    private Double scoreDistancesState(Move move, ScotlandYardState state) {
         Double score = 0.0;
+		Ticket tick = null;
+		boolean tickSet = false;
+		if (move instanceof MoveTicket) {
+			tick = ((MoveTicket) move).ticket;
+			tickSet = true;
+		}
 
         for (Colour detective : state.getPlayers()) {
             // don't find distance between MrX and himself
@@ -315,7 +322,7 @@ public class MiniMaxPlayer implements Player {
 
             // calculate shortest route between detective and MrX
             Graph<Integer, Transport> route =
-                    dijkstraGraph.getResult(playerLocationMap.get(detective), playerLocationMap.get(Colour.Black), TRANSPORT_WEIGHTER);
+                    dijkstraGraph.getResult(state.getPlayerLocations().get(detective), state.getPlayerLocations().get(Colour.Black), TRANSPORT_WEIGHTER);
 
             // add weight of each edge in route to score.
             // add more to score if edge requires greater value transport
@@ -326,22 +333,15 @@ public class MiniMaxPlayer implements Player {
             // if the route is small, decrease score regardless of transport
             // weightings.
             if (route.getEdges().size() < 3) {
-                score += -200; // MrX can lose on detective's next go
-				score += scoreNodeDegree(state);
-//                if (detective == state.getNextPlayer())
-//                    score += -100; // The next player to play can capture MrX
+                score += -20;
+				if (tickSet && tick == Ticket.Secret)
+					score += 10;
             }
-            else if (route.getEdges().size() < 4) {
-                score += -50; // MrX can lose on two goes for detective
-//				score += scoreNodeDegree(state);
-            }
-			else if (route.getEdges().size() > 5) {
-				score += 60; // Increase score if Mr X is reasonably far away from detectives
-//				score += scoreNodeDegree(state);
+			else if (route.getEdges().size() > 2) {
+				score += 10;
 			}
 
         }
-
         return score;
     }
 
@@ -363,12 +363,12 @@ public class MiniMaxPlayer implements Player {
         degree = graph.getUniqueDegree(graph.getNode(mrxLocation));
         System.out.println("MrX is at node: " + mrxLocation + ". It has " +
                 "degree: " + degree);
-		score += degree;
+//		score += degree;
         // assign a score based on this degree
-//        if (degree < 5)
-//            score += -4 * degree;
-//        else if (degree > 6)
-//            score += 2 * degree;
+        if (degree < 7)
+            score += -20;
+        else if (degree > 6)
+            score += 2 * degree;
 
         return score;
     }
@@ -382,12 +382,11 @@ public class MiniMaxPlayer implements Player {
      * @return the score for move.
      */
     protected double scoreMove(Move move, ScotlandYardState state) {
-        if (move instanceof MoveDouble)
+		if (move instanceof MoveDouble)
             return scoreMoveDouble((MoveDouble) move, state);
         else //MovePass
             return 0;
     }
-
 
     /**
      * Assigns a score to a possible MoveDouble using currentGameState, and
@@ -407,13 +406,13 @@ public class MiniMaxPlayer implements Player {
         // if next round MrX shows, increase score as double move preferred.
         // increase even more if move.move2 uses secret ticket
         if (currentGameState.getRound() != 0 && currentGameState.getRounds().get(round+1)) {
-            score += 40;
+            score += 20;
             if (move.move2.ticket == Ticket.Secret)
                 score += 20; // double move when having to show even better
                              // when move2 is secret
         }
 		else
-			score += -100; // else, double move not preferred
+			score += -40; // else, double move not preferred
 
 
         return score;
@@ -446,13 +445,13 @@ public class MiniMaxPlayer implements Player {
         int val = 0;
         switch (t) {
             case Taxi:
-                val = -5;
+                val = 1;
                 break;
             case Bus:
-                val = -10;
+                val = 2;
                 break;
             case Underground:
-                val = -20;
+                val = 2;
                 break;
             case Boat:
                 val = 20; // Really high as detective can't use a boat
