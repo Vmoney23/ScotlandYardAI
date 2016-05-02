@@ -390,7 +390,6 @@ public class MiniMaxPlayer implements Player {
 
         // increase score for a secret ticket if it is before MrX has to
         // show his location.
-        score += increaseSecretTicketScoreForMrXIfBeforeShowRound(state, move);
 
         // adjust score based on ticket type
         score += adjustScoreBasedOnTicketType(move);
@@ -421,27 +420,11 @@ public class MiniMaxPlayer implements Player {
             if (move.move2.ticket == Ticket.Secret)
                 score += 70;
         }
+		else
+			score += -40;
 
 
         return scoreMoveTicket(move.move2, state) + score;
-    }
-
-
-    private Double increaseSecretTicketScoreForMrXIfBeforeShowRound
-            (ScotlandYardState state, MoveTicket move) {
-
-        Double score = 0.0;
-
-        int round = state.getRound();
-        if (move.colour == Colour.Black // new condition
-                && round != 0
-                && state.getRounds().get(round-1)
-                && move.ticket == Ticket.Secret) {
-            // increase score if all conditions true
-            score += 60;
-        }
-
-        return score;
     }
 
 
