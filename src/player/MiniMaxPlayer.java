@@ -106,7 +106,7 @@ public class MiniMaxPlayer implements Player {
 
         // calculate a score for each move by using the MiniMax algorithm.
         // return the move with the best score.
-        int depth = 42;
+        int depth = 6;
         boolean mrx = colour.equals(Colour.Black);
         return score(depth, mrx);
     }
@@ -293,6 +293,7 @@ public class MiniMaxPlayer implements Player {
         }
 
         // set node.score to score
+		System.out.println("Move: " + moveToNode + ", Score: " + score);
         node.setScore(score);
     }
 
@@ -324,18 +325,19 @@ public class MiniMaxPlayer implements Player {
 
             // if the route is small, decrease score regardless of transport
             // weightings.
-            if (route.getEdges().size() < 2) {
+            if (route.getEdges().size() < 3) {
                 score += -200; // MrX can lose on detective's next go
+				score += scoreNodeDegree(state);
 //                if (detective == state.getNextPlayer())
 //                    score += -100; // The next player to play can capture MrX
             }
             else if (route.getEdges().size() < 4) {
-                score += -30; // MrX can lose on two goes for detective
-				score += scoreNodeDegree(state);
+                score += -50; // MrX can lose on two goes for detective
+//				score += scoreNodeDegree(state);
             }
 			else if (route.getEdges().size() > 5) {
 				score += 60; // Increase score if Mr X is reasonably far away from detectives
-				score += scoreNodeDegree(state);
+//				score += scoreNodeDegree(state);
 			}
 
         }
@@ -363,10 +365,10 @@ public class MiniMaxPlayer implements Player {
                 "degree: " + degree);
 		score += degree;
         // assign a score based on this degree
-        if (degree < 5)
-            score += -4 * degree;
-        else if (degree > 6)
-            score += 2 * degree;
+//        if (degree < 5)
+//            score += -4 * degree;
+//        else if (degree > 6)
+//            score += 2 * degree;
 
         return score;
     }
@@ -411,7 +413,7 @@ public class MiniMaxPlayer implements Player {
                              // when move2 is secret
         }
 		else
-			score += -70; // else, double move not preferred
+			score += -100; // else, double move not preferred
 
 
         return score;
