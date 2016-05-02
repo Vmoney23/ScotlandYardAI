@@ -467,16 +467,16 @@ public class MiniMaxPlayer implements Player {
         int val = 0;
         switch (t) {
             case Taxi:
-                val = 2;
+                val = 5;
                 break;
             case Bus:
-                val = 3;
+                val = 7;
                 break;
             case Underground:
-                val = 6;
+                val = 15;
                 break;
             case Boat:
-                val = 17; // Really high as detective can't use a boat
+                val = 40; // Really high as detective can't use a boat
                 break;
         }
         return val;
