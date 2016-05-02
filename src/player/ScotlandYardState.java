@@ -183,8 +183,6 @@ public final class ScotlandYardState {
 
 
     // playMove helpers
-    // TODO notify spectators?
-
     /**
      * Passes priority onto the next player whose turn it is to play.
      */
@@ -290,8 +288,6 @@ public final class ScotlandYardState {
 
 
     // GETTERS
-    //
-
     public Map<Colour, Integer> getPlayerLocations() {
         return playerLocations;
     }

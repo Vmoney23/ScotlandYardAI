@@ -121,7 +121,6 @@ public class MiniMaxPlayer implements Player {
      *         played.
      */
     protected Move score(int depth, boolean mrx) {
-
         // initialise move ai will choose
         Move aiMove = moves.get(0);
 
@@ -362,15 +361,11 @@ public class MiniMaxPlayer implements Player {
         // get degree of this node
         degree = graph.getUniqueDegree(graph.getNode(mrxLocation));
 
-
-        // assign a score based on this degree
-        if (degree < 4)
-            score += -8 * (4 - degree);
-        else if (degree < 6)
-            score += -3;
-        else
-            score += 3 * degree;
-
+		// assign a score based on this degree
+        if (degree < 7)
+            score += -20;
+        else if (degree > 6)
+            score += 2 * degree;
 
         return score;
     }
@@ -386,7 +381,7 @@ public class MiniMaxPlayer implements Player {
     protected double scoreMove(Move move, ScotlandYardState state) {
 		if (move instanceof MoveDouble)
             return scoreMoveDouble((MoveDouble) move, state);
-        else //MovePass or MoveTicket
+        else //MovePass and MoveTicket
             return 0;
     }
 
@@ -414,7 +409,7 @@ public class MiniMaxPlayer implements Player {
                              // when move2 is secret
         }
 		else
-			score += -40; // else, double move not preferred
+			score += -50; // else, double move not preferred
 
 
         return score;

@@ -18,13 +18,11 @@ public class Node<X> implements Comparable<Node<X>> {
     public Node(X index) {
         this.index = index;
         this.weight = 0.0;
-		//this.degree = 0;
     }
     
     public Node(X index, Double weight) {
         this.index = index;
         this.weight = weight;
-		//this.degree = 0;
     }
 
     /**
@@ -71,14 +69,6 @@ public class Node<X> implements Comparable<Node<X>> {
     public void setWeight(Double weight) {
         this.weight = weight;
     }
-
-	//public int getDegree() {
-    //    return ;
-    //}
-
-    //void incrDegree() {
-        //degree++;
-    //}
     
     /**
      * Implements Comparable interface
