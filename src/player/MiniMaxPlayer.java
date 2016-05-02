@@ -324,11 +324,13 @@ public class MiniMaxPlayer implements Player {
 
             // if the route is small, decrease score regardless of transport
             // weightings.
-            if (route.getEdges().size() < 2) {
-                score += -70;
+            if (route.getEdges().size() <= 1) {
+                score += -10; // MrX can lose on detective's next go
+                if (detective == state.getNextPlayer())
+                    score += -90; // The next player to play can capture MrX
             }
-            else if (route.getEdges().size() < 3) {
-                score += -20;
+            else if (route.getEdges().size() <= 2) {
+                score += -5; // MrX can lose on two goes for detective
             }
 
         }
@@ -350,12 +352,14 @@ public class MiniMaxPlayer implements Player {
 
         // get degree of this node
         degree = graph.getNode(mrxLocation).getDegree();
+        System.out.println("MrX is at node: " + mrxLocation + ". It has " +
+                "degree: " + degree);
 
         // assign a score based on this degree
-        if (degree < 3)
-            score += -55;
+        if (degree <= 2)
+            score += -30;
         else if (degree > 3)
-            score += 25;
+            score += 10;
 
         return score;
     }
@@ -410,18 +414,19 @@ public class MiniMaxPlayer implements Player {
         // account for using a valuable double move ticket
         double score = 0;
 
-        int round = currentGameState.getRound();
-        System.out.println("Round: " + round);
+        //int round = currentGameState.getRound();
+        //System.out.println("Round: " + round);
 
         // if next round MrX shows, increase score as double move preferred.
         // increase even more if move.move2 uses secret ticket
-        if (round != 0 && currentGameState.getRounds().get(round+1)) {
+        if (state.getRound() != 0 && state.getRounds().get(state.getRound()+1)) {
             score += 40;
             if (move.move2.ticket == Ticket.Secret)
-                score += 70;
+                score += 20; // double move when having to show even better
+                             // when move2 is secret
         }
 		else
-			score += -70;
+			score += -70; // else, double move not preferred
 
 
         return scoreMoveTicket(move.move2, state) + score;
@@ -432,7 +437,7 @@ public class MiniMaxPlayer implements Player {
         Double score = 0.0;
 
         if (move.colour == Colour.Black)
-            score += TICKET_WEIGHTER_X.toWeight(move.ticket);
+            //score += TICKET_WEIGHTER_X.toWeight(move.ticket);
 
         return score;
     }
@@ -501,16 +506,16 @@ public class MiniMaxPlayer implements Player {
         int val = 0;
         switch (t) {
             case Taxi:
-                val = 1;
+                val = 3;
                 break;
             case Bus:
-                val = 2;
-                break;
-            case Underground:
                 val = 4;
                 break;
+            case Underground:
+                val = 5;
+                break;
             case Boat:
-                val = 10;
+                val = 20; // Really high as detective can't use a boat
                 break;
         }
         return val;
