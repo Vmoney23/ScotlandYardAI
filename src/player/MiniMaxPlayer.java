@@ -230,7 +230,7 @@ public class MiniMaxPlayer implements Player {
 		double addOn = 0;
 		int round = view.getRound();
 		System.out.println("Round: " + round);
-		if (round != 0 && view.getRounds().get(round)){
+		if (round != 0 && view.getRounds().get(round+1)){
 			addOn += 100;
 			if (move.move2.ticket == Ticket.Secret)
 			addOn += 20;
