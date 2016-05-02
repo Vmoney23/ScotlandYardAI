@@ -310,6 +310,14 @@ public class MiniMaxPlayer implements Player {
 			tickSet = true;
 		}
 
+        // if a detective is ai player, do not try to find distance to MrX,
+        // until MrX has shown himself for the first time.
+        if (state.getPlayerLocations().get(Colour.Black) == 0 &&
+                    colour != Colour.Black) {
+            System.out.println("scoreDistancesState: mrx has not yet revealed: returning 0");
+            return 0.0;
+        }
+
         for (Colour detective : state.getPlayers()) {
             // don't find distance between MrX and himself
             if (detective == Colour.Black) continue;
