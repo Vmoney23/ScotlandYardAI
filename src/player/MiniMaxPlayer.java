@@ -287,7 +287,8 @@ public class MiniMaxPlayer implements Player {
             // adjust score based on degree of node MrX is at
             score += scoreNodeDegree(gameState);
 
-            // adjust score based on factors related to last move played
+            // adjust score based on factors related to last move played.
+            // these should only affect score if MrX played moveToNode
             score += scoreMove(moveToNode, gameState);
         }
 
@@ -323,12 +324,13 @@ public class MiniMaxPlayer implements Player {
 
             // if the route is small, decrease score regardless of transport
             // weightings.
-            if (route.getEdges().size() < 3) {
+            if (route.getEdges().size() < 2) {
+                score += -70;
+            }
+            else if (route.getEdges().size() < 3) {
                 score += -20;
             }
-            else {
-                score += route.getEdges().size();
-            }
+
         }
 
         return score;
@@ -351,9 +353,9 @@ public class MiniMaxPlayer implements Player {
 
         // assign a score based on this degree
         if (degree < 3)
-            score += -50;
+            score += -55;
         else if (degree > 3)
-            score += 50;
+            score += 25;
 
         return score;
     }
@@ -407,17 +409,21 @@ public class MiniMaxPlayer implements Player {
     protected double scoreMoveDouble(MoveDouble move, ScotlandYardState state) {
         // score the move as if single move, then divide by some factor to
         // account for using a valuable double move ticket
-        double addOn = 0;
-        int round = view.getRound();
+        double score = 0;
+
+        int round = state.getRound();
         System.out.println("Round: " + round);
-        if (round != 0 && view.getRounds().get(round+1)){
-            addOn += 100;
+
+        // if next round MrX shows, increase score as double move preferred.
+        // increase even more if move.move2 uses secret ticket
+        if (round != 0 && state.getRounds().get(round+1)) {
+            score += 40;
             if (move.move2.ticket == Ticket.Secret)
-                addOn += 20;
+                score += 70;
         }
-        else
-            addOn += -50;
-        return (scoreMoveTicket(move.move2, state) + addOn);
+
+
+        return scoreMoveTicket(move.move2, state) + score;
     }
 
 
@@ -432,7 +438,7 @@ public class MiniMaxPlayer implements Player {
                 && state.getRounds().get(round-1)
                 && move.ticket == Ticket.Secret) {
             // increase score if all conditions true
-            score += 30;
+            score += 60;
         }
 
         return score;
@@ -442,16 +448,11 @@ public class MiniMaxPlayer implements Player {
     private Double adjustScoreBasedOnTicketType(MoveTicket move) {
         Double score = 0.0;
 
-        // get move ticket
-
         if (move.colour == Colour.Black)
             score += TICKET_WEIGHTER_X.toWeight(move.ticket);
-        else
-            score += TICKET_WEIGHTER.toWeight(move.ticket);
 
         return score;
     }
-
 
 
 
@@ -481,13 +482,13 @@ public class MiniMaxPlayer implements Player {
         int val = 0;
         switch (t) {
             case Taxi:
-                val = 5;
+                val = 15;
                 break;
             case Bus:
-                val = 10;
+                val = 20;
                 break;
             case Underground:
-                val = 15;
+                val = 30;
                 break;
         }
         return val;
@@ -517,13 +518,13 @@ public class MiniMaxPlayer implements Player {
         int val = 0;
         switch (t) {
             case Taxi:
-                val = 1;
+                val = 6;
                 break;
             case Bus:
-                val = 2;
+                val = 7;
                 break;
             case Underground:
-                val = 4;
+                val = 8;
                 break;
             case Boat:
                 val = 10;
