@@ -436,7 +436,7 @@ public class MiniMaxPlayer implements Player {
     private Double adjustScoreBasedOnTicketType(MoveTicket move) {
         Double score = 0.0;
 
-        if (move.colour == Colour.Black)
+        //if (move.colour == Colour.Black)
             //score += TICKET_WEIGHTER_X.toWeight(move.ticket);
 
         return score;

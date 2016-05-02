@@ -97,9 +97,14 @@ public final class ScotlandYardState {
      * @return true is next player is MrX.
      */
     public boolean isNextPlayerMrX() {
-        int currentIx = players.lastIndexOf(currentPlayer) + 1;
+        int currentIx = players.lastIndexOf(currentPlayer);
         int playersSize = players.size();
-        return players.get(currentIx + 1 % playersSize).equals(Colour.Black);
+        return players.get((currentIx + 1) % playersSize).equals(Colour.Black);
+    }
+
+    public Colour getNextPlayer() {
+        int currentIx = players.lastIndexOf(currentPlayer);
+        return players.get((currentIx + 1) % players.size());
     }
 
     /**
