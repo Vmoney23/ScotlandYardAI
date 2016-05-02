@@ -89,11 +89,9 @@ public class MiniMaxPlayer implements Player {
         playerLocationMap = currentGameState.getPlayerLocations();
 
         // get ai move
-        System.out.println("\n\n*********Getting move***********");
         Move aiMove = getAIMove();
 
         // play ai move
-        System.out.println("*************Playing move: " + aiMove + "\n\n");
         receiver.playMove(aiMove, token);
     }
 
@@ -132,7 +130,6 @@ public class MiniMaxPlayer implements Player {
 
         // choose the move
         double bestMoveScore = gameTree.getHead().getScore();
-        System.out.println("score at head: " + bestMoveScore);
 
         boolean gotAMove = false;
         // check all first level edges to see which move gave the best score
@@ -143,9 +140,9 @@ public class MiniMaxPlayer implements Player {
                 break;
             }
         }
-        if (!gotAMove) System.out.println("score(): Move was not assigned " +
-                "from gameTree");
-        else System.out.println("score(): Move was assigned from gameTree");
+//        if (!gotAMove) System.out.println("score(): Move was not assigned " +
+//                "from gameTree");
+//        else System.out.println("score(): Move was assigned from gameTree");
 
         return aiMove;
     }
@@ -196,7 +193,6 @@ public class MiniMaxPlayer implements Player {
 
         // create children nodes and add to tree
         for (Move move : node.getGameState().validMoves(node.getGameState().getCurrentPlayer())) {
-			System.out.print("Move: " + move + ", ");
             // make a copy of currentGameState for the next move
             ScotlandYardState stateAfterMove = node.getGameState().copy();
             stateAfterMove.playMove(move);
@@ -212,7 +208,6 @@ public class MiniMaxPlayer implements Player {
 
         // base case 2 - node is leaf (no valid moves)
         if (gameTree.getChildren(node).size() == 0) {
-            //calculateScore(node);
             return node.getScore();
         }
 
@@ -283,24 +278,16 @@ public class MiniMaxPlayer implements Player {
             // MrX is from each detective
             Double x = scoreDistancesState(moveToNode, gameState);
             score += x;
-            System.out.println("\n***NEW SCORE CALCULATION***");
-            System.out.println("scoreDistancesState returned = " + x);
-
-            // adjust score based on degree of node MrX is at
-//            score += scoreNodeDegree(gameState); now called by scoreDistancesState
 
             // adjust score based on factors related to last move played.
             // these should only affect score if MrX played moveToNode
             Double y = scoreMove(moveToNode, gameState);
             score += y;
-            System.out.println("scoreMove returned = " + y);
         }
         else
             score = Double.NEGATIVE_INFINITY;
 
-        System.out.println("total score = " + score);
         // set node.score to score
-//		System.out.println("Move: " + moveToNode + ", Score: " + score);
         node.setScore(score);
     }
 
@@ -335,7 +322,6 @@ public class MiniMaxPlayer implements Player {
             // to traverse.
             for (Edge<Integer, Transport> e : route.getEdges())
                 score += TRANSPORT_WEIGHTER.toWeight(e.getData());
-            System.out.println("scoreDistancesState: score based on Dijkstra: " + score);
 
             // if the route is small, decrease score regardless of transport
             // weightings.
@@ -375,10 +361,7 @@ public class MiniMaxPlayer implements Player {
 
         // get degree of this node
         degree = graph.getUniqueDegree(graph.getNode(mrxLocation));
-        //score += degree;
 
-        //System.out.println("MrX is at node: " + mrxLocation + ". It has " +
-        //                           "degree: " + degree);
 
         // assign a score based on this degree
         if (degree < 4)
@@ -387,7 +370,6 @@ public class MiniMaxPlayer implements Player {
             score += -3;
         else
             score += 3 * degree;
-        System.out.println("scoreDistancesState: scoreNodeDegree returned: " + score);
 
 
         return score;
@@ -404,7 +386,7 @@ public class MiniMaxPlayer implements Player {
     protected double scoreMove(Move move, ScotlandYardState state) {
 		if (move instanceof MoveDouble)
             return scoreMoveDouble((MoveDouble) move, state);
-        else //MovePass
+        else //MovePass or MoveTicket
             return 0;
     }
 
@@ -421,14 +403,11 @@ public class MiniMaxPlayer implements Player {
         double score = 0;
 
         int round = currentGameState.getRound();
-        //System.out.println("Round: " + round);
 
         // if in next round MrX shows, and in this part of tree MrX shows next
         // too, increase score as double move preferred.
         // increase even more if move.move2 uses secret ticket
-        // TODO don't score every single move higher when current move is double
-        if (currentGameState.getRound() != 0 && currentGameState.getRounds().get(round+1))
-                //&& state.getRound() != 0 && state.getRounds().get(state.getRound()+1)) {
+        if (currentGameState.getRound() != 0 && currentGameState.getRounds().get(round+1)) {
             score += 40;
             if (move.move2.ticket == Ticket.Secret)
                 score += 20; // double move when having to show even better
@@ -468,13 +447,13 @@ public class MiniMaxPlayer implements Player {
         int val = 0;
         switch (t) {
             case Taxi:
-                val = 5;
+                val = 1;
                 break;
             case Bus:
-                val = 7;
+                val = 2;
                 break;
             case Underground:
-                val = 15;
+                val = 3;
                 break;
             case Boat:
                 val = 40; // Really high as detective can't use a boat
