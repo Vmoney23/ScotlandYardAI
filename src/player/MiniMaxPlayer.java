@@ -272,20 +272,24 @@ public class MiniMaxPlayer implements Player {
         // edge to node.
         Move moveToNode = gameTree.getEdgesTo(node).get(0).getData();
 
-        // if MrX loses in this game state, leave score as zero
+        // if MrX doesn't lose in this state, calculate score, else, leave the
+        // score set to zero
         if (!(!node.getGameState().getWinningPlayers().contains(Colour.Black)
                       && node.getGameState().isGameOver())) {
 
+            // get this node's game state
+            ScotlandYardState gameState = node.getGameState();
 
             // use Dijkstra's and Weighter to assign a score based on distance
             // MrX is from each detective
-            score += scoreDistancesState(node.getGameState());
+            score += scoreDistancesState(gameState);
 
-            // adjust score for factors related to last move played
-            score += scoreMove(moveToNode, node.getGameState());
+            // adjust score based on degree of node MrX is at
+            score += scoreNodeDegree(gameState);
+
+            // adjust score based on factors related to last move played
+            score += scoreMove(moveToNode, gameState);
         }
-        else
-            System.out.println("black lost.");
 
         // set node.score to score
         node.setScore(score);
@@ -362,31 +366,31 @@ public class MiniMaxPlayer implements Player {
         // show his location.
         score += increaseSecretTicketScoreIfBeforeShowRound(state, move);
 
-		score += scoreNodeDegree(move.target, state);
-
         // adjust score based on ticket type
         score += adjustScoreBasedOnTicketType(move);
 
         return score;
     }
 
-	/**
-     * Assigns a score to a possible MoveTicket using currentGameState, and
-     * returns that score.
+    /**
      *
-     * @param move the MoveTicket to calculate score for.
-     * @return the score for move.
+     * @return
      */
-    protected double scoreNodeDegree(int location, ScotlandYardState state) {
-        double score = 0;
+    private double scoreNodeDegree(ScotlandYardState state) {
+        Double score = 0.0;
 		int degree = 0;
 
-		degree = state.graph.getNode(location).getDegree();
+        // get MrX's location
+        int mrxLocation = state.getPlayerLocations().get(Colour.Black);
 
+        // get degree of this node
+		degree = graph.getNode(location).getDegree();
+
+        // assign a score based on this degree
 		if (degree < 3)
-			score += -10;
+			score += -40;
 		else if (degree > 3)
-			score += 10;
+			score += 40;
 
         return score;
     }
