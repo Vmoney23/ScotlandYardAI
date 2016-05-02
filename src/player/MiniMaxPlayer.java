@@ -336,6 +336,30 @@ public class MiniMaxPlayer implements Player {
 
 
     /**
+     *
+     * @return
+     */
+    private double scoreNodeDegree(ScotlandYardState state) {
+        Double score = 0.0;
+        int degree = 0;
+
+        // get MrX's location
+        int mrxLocation = state.getPlayerLocations().get(Colour.Black);
+
+        // get degree of this node
+        degree = graph.getNode(location).getDegree();
+
+        // assign a score based on this degree
+        if (degree < 3)
+            score += -40;
+        else if (degree > 3)
+            score += 40;
+
+        return score;
+    }
+
+
+    /**
      * Assigns a score to a possible move using currentGameState, and returns
      * that score.
      *
@@ -364,33 +388,10 @@ public class MiniMaxPlayer implements Player {
 
         // increase score for a secret ticket if it is before MrX has to
         // show his location.
-        score += increaseSecretTicketScoreIfBeforeShowRound(state, move);
+        score += increaseSecretTicketScoreForMrXIfBeforeShowRound(state, move);
 
         // adjust score based on ticket type
         score += adjustScoreBasedOnTicketType(move);
-
-        return score;
-    }
-
-    /**
-     *
-     * @return
-     */
-    private double scoreNodeDegree(ScotlandYardState state) {
-        Double score = 0.0;
-		int degree = 0;
-
-        // get MrX's location
-        int mrxLocation = state.getPlayerLocations().get(Colour.Black);
-
-        // get degree of this node
-		degree = graph.getNode(location).getDegree();
-
-        // assign a score based on this degree
-		if (degree < 3)
-			score += -40;
-		else if (degree > 3)
-			score += 40;
 
         return score;
     }
@@ -420,7 +421,7 @@ public class MiniMaxPlayer implements Player {
     }
 
 
-    private Double increaseSecretTicketScoreIfBeforeShowRound
+    private Double increaseSecretTicketScoreForMrXIfBeforeShowRound
             (ScotlandYardState state, MoveTicket move) {
 
         Double score = 0.0;
@@ -431,7 +432,7 @@ public class MiniMaxPlayer implements Player {
                 && state.getRounds().get(round-1)
                 && move.ticket == Ticket.Secret) {
             // increase score if all conditions true
-            score += 10;
+            score += 30;
         }
 
         return score;

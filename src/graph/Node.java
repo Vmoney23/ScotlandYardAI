@@ -76,8 +76,8 @@ public class Node<X> implements Comparable<Node<X>> {
         return degree;
     }
 
-    public void setDegree(int degree) {
-        this.degree = degree;
+    void incrDegree() {
+        degree++;
     }
     
     /**
