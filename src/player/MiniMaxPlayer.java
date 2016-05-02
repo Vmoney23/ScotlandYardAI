@@ -347,7 +347,7 @@ public class MiniMaxPlayer implements Player {
         int mrxLocation = state.getPlayerLocations().get(Colour.Black);
 
         // get degree of this node
-        degree = graph.getNode(location).getDegree();
+        degree = graph.getNode(mrxLocation).getDegree();
 
         // assign a score based on this degree
         if (degree < 3)
