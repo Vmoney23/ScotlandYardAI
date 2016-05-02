@@ -410,18 +410,18 @@ public class MiniMaxPlayer implements Player {
         // account for using a valuable double move ticket
         double score = 0;
 
-        int round = state.getRound();
+        int round = currentGameState.getRound();
         System.out.println("Round: " + round);
 
         // if next round MrX shows, increase score as double move preferred.
         // increase even more if move.move2 uses secret ticket
-        if (round != 0 && state.getRounds().get(round+1)) {
+        if (round != 0 && currentGameState.getRounds().get(round+1)) {
             score += 40;
             if (move.move2.ticket == Ticket.Secret)
                 score += 70;
         }
 		else
-			score += -40;
+			score += -70;
 
 
         return scoreMoveTicket(move.move2, state) + score;
@@ -501,13 +501,13 @@ public class MiniMaxPlayer implements Player {
         int val = 0;
         switch (t) {
             case Taxi:
-                val = 6;
+                val = 1;
                 break;
             case Bus:
-                val = 7;
+                val = 2;
                 break;
             case Underground:
-                val = 8;
+                val = 4;
                 break;
             case Boat:
                 val = 10;
