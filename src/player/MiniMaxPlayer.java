@@ -351,9 +351,9 @@ public class MiniMaxPlayer implements Player {
 
         // assign a score based on this degree
         if (degree < 3)
-            score += -40;
+            score += -50;
         else if (degree > 3)
-            score += 40;
+            score += 50;
 
         return score;
     }

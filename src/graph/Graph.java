@@ -73,6 +73,6 @@ public interface Graph<X, Y> {
      */
     public String toString();
 
-	public void setDegree(Node<X> node);
+	//public void setDegree(Node<X> node);
 
 }
