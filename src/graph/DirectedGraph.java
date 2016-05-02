@@ -124,6 +124,7 @@ public class DirectedGraph<X, Y> implements Graph<X, Y>{
         return getEdgesFrom(node).size();
     }
 
+
     public int getUniqueDegree(Node<X> node) {
         List<Edge<X, Y>> edges = new ArrayList<>();
         Set<Node<X>> uniqueNodes = new HashSet<>();

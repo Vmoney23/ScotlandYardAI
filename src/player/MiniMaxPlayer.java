@@ -49,6 +49,9 @@ public class MiniMaxPlayer implements Player {
             e.printStackTrace();
         }
 
+        //for (int i = 1; i <= graph.getNodes().size(); i++)
+        //    System.out.println("graph.getUniqueDegree("+i+") = " + graph.getUniqueDegree(graph.getNode(i)));
+
         // store player colour
         this.colour = colour;
 
@@ -267,10 +270,6 @@ public class MiniMaxPlayer implements Player {
         // init score
         Double score = 0.0;
 
-        // if MrX loses in this game state, leave score as zero
-        if (!(!node.getGameState().getWinningPlayers().contains(Colour.Black)
-                    && node.getGameState().isGameOver())) {
-
         // if MrX doesn't lose in this state, calculate score, else, leave the
         // score set to zero
         if (!(!node.getGameState().getWinningPlayers().contains(Colour.Black)
@@ -284,10 +283,11 @@ public class MiniMaxPlayer implements Player {
             score += scoreDistancesState(gameState);
 
             // adjust score based on degree of node MrX is at
-//            score += scoreNodeDegree(gameState);
+//            score += scoreNodeDegree(gameState); now called by scoreDistancesState
 
             // adjust score based on factors related to last move played.
             // these should only affect score if MrX played moveToNode
+            Move moveToNode = gameTree.getEdgesTo(node).get(0).getData();
             score += scoreMove(moveToNode, gameState);
         }
 
@@ -324,9 +324,9 @@ public class MiniMaxPlayer implements Player {
             // if the route is small, decrease score regardless of transport
             // weightings.
             if (route.getEdges().size() < 2) {
-                score += -200; // MrX can lose on detective's next go
-//                if (detective == state.getNextPlayer())
-//                    score += -100; // The next player to play can capture MrX
+                score += -100; // MrX can lose on detective's next go
+                if (detective == state.getNextPlayer())
+                    score += -100; // The next player to play can capture MrX
             }
             else if (route.getEdges().size() < 4) {
                 score += -30; // MrX can lose on two goes for detective
@@ -358,14 +358,16 @@ public class MiniMaxPlayer implements Player {
 
         // get degree of this node
         degree = graph.getUniqueDegree(graph.getNode(mrxLocation));
+        score += degree;
+
         System.out.println("MrX is at node: " + mrxLocation + ". It has " +
-                "degree: " + degree);
-		score += degree;
+                                   "degree: " + degree);
+
         // assign a score based on this degree
-        if (degree < 5)
-            score += -4 * degree;
-        else if (degree > 6)
-            score += 2 * degree;
+        if (degree < 4)
+            score += -10 * (4 - degree);
+        else
+            score += 5 * degree;
 
         return score;
     }
@@ -401,9 +403,11 @@ public class MiniMaxPlayer implements Player {
         int round = currentGameState.getRound();
         //System.out.println("Round: " + round);
 
-        // if next round MrX shows, increase score as double move preferred.
+        // if in next round MrX shows, and in this part of tree MrX shows next
+        // too, increase score as double move preferred.
         // increase even more if move.move2 uses secret ticket
-        if (currentGameState.getRound() != 0 && currentGameState.getRounds().get(round+1)) {
+        if (currentGameState.getRound() != 0 && currentGameState.getRounds().get(round+1)
+                && state.getRound() != 0 && state.getRounds().get(state.getRound()+1)) {
             score += 40;
             if (move.move2.ticket == Ticket.Secret)
                 score += 20; // double move when having to show even better
@@ -443,13 +447,13 @@ public class MiniMaxPlayer implements Player {
         int val = 0;
         switch (t) {
             case Taxi:
-                val = -5;
+                val = 9;
                 break;
             case Bus:
-                val = -10;
+                val = 10;
                 break;
             case Underground:
-                val = -20;
+                val = 12;
                 break;
             case Boat:
                 val = 20; // Really high as detective can't use a boat
