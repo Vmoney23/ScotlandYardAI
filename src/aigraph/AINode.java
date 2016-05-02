@@ -11,7 +11,6 @@ import player.ScotlandYardState;
 public class AINode extends Node<ScotlandYardState> {
 
     private Double score;
-    private int degree = 0;
 
     public AINode(ScotlandYardState gameState, Double score) {
         super(gameState);
@@ -35,17 +34,6 @@ public class AINode extends Node<ScotlandYardState> {
 
     public void setScore(Double score) {
         this.score = score;
-    }
-
-
-    public int getDegree() {
-        return degree;
-    }
-
-
-    // package local
-    void incrDegree() {
-        degree++;
     }
 
 

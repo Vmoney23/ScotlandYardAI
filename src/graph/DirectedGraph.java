@@ -53,6 +53,9 @@ public class DirectedGraph<X, Y> implements Graph<X, Y>{
         targetEdges.get(target).add(edge);
 
         allEdges.add(edge);
+
+		setDegree(edge.getTarget());
+		setDegree(edge.getSource());
     }
 
     /**
@@ -111,6 +114,11 @@ public class DirectedGraph<X, Y> implements Graph<X, Y>{
     public List<Edge<X, Y>> getEdgesFrom(Node<X> node){
         return sourceEdges.get(node);
     }
+
+	public void setDegree(Node<X> node) {
+		List<Edge<X, Y>> list = getEdgesFrom(node);
+		node.setDegree(list.size());
+	}
 
     /**
      * Returns a representation of the graph as a string.

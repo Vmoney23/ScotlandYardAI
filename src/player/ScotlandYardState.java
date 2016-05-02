@@ -12,7 +12,7 @@ import java.util.*;
 // TODO if playMove returns the cloned object, fields can be made final as the updated fields can be calculated before creating new instance of object.
 public final class ScotlandYardState {
 
-    private final ScotlandYardGraph graph;
+    public final ScotlandYardGraph graph;
     private final List<Colour> players;
     // which of these are these needed?
     private Set<Colour> winningPlayers;

@@ -40,9 +40,6 @@ public class ScotlandYardGameTree extends DirectedGraph<ScotlandYardState, Move>
     @Override
     public void add(Edge<ScotlandYardState, Move> edge) {
         super.add(edge);
-
-        ((AINode) edge.getSource()).incrDegree();
-        ((AINode) edge.getTarget()).incrDegree();
     }
 
 

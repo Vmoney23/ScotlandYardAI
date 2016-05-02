@@ -281,16 +281,6 @@ public class MiniMaxPlayer implements Player {
             // MrX is from each detective
             score += scoreDistancesState(node.getGameState());
 
-
-            // adjust score to be higher if degree of MrX's node is higher.
-            // this also avoids outskirts of map.
-            // TODO FIX
-            if (colour.equals(Colour.Black))
-                score *= node.getDegree(); //MrX maximises score
-            else
-                score /= node.getDegree(); //Detectives minimise score
-
-
             // adjust score for factors related to last move played
             score += scoreMove(moveToNode, node.getGameState());
         }
@@ -330,7 +320,7 @@ public class MiniMaxPlayer implements Player {
             // if the route is small, decrease score regardless of transport
             // weightings.
             if (route.getEdges().size() < 3) {
-                score += -15;
+                score += -20;
             }
             else {
                 score += route.getEdges().size();
@@ -372,8 +362,31 @@ public class MiniMaxPlayer implements Player {
         // show his location.
         score += increaseSecretTicketScoreIfBeforeShowRound(state, move);
 
+		score += scoreNodeDegree(move.target, state);
+
         // adjust score based on ticket type
         score += adjustScoreBasedOnTicketType(move);
+
+        return score;
+    }
+
+	/**
+     * Assigns a score to a possible MoveTicket using currentGameState, and
+     * returns that score.
+     *
+     * @param move the MoveTicket to calculate score for.
+     * @return the score for move.
+     */
+    protected double scoreNodeDegree(int location, ScotlandYardState state) {
+        double score = 0;
+		int degree = 0;
+
+		degree = state.graph.getNode(location).getDegree();
+
+		if (degree < 3)
+			score += -10;
+		else if (degree > 3)
+			score += 10;
 
         return score;
     }
@@ -431,7 +444,6 @@ public class MiniMaxPlayer implements Player {
         else
             score += TICKET_WEIGHTER.toWeight(move.ticket);
 
-        System.out.println("Ticket Value = " + ticketValue);
         return score;
     }
 
