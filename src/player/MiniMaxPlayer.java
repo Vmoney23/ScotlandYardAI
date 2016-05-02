@@ -22,8 +22,8 @@ import java.util.Map;
  * @see Player the interface for a Player in this game.
  *
  *
- * TODO better order valid moves to improve alpha-beta pruning
- * TODO make score more complex
+ * TODO degree count of nodes broken
+ * TODO is MiniMax actually passing scores up the tree?
  */
 public class MiniMaxPlayer implements Player {
 
