@@ -325,9 +325,9 @@ public class MiniMaxPlayer implements Player {
             // if the route is small, decrease score regardless of transport
             // weightings.
             if (route.getEdges().size() <= 1) {
-                score += -10; // MrX can lose on detective's next go
+                score += -40; // MrX can lose on detective's next go
                 if (detective == state.getNextPlayer())
-                    score += -90; // The next player to play can capture MrX
+                    score += -100; // The next player to play can capture MrX
             }
             else if (route.getEdges().size() <= 2) {
                 score += -5; // MrX can lose on two goes for detective
@@ -353,14 +353,14 @@ public class MiniMaxPlayer implements Player {
         int mrxLocation = state.getPlayerLocations().get(Colour.Black);
 
         // get degree of this node
-        degree = graph.getDegree(graph.getNode(mrxLocation));
+        degree = graph.getUniqueDegree(graph.getNode(mrxLocation));
         System.out.println("MrX is at node: " + mrxLocation + ". It has " +
                 "degree: " + degree);
 
         // assign a score based on this degree
-        if (degree <= 4)
+        if (degree <= 2)
             score += -35;
-        else if (degree > 5)
+        else if (degree > 3)
             score += 10;
 
         return score;
