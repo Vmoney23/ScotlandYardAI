@@ -102,10 +102,16 @@ public final class ScotlandYardState {
         return players.get((currentIx + 1) % playersSize).equals(Colour.Black);
     }
 
+    /**
+     * Returns the player whose turn it is after the current player.
+     *
+     * @return the player whose turn it is after the current player.
+     */
     public Colour getNextPlayer() {
         int currentIx = players.lastIndexOf(currentPlayer);
         return players.get((currentIx + 1) % players.size());
     }
+
 
     /**
      * Returns the list of valid moves for a given player.

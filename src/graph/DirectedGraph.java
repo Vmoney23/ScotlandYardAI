@@ -54,8 +54,8 @@ public class DirectedGraph<X, Y> implements Graph<X, Y>{
 
         allEdges.add(edge);
 
-		edge.getTarget().incrDegree();
-		edge.getSource().incrDegree();
+		//edge.getTarget().incrDegree();
+		//edge.getSource().incrDegree();
     }
 
     /**
@@ -119,6 +119,10 @@ public class DirectedGraph<X, Y> implements Graph<X, Y>{
 //		List<Edge<X, Y>> list = getEdgesFrom(node);
 //		node.setDegree(list.size());
 //	}
+
+    public int getDegree(Node<X> node) {
+        return getEdgesFrom(node).size();
+    }
 
     /**
      * Returns a representation of the graph as a string.

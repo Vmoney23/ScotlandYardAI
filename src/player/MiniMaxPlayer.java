@@ -341,6 +341,7 @@ public class MiniMaxPlayer implements Player {
 
     /**
      *
+     *
      * @return
      */
     private double scoreNodeDegree(ScotlandYardState state) {
@@ -351,14 +352,14 @@ public class MiniMaxPlayer implements Player {
         int mrxLocation = state.getPlayerLocations().get(Colour.Black);
 
         // get degree of this node
-        degree = graph.getNode(mrxLocation).getDegree();
+        degree = graph.getDegree(graph.getNode(mrxLocation));
         System.out.println("MrX is at node: " + mrxLocation + ". It has " +
                 "degree: " + degree);
 
         // assign a score based on this degree
-        if (degree <= 2)
-            score += -30;
-        else if (degree > 3)
+        if (degree <= 4)
+            score += -35;
+        else if (degree > 5)
             score += 10;
 
         return score;
@@ -433,6 +434,12 @@ public class MiniMaxPlayer implements Player {
     }
 
 
+    /**
+     *
+     *
+     * @param move
+     * @return
+     */
     private Double adjustScoreBasedOnTicketType(MoveTicket move) {
         Double score = 0.0;
 
