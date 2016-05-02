@@ -14,7 +14,6 @@ public final class ScotlandYardState {
 
     public final ScotlandYardGraph graph;
     private final List<Colour> players;
-    // which of these are these needed?
     private Set<Colour> winningPlayers;
     private Map<Colour, Integer> playerLocations;
     private Map<Colour, Map<Ticket, Integer>> playerTickets;
@@ -44,7 +43,7 @@ public final class ScotlandYardState {
         this.graph = graph;
         this.players = view.getPlayers();
 
-        this.winningPlayers = view.getWinningPlayers(); // NEW
+        this.winningPlayers = view.getWinningPlayers();
 
         this.currentPlayer = view.getCurrentPlayer();
 
@@ -183,7 +182,7 @@ public final class ScotlandYardState {
 
 
     // playMove helpers
-    // TODO notify spectators?
+    // TODO notify spectators if we add ai as a spectator
 
     /**
      * Passes priority onto the next player whose turn it is to play.

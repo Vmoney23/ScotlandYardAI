@@ -195,8 +195,9 @@ public class MiniMaxPlayer implements Player {
         }
 
         // create children nodes and add to tree
+        System.out.println("number of valid moves = " + node.getGameState().validMoves(node.getGameState().getCurrentPlayer()));
         for (Move move : node.getGameState().validMoves(node.getGameState().getCurrentPlayer())) {
-			System.out.print("Move: " + move + ", ");
+			System.out.println("Move: " + move);
             // make a copy of currentGameState for the next move
             ScotlandYardState stateAfterMove = node.getGameState().copy();
             stateAfterMove.playMove(move);
@@ -205,8 +206,10 @@ public class MiniMaxPlayer implements Player {
             // Give unassigned score = 0
             AINode child = new AINode(stateAfterMove, 0.0);
             gameTree.add(child);
+            //System.out.println("child node: " + child);
             Edge<ScotlandYardState, Move> edgeToChild = new Edge<>(node, child, move);
             gameTree.add(edgeToChild);
+            //System.out.println("edgeToChild: " + edgeToChild);
             calculateScore(child);
         }
 
@@ -268,6 +271,9 @@ public class MiniMaxPlayer implements Player {
         // init score
         Double score = 0.0;
 
+        if (node == null) System.out.println("NODE IS NULL");
+        else System.out.println("node is not null");
+
         // if MrX doesn't lose in this state, calculate score, else, leave the
         // score set to -infinity
         if (!(!node.getGameState().getWinningPlayers().contains(Colour.Black)
@@ -275,16 +281,20 @@ public class MiniMaxPlayer implements Player {
 
             // get this node's game state
             ScotlandYardState gameState = node.getGameState();
+            if (gameState == null) System.out.println("GAME STATE IS NULL");
+            else System.out.println("game state is not null");
 
             // get the last move played
             Move moveToNode = gameTree.getEdgesTo(node).get(0).getData();
+            if (moveToNode == null) System.out.println("MOVETONODE IS NULL");
+            else System.out.println("moveToNode is not null");
 
             // use Dijkstra's and Weighter to assign a score based on distance
             // MrX is from each detective
             Double x = scoreDistancesState(moveToNode, gameState);
             score += x;
-            System.out.println("\n***NEW SCORE CALCULATION***");
-            System.out.println("scoreDistancesState returned = " + x);
+            //System.out.println("\n***NEW SCORE CALCULATION***");
+            //System.out.println("scoreDistancesState returned = " + x);
 
             // adjust score based on degree of node MrX is at
 //            score += scoreNodeDegree(gameState); now called by scoreDistancesState
@@ -293,12 +303,12 @@ public class MiniMaxPlayer implements Player {
             // these should only affect score if MrX played moveToNode
             Double y = scoreMove(moveToNode, gameState);
             score += y;
-            System.out.println("scoreMove returned = " + y);
+            //System.out.println("scoreMove returned = " + y);
         }
         else
             score = Double.NEGATIVE_INFINITY;
 
-        System.out.println("total score = " + score);
+        //System.out.println("total score = " + score);
         // set node.score to score
 //		System.out.println("Move: " + moveToNode + ", Score: " + score);
         node.setScore(score);
@@ -315,6 +325,7 @@ public class MiniMaxPlayer implements Player {
      */
     private Double scoreDistancesState(Move move, ScotlandYardState state) {
         Double score = 0.0;
+
 		Ticket tick = null;
 		boolean tickSet = false;
 		if (move instanceof MoveTicket) {
@@ -326,6 +337,16 @@ public class MiniMaxPlayer implements Player {
             // don't find distance between MrX and himself
             if (detective == Colour.Black) continue;
 
+            if (state.getPlayerLocations().get(detective) == null)
+                System.out.println("DETECTIVE LOCATION IS NULL");
+            else
+                System.out.println("detective location not null: " + state.getPlayerLocations().get(detective));
+
+            if (state.getPlayerLocations().get(Colour.Black) == null)
+                System.out.println("MRX LOCATION IS NULL");
+            else
+                System.out.println("mrx location is not null: " + state.getPlayerLocations().get(Colour.Black));
+
             // calculate shortest route between detective and MrX
             Graph<Integer, Transport> route =
                     dijkstraGraph.getResult(state.getPlayerLocations().get(detective), state.getPlayerLocations().get(Colour.Black), TRANSPORT_WEIGHTER);
@@ -335,7 +356,7 @@ public class MiniMaxPlayer implements Player {
             // to traverse.
             for (Edge<Integer, Transport> e : route.getEdges())
                 score += TRANSPORT_WEIGHTER.toWeight(e.getData());
-            System.out.println("scoreDistancesState: score based on Dijkstra: " + score);
+            //System.out.println("scoreDistancesState: score based on Dijkstra: " + score);
 
             // if the route is small, decrease score regardless of transport
             // weightings.
@@ -387,7 +408,7 @@ public class MiniMaxPlayer implements Player {
             score += -3;
         else
             score += 3 * degree;
-        System.out.println("scoreDistancesState: scoreNodeDegree returned: " + score);
+        //System.out.println("scoreDistancesState: scoreNodeDegree returned: " + score);
 
 
         return score;
@@ -427,7 +448,7 @@ public class MiniMaxPlayer implements Player {
         // too, increase score as double move preferred.
         // increase even more if move.move2 uses secret ticket
         // TODO don't score every single move higher when current move is double
-        if (currentGameState.getRound() != 0 && currentGameState.getRounds().get(round+1))
+        if (currentGameState.getRound() != 0 && currentGameState.getRounds().get(round+1)) {
                 //&& state.getRound() != 0 && state.getRounds().get(state.getRound()+1)) {
             score += 40;
             if (move.move2.ticket == Ticket.Secret)

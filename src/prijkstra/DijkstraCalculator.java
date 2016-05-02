@@ -25,6 +25,10 @@ public class DijkstraCalculator<X, Y> extends GraphCalculator<X, Y> {
 
     // trace route from end node to start node
     Node<X> current = startToAnyNode.getNode(destinationNodeID);
+
+    if (current == null) System.out.println("CURRENT IS NULL");
+    else System.out.println("current is not null");
+
     Graph<X, Y> route = new DirectedGraph<>();
     route.add(current);
     while (!startToAnyNode.getEdgesFrom(current).isEmpty()) {
