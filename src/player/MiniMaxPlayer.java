@@ -109,7 +109,7 @@ public class MiniMaxPlayer implements Player {
 
         // calculate a score for each move by using the MiniMax algorithm.
         // return the move with the best score.
-        int depth = 12;
+        int depth = 6;
         boolean mrx = colour.equals(Colour.Black);
         return score(depth, mrx);
     }
@@ -271,8 +271,13 @@ public class MiniMaxPlayer implements Player {
         // init score
         Double score = 0.0;
 
-        if (node == null) System.out.println("NODE IS NULL");
-        else System.out.println("node is not null");
+//        if (node == null) System.out.println("NODE IS NULL");
+//        else System.out.println("node is not null");
+
+        // get the last move played
+        Move moveToNode = gameTree.getEdgesTo(node).get(0).getData();
+//            if (moveToNode == null) System.out.println("MOVETONODE IS NULL");
+//            else System.out.println("moveToNode is not null");
 
         // if MrX doesn't lose in this state, calculate score, else, leave the
         // score set to -infinity
@@ -281,15 +286,10 @@ public class MiniMaxPlayer implements Player {
 
             // get this node's game state
             ScotlandYardState gameState = node.getGameState();
-            if (gameState == null) System.out.println("GAME STATE IS NULL");
-            else System.out.println("game state is not null");
+//            if (gameState == null) System.out.println("GAME STATE IS NULL");
+//            else System.out.println("game state is not null");
 
-            // get the last move played
-            Move moveToNode = gameTree.getEdgesTo(node).get(0).getData();
-            if (moveToNode == null) System.out.println("MOVETONODE IS NULL");
-            else System.out.println("moveToNode is not null");
-
-            // use Dijkstra's and Weighter to assign a score based on distance
+                        // use Dijkstra's and Weighter to assign a score based on distance
             // MrX is from each detective
             Double x = scoreDistancesState(moveToNode, gameState);
             score += x;
@@ -310,7 +310,7 @@ public class MiniMaxPlayer implements Player {
 
         //System.out.println("total score = " + score);
         // set node.score to score
-//		System.out.println("Move: " + moveToNode + ", Score: " + score);
+		System.out.println("Move: " + moveToNode + ", Score: " + score);
         node.setScore(score);
     }
 
@@ -326,6 +326,15 @@ public class MiniMaxPlayer implements Player {
     private Double scoreDistancesState(Move move, ScotlandYardState state) {
         Double score = 0.0;
 
+        // if a detective is ai player, do not try to find distance to MrX,
+        // until MrX has shown himself for the first time.
+        if (state.getPlayerLocations().get(Colour.Black) == 0 &&
+                colour != Colour.Black) {
+            System.out.println("scoreDistancesState: mrx has not yet revealed: returning 0");
+            return 0.0;
+        }
+
+
 		Ticket tick = null;
 		boolean tickSet = false;
 		if (move instanceof MoveTicket) {
@@ -337,15 +346,15 @@ public class MiniMaxPlayer implements Player {
             // don't find distance between MrX and himself
             if (detective == Colour.Black) continue;
 
-            if (state.getPlayerLocations().get(detective) == null)
-                System.out.println("DETECTIVE LOCATION IS NULL");
-            else
-                System.out.println("detective location not null: " + state.getPlayerLocations().get(detective));
-
-            if (state.getPlayerLocations().get(Colour.Black) == null)
-                System.out.println("MRX LOCATION IS NULL");
-            else
-                System.out.println("mrx location is not null: " + state.getPlayerLocations().get(Colour.Black));
+//            if (state.getPlayerLocations().get(detective) == null)
+//                System.out.println("DETECTIVE LOCATION IS NULL");
+//            else
+//                System.out.println("detective location not null: " + state.getPlayerLocations().get(detective));
+//
+//            if (state.getPlayerLocations().get(Colour.Black) == null)
+//                System.out.println("MRX LOCATION IS NULL");
+//            else
+//                System.out.println("mrx location is not null: " + state.getPlayerLocations().get(Colour.Black));
 
             // calculate shortest route between detective and MrX
             Graph<Integer, Transport> route =
