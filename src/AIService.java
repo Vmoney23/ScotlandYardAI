@@ -29,6 +29,7 @@ public class AIService {
         System.out.println("Welcome! AI service started on localhost:" + port);
 
         //TODO: Replace this player factory with your own AI.
+
         PlayerFactory factory = new MiniMaxPlayerFactory();
 
         MessengerServer<Integer> server = new Server(port);
