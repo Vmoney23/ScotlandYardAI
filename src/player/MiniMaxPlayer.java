@@ -340,9 +340,10 @@ public class MiniMaxPlayer implements Player {
 
 
     /**
+     * Generates and returns a score for a game state based on the degree of the
+     * node MrX is at.
      *
-     *
-     * @return
+     * @return the score for MrX based on his node's degree.
      */
     private double scoreNodeDegree(ScotlandYardState state) {
         Double score = 0.0;
