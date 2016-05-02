@@ -12,7 +12,7 @@ import java.util.*;
 // TODO if playMove returns the cloned object, fields can be made final as the updated fields can be calculated before creating new instance of object.
 public final class ScotlandYardState {
 
-    private final ScotlandYardGraph graph;
+    public final ScotlandYardGraph graph;
     private final List<Colour> players;
     // which of these are these needed?
     private Set<Colour> winningPlayers;
@@ -97,10 +97,21 @@ public final class ScotlandYardState {
      * @return true is next player is MrX.
      */
     public boolean isNextPlayerMrX() {
-        int currentIx = players.lastIndexOf(currentPlayer) + 1;
+        int currentIx = players.lastIndexOf(currentPlayer);
         int playersSize = players.size();
-        return players.get(currentIx + 1 % playersSize).equals(Colour.Black);
+        return players.get((currentIx + 1) % playersSize).equals(Colour.Black);
     }
+
+    /**
+     * Returns the player whose turn it is after the current player.
+     *
+     * @return the player whose turn it is after the current player.
+     */
+    public Colour getNextPlayer() {
+        int currentIx = players.lastIndexOf(currentPlayer);
+        return players.get((currentIx + 1) % players.size());
+    }
+
 
     /**
      * Returns the list of valid moves for a given player.

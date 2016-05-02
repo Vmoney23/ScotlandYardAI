@@ -22,8 +22,8 @@ import java.util.Map;
  * @see Player the interface for a Player in this game.
  *
  *
- * TODO better order valid moves to improve alpha-beta pruning
- * TODO make score more complex
+ * TODO degree count of nodes broken
+ * TODO is MiniMax actually passing scores up the tree?
  */
 public class MiniMaxPlayer implements Player {
 
@@ -106,7 +106,7 @@ public class MiniMaxPlayer implements Player {
 
         // calculate a score for each move by using the MiniMax algorithm.
         // return the move with the best score.
-        int depth = 25;
+        int depth = 42;
         boolean mrx = colour.equals(Colour.Black);
         return score(depth, mrx);
     }
@@ -146,31 +146,6 @@ public class MiniMaxPlayer implements Player {
 
         return aiMove;
     }
-
-
-    /**
-     * A lambda function implements Weighter<Transport>, to be passed to
-     * Dijkstra's. This Weighter assigns a higher weight to transports with
-     * which players start with less tickets for.
-     */
-    protected static final Weighter<Transport> TRANSPORT_WEIGHTER = t -> {
-        int val = 0;
-        switch (t) {
-            case Taxi:
-                val = 1;
-                break;
-            case Bus:
-                val = 2;
-                break;
-            case Underground:
-                val = 4;
-                break;
-            case Boat:
-                val = 15;
-                break;
-        }
-        return val;
-    };
 
 
     /**
@@ -289,26 +264,32 @@ public class MiniMaxPlayer implements Player {
      * @param node the node to calculate the score for.
      */
     protected void calculateScore(AINode node) {
+        // init score
         Double score = 0.0;
 
         // if MrX loses in this game state, leave score as zero
         if (!(!node.getGameState().getWinningPlayers().contains(Colour.Black)
                     && node.getGameState().isGameOver())) {
 
+        // if MrX doesn't lose in this state, calculate score, else, leave the
+        // score set to zero
+        if (!(!node.getGameState().getWinningPlayers().contains(Colour.Black)
+                      && node.getGameState().isGameOver())) {
+
+            // get this node's game state
+            ScotlandYardState gameState = node.getGameState();
+
             // use Dijkstra's and Weighter to assign a score based on distance
             // MrX is from each detective
-            score += scoreDistancesState(node.getGameState());
+            score += scoreDistancesState(gameState);
 
+            // adjust score based on degree of node MrX is at
+//            score += scoreNodeDegree(gameState);
 
-            // adjust score to be higher if degree of MrX's node is higher.
-            // this also avoids outskirts of map.
-            if (colour.equals(Colour.Black))
-                score *= node.getDegree(); //MrX maximises score
-            else
-                score /= node.getDegree(); //Detectives minimise score
-
+            // adjust score based on factors related to last move played.
+            // these should only affect score if MrX played moveToNode
+            score += scoreMove(moveToNode, gameState);
         }
-        else System.out.println("black lost.");
 
         // set node.score to score
         node.setScore(score);
@@ -339,11 +320,104 @@ public class MiniMaxPlayer implements Player {
             // to traverse.
             for (Edge<Integer, Transport> e : route.getEdges())
                 score += TRANSPORT_WEIGHTER.toWeight(e.getData());
+
+            // if the route is small, decrease score regardless of transport
+            // weightings.
+            if (route.getEdges().size() < 2) {
+                score += -200; // MrX can lose on detective's next go
+//                if (detective == state.getNextPlayer())
+//                    score += -100; // The next player to play can capture MrX
+            }
+            else if (route.getEdges().size() < 4) {
+                score += -30; // MrX can lose on two goes for detective
+				score += scoreNodeDegree(state);
+            }
+			else if (route.getEdges().size() > 5) {
+				score += 60; // Increase score if Mr X is reasonably far away from detectives
+				score += scoreNodeDegree(state);
+			}
+
         }
 
         return score;
     }
 
+
+    /**
+     * Generates and returns a score for a game state based on the degree of the
+     * node MrX is at.
+     *
+     * @return the score for MrX based on his node's degree.
+     */
+    private double scoreNodeDegree(ScotlandYardState state) {
+        Double score = 0.0;
+        int degree = 0;
+
+        // get MrX's location
+        int mrxLocation = state.getPlayerLocations().get(Colour.Black);
+
+        // get degree of this node
+        degree = graph.getUniqueDegree(graph.getNode(mrxLocation));
+        System.out.println("MrX is at node: " + mrxLocation + ". It has " +
+                "degree: " + degree);
+		score += degree;
+        // assign a score based on this degree
+        if (degree < 5)
+            score += -4 * degree;
+        else if (degree > 6)
+            score += 2 * degree;
+
+        return score;
+    }
+
+
+    /**
+     * Assigns a score to a possible move using currentGameState, and returns
+     * that score.
+     *
+     * @param move the Move to calculate score for.
+     * @return the score for move.
+     */
+    protected double scoreMove(Move move, ScotlandYardState state) {
+        if (move instanceof MoveDouble)
+            return scoreMoveDouble((MoveDouble) move, state);
+        else //MovePass
+            return 0;
+    }
+
+
+    /**
+     * Assigns a score to a possible MoveDouble using currentGameState, and
+     * returns that score.
+     *
+     * @param move the MoveTicket to calculate score for.
+     * @return the score for move.
+     */
+    protected double scoreMoveDouble(MoveDouble move, ScotlandYardState state) {
+        // score the move as if single move, then divide by some factor to
+        // account for using a valuable double move ticket
+        double score = 0;
+
+        int round = currentGameState.getRound();
+        //System.out.println("Round: " + round);
+
+        // if next round MrX shows, increase score as double move preferred.
+        // increase even more if move.move2 uses secret ticket
+        if (currentGameState.getRound() != 0 && currentGameState.getRounds().get(round+1)) {
+            score += 40;
+            if (move.move2.ticket == Ticket.Secret)
+                score += 20; // double move when having to show even better
+                             // when move2 is secret
+        }
+		else
+			score += -70; // else, double move not preferred
+
+
+        return score;
+    }
+
+
+    // Comparator and Weighter objects
 
     /**
      * A comparator for AINode that ranks AINodes with a greater score field as
@@ -361,69 +435,26 @@ public class MiniMaxPlayer implements Player {
            (node1, node2) -> node2.getScore().intValue() - node1.getScore().intValue();
 
 
-
-
-
-    //-----------------old--------------------------
     /**
-     * Assigns a score to a possible move using currentGameState, and returns
-     * that score.
-     *
-     * @param move the Move to calculate score for.
-     * @return the score for move.
+     * A lambda function implements Weighter<Transport>. This Weighter assigns a lower
+     * weight to transports with which players can move further with.
      */
-    protected double scoreMove(Move move) {
-        if (move instanceof MoveTicket)
-            return scoreMoveTicket((MoveTicket) move);
-        else if (move instanceof MoveDouble)
-            return scoreMoveDouble((MoveDouble) move);
-        else //MovePass
-            return 0;
-    }
-
-
-    /**
-     * Assigns a score to a possible MoveTicket using currentGameState, and
-     * returns that score.
-     *
-     * @param move the MoveTicket to calculate score for.
-     * @return the score for move.
-     */
-    protected double scoreMoveTicket(MoveTicket move) {
-        // upon return, score
-        double score = 0;
-
-        // loop through all other players, find 'best' route to each other
-        // player from move target, score this route, add route score to total.
-        for (Colour player : currentGameState.getPlayers()) {
-
-            // no need to calculate distance between player and himself...
-            if (move.colour == player) continue;
-
-            // calculate shortest route from MiniMax player to other player
-            Graph<Integer, Transport> route = dijkstraGraph.getResult(move.target, playerLocationMap.get(player), TRANSPORT_WEIGHTER);
-
-            // add weight of each edge in route to score.
-            // add more to score if edge requires greater value transport
-            // to traverse.
-            for (Edge<Integer, Transport> e : route.getEdges())
-                score += TRANSPORT_WEIGHTER.toWeight(e.getData());
+    protected static final Weighter<Transport> TRANSPORT_WEIGHTER = t -> {
+        int val = 0;
+        switch (t) {
+            case Taxi:
+                val = -5;
+                break;
+            case Bus:
+                val = -10;
+                break;
+            case Underground:
+                val = -20;
+                break;
+            case Boat:
+                val = 20; // Really high as detective can't use a boat
+                break;
         }
-
-        return score;
-    }
-
-
-    /**
-     * Assigns a score to a possible MoveDouble using currentGameState, and
-     * returns that score.
-     *
-     * @param move the MoveTicket to calculate score for.
-     * @return the score for move.
-     */
-    protected double scoreMoveDouble(MoveDouble move) {
-        // score the move as if single move, then divide by some factor to
-        // account for using a valuable double move ticket
-        return scoreMoveTicket(move.move2) / 2;
-    }
+        return val;
+    };
 }

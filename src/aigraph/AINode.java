@@ -11,7 +11,6 @@ import player.ScotlandYardState;
 public class AINode extends Node<ScotlandYardState> {
 
     private Double score;
-    private int degree = 0;
 
     public AINode(ScotlandYardState gameState, Double score) {
         super(gameState);
@@ -35,18 +34,6 @@ public class AINode extends Node<ScotlandYardState> {
 
     public void setScore(Double score) {
         this.score = score;
-    }
-
-
-    // TODO THIS SHOULD NOT BE HERE, degree should be counted for nodes in the game map, not the minimax tree
-    public int getDegree() {
-        return degree;
-    }
-
-
-    // package local
-    void incrDegree() {
-        degree++;
     }
 
 
