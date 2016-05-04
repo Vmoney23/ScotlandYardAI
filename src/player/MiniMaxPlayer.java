@@ -85,8 +85,19 @@ public class MiniMaxPlayer implements Player {
         // store locations of other players
         playerLocationMap = currentGameState.getPlayerLocations();
 
-        // get ai move
-        Move aiMove = getAIMove();
+        // declare aiMove
+        Move aiMove;
+
+        // if a detective, and mrX never revealed himself, choose a random move
+        if (colour != Colour.Black && view.getPlayerLocation(Colour.Black) ==
+                0) {
+            // choose random move
+            aiMove = moves.get(0);
+        }
+        else {
+            // get ai move
+            aiMove = getAIMove();
+        }
 
         // play ai move
         receiver.playMove(aiMove, token);
@@ -104,7 +115,7 @@ public class MiniMaxPlayer implements Player {
 
         // calculate a score for each move by using the MiniMax algorithm.
         // return the move with the best score.
-        int depth = 12;
+        int depth = 48;
         boolean mrx = colour.equals(Colour.Black);
         return score(depth, mrx);
     }
@@ -123,16 +134,15 @@ public class MiniMaxPlayer implements Player {
 
         // generate the game tree
         generateTree(gameTree, depth, mrx);
+        System.out.println("generateTree returned");
 
+        System.out.println("gameTree.getListFirstLevelEdges().size() = " + gameTree.getListFirstLevelEdges().size());
         // choose the move
         double bestMoveScore = gameTree.getHead().getScore();
-
-        boolean gotAMove = false;
         // check all first level edges to see which move gave the best score
         for (Edge<ScotlandYardState, Move> possibleBest : gameTree.getListFirstLevelEdges()) {
             if (((AINode) possibleBest.getTarget()).getScore() == bestMoveScore) { // ERROR IF STATEMENT BROKEN
                 aiMove = possibleBest.getData();
-                gotAMove = true;
                 break;
             }
         }
@@ -140,6 +150,7 @@ public class MiniMaxPlayer implements Player {
 //                "from gameTree");
 //        else System.out.println("score(): Move was assigned from gameTree");
 
+        System.out.println("aiMove = " + aiMove);
         return aiMove;
     }
 
@@ -158,9 +169,11 @@ public class MiniMaxPlayer implements Player {
 
         // generate the tree
         MiniMax(gameTree.getHead(), depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, max);
+        System.out.println("finished minimax");
 
         // set the score for game tree head
         gameTree.getHead().setScore(Collections.max(gameTree.getFirstLevelScores()));
+        System.out.println("set gameTree head score");
     }
 
 
@@ -181,6 +194,7 @@ public class MiniMaxPlayer implements Player {
      *         can get, based on a tree of {@code depth} depth.
      */
     private Double MiniMax(AINode node, int depth, double alpha, double beta, boolean max) {
+        System.out.println("minimax recurse");
         // base case 1 - depth is zero
         if (depth <= 0) {
             calculateScore(node);
@@ -191,6 +205,7 @@ public class MiniMaxPlayer implements Player {
         //System.out.println("number of valid moves: " + node.getGameState().validMoves(node.getGameState().getCurrentPlayer()).size());
 //        System.out.println(node.getGameState().getCurrentPlayer());
 
+        System.out.println("number of valid moves = " + node.getGameState().validMoves(node.getGameState().getCurrentPlayer()).size());
         for (Move move : node.getGameState().validMoves(node.getGameState().getCurrentPlayer())) {
             // make a copy of currentGameState for the next move
             ScotlandYardState stateAfterMove = node.getGameState().copy();
@@ -361,8 +376,9 @@ public class MiniMaxPlayer implements Player {
         // get MrX's location
         int mrxLocation = state.getPlayerLocations().get(Colour.Black);
 
-        // get degree of this node
-        degree = graph.getUniqueDegree(graph.getNode(mrxLocation));
+        // get degree of this node, if mrx has revealed
+        if (mrxLocation != 0 && colour != Colour.Black)
+            degree = graph.getUniqueDegree(graph.getNode(mrxLocation));
 
 		// assign a score based on this degree
         if (degree < 7)

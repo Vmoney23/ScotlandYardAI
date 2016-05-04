@@ -123,7 +123,7 @@ public final class ScotlandYardState {
         int location = playerLocations.get(player);
         List<Move> moves = graph.generateMoves(player, location);
         List<Move> validMoves = new ArrayList<>();
-		Map<Ticket, Integer> thisPlayersTicketMap = new HashMap<>();
+		Map<Ticket, Integer> thisPlayersTicketMap;
 		thisPlayersTicketMap = playerTickets.get(player);
         if (player != Colour.Black) {
             for (Move move : moves) {
