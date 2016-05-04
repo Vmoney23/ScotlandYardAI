@@ -224,8 +224,9 @@ public class TestHelper {
      * added by ahmerb
      */
     public static class MrXMiniMaxTestPlayer extends MiniMaxPlayer {
-        public MrXMiniMaxTestPlayer(ScotlandYardView view, String graphFilename) {
-            super(view, graphFilename);
+        public MrXMiniMaxTestPlayer(ScotlandYardView view, String
+                graphFilename, Colour colour) {
+            super(view, graphFilename, colour);
         }
     }
 }

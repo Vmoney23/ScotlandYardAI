@@ -1,17 +1,21 @@
 package player;
 
 import org.junit.Test;
-import scotlandyard.*;
+import scotlandyard.Colour;
+import scotlandyard.MoveTicket;
+import scotlandyard.ScotlandYard;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by ahmerb on 24/04/16.
  */
 public class MiniMaxPlayerTest {
+    // TODO remove this test
     /**
      * Tests the lambda function used to return key associated with highest
      * value from a map.
@@ -37,7 +41,8 @@ public class MiniMaxPlayerTest {
     public void scoreCalculatesMrXMoveToAwayFromDetectivesAsBetter() throws Exception {
         // instantiate a game with MrX as MiniMax player
         ScotlandYard game = TestHelper.getStoppedGame(1, "test_resources/graph.txt");
-        MiniMaxPlayer mrx = new TestHelper.MrXMiniMaxTestPlayer(game, "graph.txt");
+        MiniMaxPlayer mrx = new TestHelper.MrXMiniMaxTestPlayer(game, "graph" +
+                ".txt", Colour.Black);
         TestHelper.addMrxToGame(game, mrx, 1);
 
         // TODO get a weaker and a stronger move.

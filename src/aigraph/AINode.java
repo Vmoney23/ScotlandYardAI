@@ -1,35 +1,41 @@
 package aigraph;
 
-import graph.*;
-import scotlandyard.*;
+import graph.Node;
+import player.ScotlandYardState;
 
 /**
- * Created by ahmerb on 20/04/16.
+ * This class extends Node<ScotlandYardView>. Each AINode contains two pieces
+ * of data: a ScotlandYardView gameState, and an associated score: a double
+ * score.
  */
-public class AINode<X extends ScotlandYardView> extends Node<X> {
+public class AINode extends Node<ScotlandYardState> {
 
-    private Integer score;
+    private Double score;
 
-    public AINode(X gameState, Integer score) {
+    public AINode(ScotlandYardState gameState, Double score) {
         super(gameState);
         this.score = score;
     }
 
-    public X getGameState() {
+
+    public ScotlandYardState getGameState() {
         return super.getIndex();
     }
 
-    public void setGameState(X gameState) {
+
+    public void setGameState(ScotlandYardState gameState) {
         super.setIndex(gameState);
     }
 
-    public Integer getScore() {
+    public Double getScore() {
         return score;
     }
 
-    public void setScore(Integer score) {
+
+    public void setScore(Double score) {
         this.score = score;
     }
+
 
     /**
      * Returns a string representation of the score of the game state associated
