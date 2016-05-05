@@ -1,0 +1,61 @@
+@font-face {
+  font-family: Joystix;
+  src: url('resources/Joystix.ttf');
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #333333;
+}
+
+h1 {
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  padding-top: 11%;
+  color: white;
+  font-size: 30pt;
+  font-family: Joystix, sans-serif;
+  position: absolute;
+}
+
+#container {
+  width: 704px;
+  height: 100%;
+  margin: 0 auto;
+  position: relative;
+}
+
+#scrollingTextView {
+  width: 100%;
+  height: 50px;
+  position: absolute;
+  top: 22%;
+}
+
+#listContainer {
+  width: 704px;
+  position: absolute;
+  top: 30%;
+}
+
+#list {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+#list li {
+  font-size: 1.2em;
+  font-family: Joystix, sans-serif;
+  color: white;
+  margin: 10px;
+}
+
+#list li:first-of-type {
+  color: #FFE000;
+}
