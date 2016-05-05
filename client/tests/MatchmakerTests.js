@@ -9,7 +9,7 @@ QUnit.test("Matchmaker: Connection message is recieved correctly", function (ass
 	};
 	gameMessenger.handleMessage(JSON.stringify(connectionMessage));
 
-	var expectedURL = "ws://host:1234"
+	var expectedURL = "ws://host:1234";
 	var url = gameMessenger.testContainer.changeConnection[0];
 	assert.equal(url, expectedURL, "The changeConnection method should have been" + " called with the new connection information before sending the spectate" + " message.");
 

@@ -170,17 +170,17 @@ SetUpView.prototype.showPane = function (pane) {
 		for (var i = 0; i < children.length; i++) {
 			children[i].style.display = display
 		}
-	}
+	};
 	this.mainPane.style.display = "none";
 	displayChildren(this.mainPane, "none");
 	this.waitingPane.style.display = "none";
 	displayChildren(this.waitingPane, "none");
-	this.idPane.style.display = "none"
+	this.idPane.style.display = "none";
 	displayChildren(this.idPane, "none");
 	pane.style.display = "block";
 
 	displayChildren(pane, "block");
-}
+};
 
 /**
  * Shows or hides the waiting pane.
@@ -252,11 +252,11 @@ SetUpView.prototype.disconnectMatchmaker = function () {
 		document.getElementById("matchmakerButton").style.background = "#333333";
 	};
 	gameMessenger.close(callback);
-}
+};
 
 SetUpView.prototype.disconnectAI = function () {
 	aiMessenger.close();
-}
+};
 
 /**
  * Returns the connection information for the matchmaker

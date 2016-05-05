@@ -30,7 +30,7 @@ ListView.prototype.updateList = function (list) {
     item.innerHTML = this.format(sortable[i][0], sortable[i][1], i);
     this.container.appendChild(item);
   }
-}
+};
 
 /**
  * Returns a formatted string for an item in the list.

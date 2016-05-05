@@ -21,7 +21,7 @@ Messenger.prototype.close = function (callback) {
 
 Messenger.prototype.setConnected = function (connected) {
 	this.connected = connected;
-}
+};
 
 Messenger.prototype.isConnected = function () {
 	this.testContainer.isConnected = [true];

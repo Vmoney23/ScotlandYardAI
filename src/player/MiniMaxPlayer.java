@@ -34,6 +34,13 @@ public class MiniMaxPlayer implements Player {
     private List<Move> moves;
 
 
+    /**
+     * Create a new AI player that uses a MiniMax tree to determine next move.
+     *
+     * @param view the view of the current game that this player will play in.
+     * @param graphFilename the graph of the map of the Scotland Yard game.
+     * @param colour the colour for this player.
+     */
     @SuppressWarnings("unchecked")
     public MiniMaxPlayer(ScotlandYardView view, String graphFilename, Colour colour) {
         // store graph
@@ -86,10 +93,11 @@ public class MiniMaxPlayer implements Player {
         // declare aiMove
         Move aiMove;
 
+        System.out.println("\n\nGetting move... ");
         // if a detective, and mrX never revealed himself, choose a random move
-        if (colour != Colour.Black && view.getPlayerLocation(Colour.Black) ==
-                0) {
+        if (colour != Colour.Black && view.getPlayerLocation(Colour.Black) == 0) {
             // choose random move
+            System.out.println("detective played default move");
             aiMove = moves.get(0);
         }
         else {
@@ -97,6 +105,7 @@ public class MiniMaxPlayer implements Player {
             aiMove = getAIMove();
         }
 
+        System.out.println("Playing move: " + aiMove + "\n\n");
         // play ai move
         receiver.playMove(aiMove, token);
     }
@@ -193,7 +202,7 @@ public class MiniMaxPlayer implements Player {
      *         can get, based on a tree of {@code depth} depth.
      */
     private Double MiniMax(AINode node, int depth, double alpha, double beta, boolean max) {
-        System.out.println("minimax recurse");
+        //System.out.println("minimax recurse");
         // base case 1 - depth is zero
         if (depth <= 0) {
             calculateScore(node);
@@ -204,7 +213,7 @@ public class MiniMaxPlayer implements Player {
         //System.out.println("number of valid moves: " + node.getGameState().validMoves(node.getGameState().getCurrentPlayer()).size());
 //        System.out.println(node.getGameState().getCurrentPlayer());
 
-        System.out.println("number of valid moves = " + node.getGameState().validMoves(node.getGameState().getCurrentPlayer()).size());
+        //System.out.println("number of valid moves = " + node.getGameState().validMoves(node.getGameState().getCurrentPlayer()).size());
         for (Move move : node.getGameState().validMoves(node.getGameState().getCurrentPlayer())) {
             // make a copy of currentGameState for the next move
             ScotlandYardState stateAfterMove = node.getGameState().copy();

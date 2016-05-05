@@ -35,7 +35,7 @@ ListView.prototype.setGames = function (games) {
 	else if (this.container.attachEvent) this.container.attachEvent("onclick", function (event) {
 		self.onClick(event);
 	});
-}
+};
 
 /**
  * Called when the user clicks on an item in the list. It updates which item has been selected.

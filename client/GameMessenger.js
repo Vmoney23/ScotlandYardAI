@@ -152,7 +152,7 @@ GameMessenger.prototype.interpretConnection = function (messageConnection) {
 	var message = {
 		type: "SPECTATE",
 		game_id: gameId
-	}
+	};
 	gameMessenger.sendMessage(message);
 };
 

@@ -26,7 +26,7 @@ var BoardView = function (canvas, boardCanvas, dropDown, colour, boardImage, loc
 	this.dropDown = dropDown;
 	this.board = new Board(boardImage);
 	this.locations = locations;
-	this.colour = colour
+	this.colour = colour;
 	this.currentPlayer = null;
 	this.selectedNode = null;
 	this.playerPositions = {
@@ -260,7 +260,7 @@ BoardView.prototype.mouseMoved = function (event, canvas) {
 		this.selectedNode = null;
 	}
 	this.repaint();
-}
+};
 
 /**
  * Returns the position relative to an element.
@@ -278,7 +278,7 @@ BoardView.prototype.positionRelativeTo = function (pos, element) {
 		x: x,
 		y: y
 	};
-}
+};
 
 /**
  * Returns the node in the map closest to the mouse position within a boundary.
@@ -383,7 +383,7 @@ var Board = function (boardImage) {
 		x: 0,
 		y: 0
 	};
-}
+};
 
 /**
  * Returns the scaled position on the board. (i.e. the position on the canvas from a positon on the board image).
