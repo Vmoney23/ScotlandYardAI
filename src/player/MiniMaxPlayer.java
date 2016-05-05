@@ -119,6 +119,11 @@ public class MiniMaxPlayer implements Player {
         // initialise move ai will choose
         Move aiMove = moves.get(0);
 
+        // if MrX hasn't revealed himself yet, detective cannot make an
+        // intelligent move, so just return a random move.
+        if (!mrx && view.getPlayerLocation(Colour.Black) == 0)
+            return aiMove;
+
         // generate the game tree
         generateTree(gameTree, depth, mrx);
 
