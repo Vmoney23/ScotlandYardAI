@@ -10,7 +10,7 @@ import graph.*;
 public abstract class GraphCalculator<X, Y> {
 
   // reference to input graph
-  protected Graph<X, Y> graph;
+  private Graph<X, Y> graph;
 
   // constructor
   public GraphCalculator(Graph<X, Y> graph) {
@@ -82,7 +82,7 @@ public abstract class GraphCalculator<X, Y> {
           unvisited.add(neighbour);
 
           // add reverse edge to result (to create paths to start node rather than from)
-          ourResult.add(new Edge<X, Y>(neighbour, currentNode, e.getData()));
+          ourResult.add(new Edge<>(neighbour, currentNode, e.getData()));
         }
       }
     }

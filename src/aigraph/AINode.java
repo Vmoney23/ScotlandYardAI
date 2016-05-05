@@ -14,7 +14,7 @@ public class AINode extends Node<ScotlandYardState> {
 
     public AINode(ScotlandYardState gameState, Double score) {
         super(gameState);
-        this.score = score;
+        this.score = 0.0;
     }
 
 

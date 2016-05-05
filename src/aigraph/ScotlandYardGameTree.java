@@ -15,7 +15,7 @@ import java.util.PriorityQueue;
  */
 public class ScotlandYardGameTree extends DirectedGraph<ScotlandYardState, Move> {
 
-    private AINode head;
+    private final AINode head;
 
     /**
      * Creates a game tree with just the parent node. Node's score is set to a

@@ -46,7 +46,7 @@ public class Writer {
 		printer.println(nodeNumber);
 		
 		// now we write all the edges
-		List<Edge<Integer,Integer>> edges = new ArrayList<Edge<Integer,Integer>>(graph.getEdges());
+		List<Edge<Integer,Integer>> edges = new ArrayList<>(graph.getEdges());
 		for(Edge<Integer,Integer> e: edges) 
 		{		
 			String line = e.getSource().toString() + " " + 

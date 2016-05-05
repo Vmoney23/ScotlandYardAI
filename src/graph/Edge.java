@@ -82,7 +82,7 @@ public class Edge<X, Y> {
      * @return a new edge with the target and source the other way round.
      */
     public Edge<X, Y> swap() {
-        return new Edge<X, Y>(target, source, data);
+        return new Edge<>(target, source, data);
     }
 
     /**

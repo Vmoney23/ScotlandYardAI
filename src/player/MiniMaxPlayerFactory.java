@@ -27,7 +27,7 @@ public class MiniMaxPlayerFactory implements PlayerFactory {
 
     @Override
     public List<Spectator> getSpectators(ScotlandYardView view) {
-        List<Spectator> spectators = new ArrayList<Spectator>();
+        List<Spectator> spectators = new ArrayList<>();
         //TODO: Add your AI here if you want it to be a spectator.
         return spectators;
     }

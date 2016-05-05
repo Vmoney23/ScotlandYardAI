@@ -64,7 +64,7 @@ public class Node<X> implements Comparable<Node<X>> {
     /**
      * Sets the weight of the node in the graph.
      *
-     * @param weight
+     * @param weight the weights of the node.
      */
     public void setWeight(Double weight) {
         this.weight = weight;

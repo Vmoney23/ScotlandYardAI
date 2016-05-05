@@ -13,7 +13,7 @@ public interface Graph<X, Y> {
      *
      * @param node the node to be added to the graph.
      */
-    public void add(Node<X> node);
+    void add(Node<X> node);
 
     /**
      * Adds an edge to the graph. Multiple edges with the same source and
@@ -21,21 +21,21 @@ public interface Graph<X, Y> {
      *
      * @param edge the edge to add to the graph.
      */
-    public void add(Edge<X, Y> edge);
+    void add(Edge<X, Y> edge);
 
     /**
      * Returns all edges in the graph.
      *
      * @return all edges in the graph.
      */
-    public List<Edge<X, Y>> getEdges();
+    List<Edge<X, Y>> getEdges();
 
     /**
      * Returns all nodes in the graph.
      *
      * @return all nodes in the graph.
      */
-    public List<Node<X>> getNodes();
+    List<Node<X>> getNodes();
 
     /**
      * Returns the node in the graph with the specified index. Returns null
@@ -44,7 +44,7 @@ public interface Graph<X, Y> {
      * @param index the index of the node to be returned.
      * @return the node in the graph with the specified index.
      */
-    public Node<X> getNode(X index);
+    Node<X> getNode(X index);
 
     /**
      * Returns all edges in the graph where the target of the edge is
@@ -54,7 +54,7 @@ public interface Graph<X, Y> {
      * @return all edges in the graph where the target of the edge is
      * the specified node.
      */
-    public List<Edge<X, Y>> getEdgesTo(Node<X> node);
+    List<Edge<X, Y>> getEdgesTo(Node<X> node);
 
     /**
      * Returns all edges in the graph where the source of the edge is
@@ -64,14 +64,14 @@ public interface Graph<X, Y> {
      * @return all edges in the graph where the source of the edge is
      * the specified node.
      */
-    public List<Edge<X, Y>> getEdgesFrom(Node<X> node);
+    List<Edge<X, Y>> getEdgesFrom(Node<X> node);
 
     /**
      * Returns a representation of the graph as a string.
      *
      * @return a representation of the graph as a string.
      */
-    public String toString();
+    String toString();
 
 	//public void setDegree(Node<X> node);
 

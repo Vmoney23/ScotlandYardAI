@@ -18,11 +18,11 @@ public class DirectedGraph<X, Y> implements Graph<X, Y>{
      * Constructs a new empty directed graph.
      */
     public DirectedGraph() {
-        nodeMap = new HashMap<X, Node<X>>();
-        sourceEdges = new HashMap<Node<X>, List<Edge<X, Y>>>();
-        targetEdges = new HashMap<Node<X>, List<Edge<X, Y>>>();
-        allNodes = new ArrayList<Node<X>>();
-        allEdges = new ArrayList<Edge<X, Y>>();
+        nodeMap = new HashMap<>();
+        sourceEdges = new HashMap<>();
+        targetEdges = new HashMap<>();
+        allNodes = new ArrayList<>();
+        allEdges = new ArrayList<>();
     }
 
     /**
@@ -34,8 +34,8 @@ public class DirectedGraph<X, Y> implements Graph<X, Y>{
     public void add(Node<X> node){
         nodeMap.put(node.getIndex(), node);
         allNodes.add(node);
-        sourceEdges.put(node, new ArrayList<Edge<X, Y>>());
-        targetEdges.put(node, new ArrayList<Edge<X, Y>>());
+        sourceEdges.put(node, new ArrayList<>());
+        targetEdges.put(node, new ArrayList<>());
     }
 
     /**

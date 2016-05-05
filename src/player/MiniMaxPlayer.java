@@ -20,24 +20,21 @@ import java.util.Map;
  * alpha-beta pruning, and selecting a move based on the MiniMax algorithm. The
  * score for each possible state of the game is based on numerous factors.
  * @see Player the interface for a Player in this game.
- *
- *
- * TODO degree count of nodes broken
- * TODO is MiniMax actually passing scores up the tree?
  */
 public class MiniMaxPlayer implements Player {
 
-    private int location;
-    private Colour colour;
-    private ScotlandYardView view;
+    private int location; // not used anymore
+    private final Colour colour;
+    private final ScotlandYardView view;
     private ScotlandYardState currentGameState;
-    private Map<Colour, Integer> playerLocationMap;
+    private Map<Colour, Integer> playerLocationMap; // not used anymore
     private ScotlandYardGraph graph;
     private ScotlandYardGameTree gameTree;
-    private DijkstraCalculator dijkstraGraph;
-    protected List<Move> moves;
+    private final DijkstraCalculator dijkstraGraph;
+    private List<Move> moves;
 
 
+    @SuppressWarnings("unchecked")
     public MiniMaxPlayer(ScotlandYardView view, String graphFilename, Colour colour) {
         // store graph
         ScotlandYardGraphReader graphReader = new ScotlandYardGraphReader();
@@ -56,6 +53,7 @@ public class MiniMaxPlayer implements Player {
         this.view = view;
 
         // store dijkstra graph
+        //noinspection unchecked
         this.dijkstraGraph = new DijkstraCalculator(this.graph);
     }
 
@@ -98,7 +96,7 @@ public class MiniMaxPlayer implements Player {
      *
      * @return the chosen move.
      */
-    protected Move getAIMove() {
+    private Move getAIMove() {
         // initialise tree with the current game state at root node
         gameTree = new ScotlandYardGameTree(currentGameState);
 
@@ -117,7 +115,7 @@ public class MiniMaxPlayer implements Player {
      *         after looking at every possibility after {@code depth} moves are
      *         played.
      */
-    protected Move score(int depth, boolean mrx) {
+    private Move score(int depth, boolean mrx) {
         // initialise move ai will choose
         Move aiMove = moves.get(0);
 
@@ -127,12 +125,10 @@ public class MiniMaxPlayer implements Player {
         // choose the move
         double bestMoveScore = gameTree.getHead().getScore();
 
-        boolean gotAMove = false;
         // check all first level edges to see which move gave the best score
         for (Edge<ScotlandYardState, Move> possibleBest : gameTree.getListFirstLevelEdges()) {
             if (((AINode) possibleBest.getTarget()).getScore() == bestMoveScore) { // ERROR IF STATEMENT BROKEN
                 aiMove = possibleBest.getData();
-                gotAMove = true;
                 break;
             }
         }
@@ -259,7 +255,7 @@ public class MiniMaxPlayer implements Player {
      *
      * @param node the node to calculate the score for.
      */
-    protected void calculateScore(AINode node) {
+    private void calculateScore(AINode node) {
         // init score
         Double score = 0.0;
 
@@ -286,6 +282,8 @@ public class MiniMaxPlayer implements Player {
             // these should only affect score if MrX played moveToNode
             score += scoreMove(moveToNode, gameState);
         }
+        else
+            score = Double.NEGATIVE_INFINITY;
 
         // set node.score to score
 //		System.out.println("Move: " + moveToNode + ", Score: " + score);
@@ -303,6 +301,16 @@ public class MiniMaxPlayer implements Player {
      */
     private Double scoreDistancesState(Move move, ScotlandYardState state) {
         Double score = 0.0;
+
+        // if a detective is ai player, do not try to find distance to MrX,
+        // until MrX has shown himself for the first time.
+        if (state.getPlayerLocations().get(Colour.Black) == 0 &&
+                    colour != Colour.Black) {
+            System.out.println("scoreDistancesState: mrx has not yet revealed: returning 0");
+            return 0.0;
+        }
+
+
 		Ticket tick = null;
 		boolean tickSet = false;
 		if (move instanceof MoveTicket) {
@@ -323,6 +331,7 @@ public class MiniMaxPlayer implements Player {
             if (detective == Colour.Black) continue;
 
             // calculate shortest route between detective and MrX
+            @SuppressWarnings("unchecked")
             Graph<Integer, Transport> route =
                     dijkstraGraph.getResult(state.getPlayerLocations().get(detective), state.getPlayerLocations().get(Colour.Black), TRANSPORT_WEIGHTER);
 
@@ -381,7 +390,7 @@ public class MiniMaxPlayer implements Player {
      * @param move the Move to calculate score for.
      * @return the score for move.
      */
-    protected double scoreMove(Move move, ScotlandYardState state) {
+    private double scoreMove(Move move, ScotlandYardState state) {
 		if (move instanceof MoveDouble)
             return scoreMoveDouble((MoveDouble) move, state);
         else //MovePass and MoveTicket
@@ -395,7 +404,7 @@ public class MiniMaxPlayer implements Player {
      * @param move the MoveTicket to calculate score for.
      * @return the score for move.
      */
-    protected double scoreMoveDouble(MoveDouble move, ScotlandYardState state) {
+    private double scoreMoveDouble(MoveDouble move, ScotlandYardState state) {
         // score the move as if single move, then divide by some factor to
         // account for using a valuable double move ticket
         double score = 0;
@@ -440,7 +449,7 @@ public class MiniMaxPlayer implements Player {
      * A lambda function implements Weighter<Transport>. This Weighter assigns a lower
      * weight to transports with which players can move further with.
      */
-    protected static final Weighter<Transport> TRANSPORT_WEIGHTER = t -> {
+    private static final Weighter<Transport> TRANSPORT_WEIGHTER = t -> {
         int val = 0;
         switch (t) {
             case Taxi:

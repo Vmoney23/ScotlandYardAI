@@ -31,7 +31,7 @@ public class Reader
     {
     	
     	// initialise the graph
-    	graph = new UndirectedGraph<Integer,Integer>();
+    	graph = new UndirectedGraph<>();
     	
     	// load the file
         File file = new File(filename);
@@ -46,7 +46,7 @@ public class Reader
         // create the number of nodes
         for(int i = 0; i < numberOfNodes; i++)
         {
-        	Node<Integer> n = new Node<Integer>(i+1);
+        	Node<Integer> n = new Node<>(i + 1);
         	graph.add(n);
         }
         
@@ -71,12 +71,12 @@ public class Reader
             else 
             {
             	mtype = 2;
-            };
+            }
             
             // create the edge
             
-            Edge<Integer,Integer> edge = new Edge<Integer,Integer>(graph.getNode(Integer.parseInt(id1)), 
-            		                                               graph.getNode(Integer.parseInt(id2)),new Integer(mtype));
+            Edge<Integer,Integer> edge = new Edge<>(graph.getNode(Integer.parseInt(id1)),
+                                                           graph.getNode(Integer.parseInt(id2)), new Integer(mtype));
             if (mtype==0) {
             	graph.add(edge);
             }

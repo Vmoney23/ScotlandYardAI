@@ -15,14 +15,14 @@ public final class ScotlandYardState {
     public final ScotlandYardGraph graph;
     private final List<Colour> players;
     // which of these are these needed?
-    private Set<Colour> winningPlayers;
-    private Map<Colour, Integer> playerLocations;
-    private Map<Colour, Map<Ticket, Integer>> playerTickets;
-    private boolean gameOver;
-    private boolean ready;
+    private final Set<Colour> winningPlayers;
+    private final Map<Colour, Integer> playerLocations;
+    private final Map<Colour, Map<Ticket, Integer>> playerTickets;
+    private final boolean gameOver;
+    private final boolean ready;
     private Colour currentPlayer;
     private int round;
-    private List<Boolean> rounds;
+    private final List<Boolean> rounds;
 
 
     private ScotlandYardState(ScotlandYardGraph graph, List<Colour> players, Map<Colour, Integer> playerLocations, Map<Colour, Map<Ticket, Integer>> playerTickets, Set<Colour> winningPlayers, boolean gameOver, boolean ready, Colour currentPlayer, int round, List<Boolean> rounds) {
@@ -123,7 +123,7 @@ public final class ScotlandYardState {
         int location = playerLocations.get(player);
         List<Move> moves = graph.generateMoves(player, location);
         List<Move> validMoves = new ArrayList<>();
-		Map<Ticket, Integer> thisPlayersTicketMap = new HashMap<>();
+		Map<Ticket, Integer> thisPlayersTicketMap;
 		thisPlayersTicketMap = playerTickets.get(player);
         if (player != Colour.Black) {
             for (Move move : moves) {
@@ -160,9 +160,9 @@ public final class ScotlandYardState {
                         if (playerLocations.get(internalPlayer) == dest2)
                             occupied2 = true;
                     }
-                    if (((thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket)) != (thisPlayersTicketMap.get(((MoveDouble) move).move2.ticket))) &&(thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket) > 0) && (thisPlayersTicketMap.get(((MoveDouble) move).move2.ticket) > 0) && !occupied1 && !occupied2)
+                    if ((!Objects.equals(thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket), thisPlayersTicketMap.get(((MoveDouble) move).move2.ticket))) &&(thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket) > 0) && (thisPlayersTicketMap.get(((MoveDouble) move).move2.ticket) > 0) && !occupied1 && !occupied2)
                         validMoves.add(move);
-					else if (((thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket)) == (thisPlayersTicketMap.get(((MoveDouble) move).move2.ticket))) &&(thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket) > 1) && !occupied1 && !occupied2)
+					else if ((Objects.equals(thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket), thisPlayersTicketMap.get(((MoveDouble) move).move2.ticket))) &&(thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket) > 1) && !occupied1 && !occupied2)
 						validMoves.add(move);
                 }
             }
@@ -186,7 +186,7 @@ public final class ScotlandYardState {
     /**
      * Passes priority onto the next player whose turn it is to play.
      */
-    protected void nextPlayer() {
+    private void nextPlayer() {
         int nextPlayerIndex = (players.indexOf(currentPlayer) + 1) % players.size();
         currentPlayer = players.get(nextPlayerIndex);
     }
@@ -196,7 +196,7 @@ public final class ScotlandYardState {
      *
      * @param move the move that is to be played.
      */
-    protected void play(Move move) {
+    private void play(Move move) {
         if (move instanceof MoveTicket)
             play((MoveTicket) move);
         else if (move instanceof MoveDouble)
