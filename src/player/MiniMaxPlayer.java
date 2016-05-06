@@ -10,10 +10,7 @@ import prijkstra.Weighter;
 import scotlandyard.*;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A class for a player in a Scotland Yard game, implementing Player. A player
@@ -107,7 +104,7 @@ public class MiniMaxPlayer implements Player {
 
         // calculate a score for each move by using the MiniMax algorithm.
         // return the move with the best score.
-        int depth = 25;
+        int depth = 3;
         boolean mrx = colour.equals(Colour.Black);
         return score(depth, mrx);
     }
@@ -187,15 +184,12 @@ public class MiniMaxPlayer implements Player {
      * @return the move which leads to the game state with highest score
      */
     private Move generateTree(ScotlandYardGameTree gameTree, int depth, boolean max) {
-
         // generate the tree
-        Pair<Double, Move> result = MiniMax(gameTree.getHead(), null, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, max);
+        //Pair<Double, Move> result = MiniMax(gameTree.getHead(), depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, max);
+        Pair<Double, Move> result = MiniMax(gameTree.getHead(), depth, max);
+
         gameTree.getHead().setScore(result.getLeft());
         return result.getRight();
-
-        // set the score for game tree head
-        // TODO should set to Collections.min if param passed in is false
-        //gameTree.getHead().setScore(Collections.max(gameTree.getFirstLevelScores()));
     }
 
 
@@ -205,8 +199,8 @@ public class MiniMaxPlayer implements Player {
      * @param node the AINode from which to create a tree from. node will be
      *             head of the (sub)tree.
      * @param depth the number of lays to generate for the tree.
-     * @param alpha should be set to initial value Double.NEGATIVE_INFINITY.
-     * @param beta should be set to initial value Double.POSITIVE_INFINITY.
+     * param alpha should be set to initial value Double.NEGATIVE_INFINITY.
+     * param beta should be set to initial value Double.POSITIVE_INFINITY.
      * @param max If true, the player who's turn it is in
      *            {@code node.getGameState()}
      *            should be a maximising player, else minimising player.
@@ -215,97 +209,167 @@ public class MiniMaxPlayer implements Player {
      *         {@code node.getGameState().getCurrentPlayer()}
      *         can get, based on a tree of {@code depth} depth.
      */
-    private Pair<Double, Move> MiniMax(AINode node, Move bestMove, int depth, double alpha, double beta, boolean max) {
-        // base case 1 - depth is zero
-        if (depth <= 0) {
+    private Pair<Double, Move> MiniMax(AINode node, int depth, boolean max) {
+        // store the valid moves for current player at current game state
+        List<Move> validMoves = node.getGameState().validMoves(node.getGameState().getCurrentPlayer());
+
+        // base cases - 1) depth is zero. 2) node is leaf (no valid moves).
+        //              3) game is over in current state
+        if (depth <= 0 || validMoves.size() == 0 || node.getGameState().isGameOver()) {
             node.setScore(calculateScore(node));
-            return new Pair<>(node.getScore(), bestMove);
+            return new Pair<>(node.getScore(), null);
         }
 
-        // create children nodes and add to tree
-        //System.out.println("number of valid moves: " + node.getGameState().validMoves(node.getGameState().getCurrentPlayer()).size());
-        System.out.println(node.getGameState().getCurrentPlayer());
+        // store the current bestPair, initialising it's score also
+        double bestScore = max ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
+        Pair<Double, Move> bestPair = new Pair<>(bestScore, null);
 
-        for (Move move : node.getGameState().validMoves(node.getGameState().getCurrentPlayer())) {
+        // store the pair to be returned from each child
+        Pair<Double, Move> returnPair;
+
+        for (Move currentMove : validMoves) {
+
             // make a copy of currentGameState for the next move
             ScotlandYardState stateAfterMove = node.getGameState().copy();
-            stateAfterMove.playMove(move);
+            stateAfterMove.playMove(currentMove);
 
-            // create node for this game state and link to tree.
-            // Give unassigned score = 0
-            AINode child = new AINode(stateAfterMove, 0.0);
+            // create child node for this game state and link to tree.
+            // Give unassigned score = -1.0
+            AINode child = new AINode(stateAfterMove, -1.0);
             gameTree.add(child);
-            Edge<ScotlandYardState, Move> edgeToChild = new Edge<>(node, child, move);
+            Edge<ScotlandYardState, Move> edgeToChild = new Edge<>(node, child, currentMove);
             gameTree.add(edgeToChild);
-            //calculateScore(child);
-        }
 
-        // base case 2 - node is leaf (no valid moves)
-        if (gameTree.getChildren(node).size() == 0) {
-            node.setScore(calculateScore(node));
-            return new Pair<>(node.getScore(), bestMove);
-        }
 
-        // store the score for the best move
-        Double score;
-        Move move;
+            // store if next player is maximising or minimising
+            boolean isMax = Objects.equals(child.getGameState().getCurrentPlayer(), Colour.Black);
 
-        // this player is maximising MrX score
-        if (max) {
-            // find child node with highest score
-            score = Double.NEGATIVE_INFINITY;
-            move = bestMove;
+            if (max) {
+                returnPair = MiniMax(child, depth-1, isMax);
 
-            //System.out.println("MiniMax: NUMBER OF CHILDREN NODES: " + gameTree.getChildren(node).size());
-            for (AINode child : gameTree.getChildrenQueue(node, AINODE_COMPARATOR)) {
-                // see if next player is maximising or minimising
-                boolean isMax = child.getGameState().getCurrentPlayer().equals(Colour.Black);
-
-                // get result of recurse to one more level
-                Pair<Double, Move> result = MiniMax(child, bestMove, depth - 1, alpha, beta, isMax);
-
-                // assign score and move to result values if they yield a better score
-                if(result.getLeft() > score) {
-                    score = result.getLeft();
-                    move = result.getRight();
+                // if the return pair is better, assign the bestPair it's score,
+                // and make the currentMove the best move
+                if (returnPair.getLeft() > bestPair.getLeft()) {
+                    bestPair = returnPair; // update bestPair score
+                    bestPair.setRight(currentMove);
                 }
+            }
+            else { // min
+                returnPair = MiniMax(child, depth-1, isMax);
 
-                // update alpha and prune if possible
-                alpha = Math.max(alpha, score);
-                if (beta <= alpha)
-                    break; // beta cut off
+                if (returnPair.getLeft() < bestPair.getLeft()) {
+                    bestPair = returnPair; // update bestPair score
+                    bestPair.setRight(currentMove);
+                }
             }
         }
 
-        // or player is minimising MrX score
-        else {
-            // find child with lowest score
-            score = Double.POSITIVE_INFINITY;
-            move = bestMove;
 
-            //System.out.println("MiniMax: NUMBER OF CHILDREN NODES: " + gameTree.getChildren(node).size());
-            for (AINode child : gameTree.getChildrenQueue(node, AINODE_INV_COMPARATOR)) {
-                // see if next player is maximising or minimising
-                boolean isMax = child.getGameState().getCurrentPlayer().equals(Colour.Black);
+        return bestPair;
 
-                // get result of recurse to one more level
-                Pair<Double, Move> result = MiniMax(child, bestMove, depth - 1, alpha, beta, isMax);
 
-                // assign score and move
-                if (result.getLeft() < score) {
-                    score = result.getLeft();
-                    move = result.getRight();
-                }
 
-                // update beta and prune if possible
-                beta = Math.min(beta, score);
-                if (beta <= alpha)
-                    break; // alpha cut off
-            }
-        }
 
-        // return the best score
-        return new Pair<>(score, move);
+//        // store the current bestPair and the pair the next recurse is going to
+//        // return
+//        Pair<Double, Move> bestPair = null;
+//        Pair<Double, Move> returnPair;
+//
+//        // iterate through validMoves, add child to tree and play move,
+//        // choose MiniMax child, update values and prune.
+//        if (max) {
+//
+//            for (Move currentMove : node.getGameState().validMoves(node.getGameState().getCurrentPlayer())) {
+//
+//                // make a copy of currentGameState for the next move
+//                ScotlandYardState stateAfterMove = node.getGameState().copy();
+//                stateAfterMove.playMove(currentMove);
+//
+//                // create child node for this game state and link to tree.
+//                // Give unassigned score = 0
+//                AINode child = new AINode(stateAfterMove, 0.0);
+//                gameTree.add(child);
+//                Edge<ScotlandYardState, Move> edgeToChild = new Edge<>(node, child, currentMove);
+//                gameTree.add(edgeToChild);
+//
+//
+//                // see if next player is maximising or minimising
+//                boolean isMax = child.getGameState().getCurrentPlayer().equals(Colour.Black);
+//
+//                // get (score, move) pair from child
+//                returnPair = MiniMax(child, depth - 1, alpha, beta, isMax);
+//
+//                // if haven't yet assigned a bestPair (not reached leaf), OR
+//                // if child returns a better score, set it's pair to bestPair
+//                if ((bestPair == null || bestPair.getLeft() < returnPair.getLeft())) {
+//                    bestPair = returnPair;
+//                }
+//
+//                // update alpha (found a new leaf with a better option for the
+//                // current maximising player)
+//                if (returnPair.getLeft() > alpha) {
+//                    alpha = returnPair.getLeft();
+//                    bestPair = returnPair;
+//                }
+//
+//                // prune
+//                if (beta <= alpha) {
+//                    bestPair.setLeft(beta);
+//                    bestPair.setRight(null);
+//                    break;
+//                }
+//
+//            }
+//
+//        }
+//
+//        else { // min
+//
+//            for (Move currentMove : node.getGameState().validMoves(node.getGameState().getCurrentPlayer())) {
+//
+//                // make a copy of currentGameState for the next move
+//                ScotlandYardState stateAfterMove = node.getGameState().copy();
+//                stateAfterMove.playMove(currentMove);
+//
+//                // create child node for this game state and link to tree.
+//                // Give unassigned score = 0
+//                AINode child = new AINode(stateAfterMove, 0.0);
+//                gameTree.add(child);
+//                Edge<ScotlandYardState, Move> edgeToChild = new Edge<>(node, child, currentMove);
+//                gameTree.add(edgeToChild);
+//
+//
+//                // see if next player is maximising or minimising
+//                boolean isMax = child.getGameState().getCurrentPlayer().equals(Colour.Black);
+//
+//                // get (score, move) pair from child
+//                returnPair = MiniMax(child, depth - 1, alpha, beta, isMax);
+//
+//                // if haven't yet assigned a bestPair, OR
+//                // if child returns a better score, set it's pair to bestPair
+//                if ((bestPair == null || bestPair.getLeft() > returnPair.getLeft())) {
+//                    bestPair = returnPair;
+//                }
+//
+//                // update beta
+//                if (returnPair.getLeft() < beta) {
+//                    beta = returnPair.getLeft();
+//                    bestPair = returnPair;
+//                }
+//
+//                // prune
+//                if (beta <= alpha) {
+//                    bestPair.setLeft(alpha);
+//                    bestPair.setRight(null);
+//                    break;
+//                }
+//
+//            }
+//
+//        }
+//
+//        // return the best score
+//        return bestPair;
     }
 
 
