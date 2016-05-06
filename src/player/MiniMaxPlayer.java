@@ -213,6 +213,8 @@ public class MiniMaxPlayer implements Player {
         // store the valid moves for current player at current game state
         List<Move> validMoves = node.getGameState().validMoves(node.getGameState().getCurrentPlayer());
 
+        System.out.println("depth = " + depth);
+
         // base cases - 1) depth is zero. 2) node is leaf (no valid moves).
         //              3) game is over in current state
         if (depth <= 0 || validMoves.size() == 0 || node.getGameState().isGameOver()) {
@@ -225,7 +227,7 @@ public class MiniMaxPlayer implements Player {
         Pair<Double, Move> bestPair = new Pair<>(bestScore, null);
 
         // store the pair to be returned from each child
-        Pair<Double, Move> returnPair;
+        Pair<Double, Move> currentPair;
 
         for (Move currentMove : validMoves) {
 
@@ -241,28 +243,26 @@ public class MiniMaxPlayer implements Player {
             gameTree.add(edgeToChild);
 
 
-            // store if next player is maximising or minimising
+            // get the MiniMax for current node
             boolean isMax = Objects.equals(child.getGameState().getCurrentPlayer(), Colour.Black);
+            currentPair = MiniMax(child, depth-1, isMax);
 
+            // if the current pair is better, assign the bestPair it's score,
+            // and make the currentMove the best move.
             if (max) {
-                returnPair = MiniMax(child, depth-1, isMax);
-
-                // if the return pair is better, assign the bestPair it's score,
-                // and make the currentMove the best move
-                if (returnPair.getLeft() > bestPair.getLeft()) {
-                    bestPair = returnPair; // update bestPair score
+                if (currentPair.getLeft() > bestPair.getLeft()) {
+                    bestPair = currentPair; // update bestPair score
                     bestPair.setRight(currentMove);
                 }
             }
-            else { // min
-                returnPair = MiniMax(child, depth-1, isMax);
-
-                if (returnPair.getLeft() < bestPair.getLeft()) {
-                    bestPair = returnPair; // update bestPair score
+            else {//min
+                if (currentPair.getLeft() < bestPair.getLeft()) {
+                    bestPair = currentPair; // update bestPair score
                     bestPair.setRight(currentMove);
                 }
             }
         }
+
 
 
         return bestPair;
@@ -273,7 +273,7 @@ public class MiniMaxPlayer implements Player {
 //        // store the current bestPair and the pair the next recurse is going to
 //        // return
 //        Pair<Double, Move> bestPair = null;
-//        Pair<Double, Move> returnPair;
+//        Pair<Double, Move> currentPair;
 //
 //        // iterate through validMoves, add child to tree and play move,
 //        // choose MiniMax child, update values and prune.
@@ -297,19 +297,19 @@ public class MiniMaxPlayer implements Player {
 //                boolean isMax = child.getGameState().getCurrentPlayer().equals(Colour.Black);
 //
 //                // get (score, move) pair from child
-//                returnPair = MiniMax(child, depth - 1, alpha, beta, isMax);
+//                currentPair = MiniMax(child, depth - 1, alpha, beta, isMax);
 //
 //                // if haven't yet assigned a bestPair (not reached leaf), OR
 //                // if child returns a better score, set it's pair to bestPair
-//                if ((bestPair == null || bestPair.getLeft() < returnPair.getLeft())) {
-//                    bestPair = returnPair;
+//                if ((bestPair == null || bestPair.getLeft() < currentPair.getLeft())) {
+//                    bestPair = currentPair;
 //                }
 //
 //                // update alpha (found a new leaf with a better option for the
 //                // current maximising player)
-//                if (returnPair.getLeft() > alpha) {
-//                    alpha = returnPair.getLeft();
-//                    bestPair = returnPair;
+//                if (currentPair.getLeft() > alpha) {
+//                    alpha = currentPair.getLeft();
+//                    bestPair = currentPair;
 //                }
 //
 //                // prune
@@ -343,18 +343,18 @@ public class MiniMaxPlayer implements Player {
 //                boolean isMax = child.getGameState().getCurrentPlayer().equals(Colour.Black);
 //
 //                // get (score, move) pair from child
-//                returnPair = MiniMax(child, depth - 1, alpha, beta, isMax);
+//                currentPair = MiniMax(child, depth - 1, alpha, beta, isMax);
 //
 //                // if haven't yet assigned a bestPair, OR
 //                // if child returns a better score, set it's pair to bestPair
-//                if ((bestPair == null || bestPair.getLeft() > returnPair.getLeft())) {
-//                    bestPair = returnPair;
+//                if ((bestPair == null || bestPair.getLeft() > currentPair.getLeft())) {
+//                    bestPair = currentPair;
 //                }
 //
 //                // update beta
-//                if (returnPair.getLeft() < beta) {
-//                    beta = returnPair.getLeft();
-//                    bestPair = returnPair;
+//                if (currentPair.getLeft() < beta) {
+//                    beta = currentPair.getLeft();
+//                    bestPair = currentPair;
 //                }
 //
 //                // prune
@@ -383,22 +383,20 @@ public class MiniMaxPlayer implements Player {
     protected Double calculateScore(AINode node) {
         Double score = 0.0;
 
-        // if MrX loses in this game state, leave score as zero
-        if (!node.getGameState().getWinningPlayers().contains(Colour.Black)
-                    && node.getGameState().isGameOver()) {
-
+        // if game over in this state, set to +/-infinity accordingly, else
+        // calculate the score
+        if (node.getGameState().getWinningPlayers().contains(Colour.Black)
+                     && node.getGameState().isGameOver()) {
+            score = Double.POSITIVE_INFINITY;
+        }
+        else if (!node.getGameState().getWinningPlayers().contains(Colour.Black)
+                         && node.getGameState().isGameOver()) {
+            score = Double.NEGATIVE_INFINITY;
+        }
+        else {
             // use Dijkstra's and Weighter to assign a score based on distance
             // MrX is from each detective
             score += scoreDistancesState(node.getGameState());
-
-
-            // adjust score to be higher if degree of MrX's node is higher.
-            // this also avoids outskirts of map.
-            if (colour.equals(Colour.Black))
-                score *= node.getDegree(); //MrX maximises score
-            else
-                score /= node.getDegree(); //Detectives minimise score
-
         }
 
         return score;
