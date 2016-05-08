@@ -2,6 +2,7 @@ package player;
 
 import aigraph.AINode;
 import aigraph.ScotlandYardGameTree;
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import graph.Edge;
 import graph.Graph;
 import pair.Pair;
@@ -104,7 +105,7 @@ public class MiniMaxPlayer implements Player {
 
         // calculate a score for each move by using the MiniMax algorithm.
         // return the move with the best score.
-        int depth = 4;
+        int depth = 30;
         boolean mrx = colour.equals(Colour.Black);
         return score(depth, mrx);
     }
@@ -185,8 +186,8 @@ public class MiniMaxPlayer implements Player {
      */
     private Move generateTree(ScotlandYardGameTree gameTree, int depth, boolean max) {
         // generate the tree
-        //Pair<Double, Move> result = MiniMax(gameTree.getHead(), depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, max);
-        Pair<Double, Move> result = MiniMax(gameTree.getHead(), depth, max);
+        Pair<Double, Move> result = MiniMax(gameTree.getHead(), depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, max);
+        //Pair<Double, Move> result = MiniMax(gameTree.getHead(), depth, max);
 
         gameTree.getHead().setScore(result.getLeft());
         return result.getRight();
@@ -199,8 +200,12 @@ public class MiniMaxPlayer implements Player {
      * @param node the AINode from which to create a tree from. node will be
      *             head of the (sub)tree.
      * @param depth the number of lays to generate for the tree.
-     * param alpha should be set to initial value Double.NEGATIVE_INFINITY.
-     * param beta should be set to initial value Double.POSITIVE_INFINITY.
+     * @param alpha Best already explored score along path to the root for
+     *              maximiser. Should be set to initial value
+     *              <p>Double.NEGATIVE_INFINITY</p>
+     * @param beta Best already explored option along path to the root for
+     *             minimiser. Should be set to initial value
+     *             <p>Double.POSITIVE_INFINITY</p>
      * @param max If true, the player who's turn it is in
      *            {@code node.getGameState()}
      *            should be a maximising player, else minimising player.
@@ -209,15 +214,19 @@ public class MiniMaxPlayer implements Player {
      *         {@code node.getGameState().getCurrentPlayer()}
      *         can get, based on a tree of {@code depth} depth.
      */
-    private Pair<Double, Move> MiniMax(AINode node, int depth, boolean max) {
+    private Pair<Double, Move> MiniMax(AINode node, int depth, Double alpha, Double beta, boolean max) {
         // store the valid moves for current player at current game state
-        List<Move> validMoves = node.getGameState().validMoves(node.getGameState().getCurrentPlayer());
+        List<Move> nodeValidMoves = node.getGameState().validMoves(node.getGameState().getCurrentPlayer());
 
         System.out.println("depth = " + depth);
 
         // base cases - 1) depth is zero. 2) node is leaf (no valid moves).
         //              3) game is over in current state
-        if (depth <= 0 || validMoves.size() == 0 || node.getGameState().isGameOver()) {
+        if (depth == 0 || nodeValidMoves.size() == 0 || node.getGameState().isGameOver()) {
+            if (depth == 0) System.out.println("BASE CASE - depth == 0");
+            if (node.getGameState().isGameOver()) System.out.println("BASE CASE - game over");
+            if (nodeValidMoves.size() == 0) System.out.println("BASE CASE - no valid moves");
+
             node.setScore(calculateScore(node));
             return new Pair<>(node.getScore(), null);
         }
@@ -229,10 +238,11 @@ public class MiniMaxPlayer implements Player {
         // store the pair to be returned from each child
         Pair<Double, Move> currentPair;
 
-        for (Move currentMove : validMoves) {
+        for (Move currentMove : nodeValidMoves) {
 
             // make a copy of currentGameState for the next move
             ScotlandYardState stateAfterMove = node.getGameState().copy();
+            // play move on the copy
             stateAfterMove.playMove(currentMove);
 
             // create child node for this game state and link to tree.
@@ -243,9 +253,9 @@ public class MiniMaxPlayer implements Player {
             gameTree.add(edgeToChild);
 
 
-            // get the MiniMax for current node
+            // get the MiniMax pair for current node
             boolean isMax = Objects.equals(child.getGameState().getCurrentPlayer(), Colour.Black);
-            currentPair = MiniMax(child, depth-1, isMax);
+            currentPair = MiniMax(child, depth-1, alpha, beta, isMax);
 
             // if the current pair is better, assign the bestPair it's score,
             // and make the currentMove the best move.
@@ -254,11 +264,23 @@ public class MiniMaxPlayer implements Player {
                     bestPair = currentPair; // update bestPair score
                     bestPair.setRight(currentMove);
                 }
+                // update alpha and prune, if possible
+                alpha = Math.max(alpha, bestPair.getLeft());
+                if (beta <= alpha) {
+                    System.out.println("PRUNED FOR MAXIMISER");
+                    break;
+                }
             }
             else {//min
                 if (currentPair.getLeft() < bestPair.getLeft()) {
                     bestPair = currentPair; // update bestPair score
                     bestPair.setRight(currentMove);
+                }
+                // update beta and prune, if possible
+                beta = Math.min(beta, bestPair.getLeft());
+                if (beta <= alpha) {
+                    System.out.println("PRUNED FOR MINIMISER");
+                    break;
                 }
             }
         }

@@ -112,51 +112,75 @@ public final class ScotlandYardState {
         int location = playerLocations.get(player);
         List<Move> moves = graph.generateMoves(player, location);
         List<Move> validMoves = new ArrayList<>();
-		Map<Ticket, Integer> thisPlayersTicketMap = new HashMap<>();
-		thisPlayersTicketMap = playerTickets.get(player);
+
         if (player != Colour.Black) {
             for (Move move : moves) {
                 int dest = ((MoveTicket) move).target;
                 boolean occupied = false;
                 for (Colour internalPlayer : players.subList(1, players.size())) {
-                    if (playerLocations.get(internalPlayer) == dest)
+                    if (playerLocations.get(internalPlayer).intValue() == dest)
                         occupied = true;
                 }
-                if (!occupied && thisPlayersTicketMap.get(((MoveTicket) move).ticket) > 0)
+                if (!occupied && hasTickets(player, move))
                     validMoves.add(move);
             }
             if (validMoves.isEmpty())
                 validMoves.add(MovePass.instance(player));
+
         } else {
             for (Move move : moves) {
                 if (move instanceof MoveTicket) {
                     int dest = ((MoveTicket) move).target;
                     boolean occupied = false;
                     for (Colour internalPlayer : players) {
-                        if (playerLocations.get(internalPlayer) == dest)
+                        if (playerLocations.get(internalPlayer).intValue() == dest)
                             occupied = true;
                     }
-                    if (!occupied && thisPlayersTicketMap.get(((MoveTicket) move).ticket) > 0)
+                    if (!occupied && hasTickets(player, move))
                         validMoves.add(move);
-                } else if ((move instanceof MoveDouble) && thisPlayersTicketMap.get(Ticket.Double) > 0) {
+
+                } else if ((move instanceof MoveDouble) && hasTickets(player, move)) {
                     int dest1 = ((MoveDouble) move).move1.target;
                     int dest2 = ((MoveDouble) move).move2.target;
                     boolean occupied1 = false;
                     boolean occupied2 = false;
                     for (Colour internalPlayer : players) {
-                        if (playerLocations.get(internalPlayer) == dest1)
+                        if (playerLocations.get(internalPlayer).intValue() == dest1)
                             occupied1 = true;
-                        if (playerLocations.get(internalPlayer) == dest2)
+                        if (playerLocations.get(internalPlayer).intValue() == dest2 && dest2 != location)
                             occupied2 = true;
                     }
-                    if (((thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket)) != (thisPlayersTicketMap.get(((MoveDouble) move).move2.ticket))) &&(thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket) > 0) && (thisPlayersTicketMap.get(((MoveDouble) move).move2.ticket) > 0) && !occupied1 && !occupied2)
+                    if (hasTickets(player, move) && !occupied1 && !occupied2)
                         validMoves.add(move);
-					else if (((thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket)) == (thisPlayersTicketMap.get(((MoveDouble) move).move2.ticket))) &&(thisPlayersTicketMap.get(((MoveDouble) move).move1.ticket) > 1) && !occupied1 && !occupied2)
-						validMoves.add(move);
                 }
             }
         }
         return validMoves;
+    }
+
+    private boolean hasTickets(Colour player, Move move) {
+        if (move instanceof MoveTicket) return hasTickets(player, (MoveTicket) move);
+        else if (move instanceof MoveDouble) return hasTickets(player, (MoveDouble) move);
+        else return true;
+    }
+
+    private boolean hasTickets(Colour player, MoveTicket move) {
+        if (playerTickets.get(player).get(move.ticket) > 0) return true;
+        else return false;
+    }
+
+    private boolean hasTickets(Colour player, MoveDouble move) {
+        if (playerTickets.get(player).get(Ticket.Double) > 0) {
+            MoveTicket move1 = move.move1;
+            MoveTicket move2 = move.move2;
+            if (move1.ticket.equals(move2.ticket)) {
+                return playerTickets.get(player).get(move1.ticket) > 1;
+            }
+            else {
+                return hasTickets(player, move1) && hasTickets(player, move2);
+            }
+        }
+        return false;
     }
 
 
@@ -168,6 +192,7 @@ public final class ScotlandYardState {
     public void playMove(Move move) {
         play(move);
         nextPlayer();
+        calculateIsGameOver();
     }
 
 
@@ -215,6 +240,7 @@ public final class ScotlandYardState {
      * @param move the MoveDouble to play.
      */
     private void play(MoveDouble move) {
+        //notifySpectators(move);
         updatePlayerTickets(move);
         play(move.move1);
         play(move.move2);
@@ -275,6 +301,117 @@ public final class ScotlandYardState {
      */
     private void updatePlayerLocation(MoveTicket move) {
         playerLocations.put(move.colour, move.target);
+    }
+
+
+    // Calculate if game is over
+
+    /**
+     * Returns the colours of the winning players. If Mr X it should contain a single
+     * colour, else it should send the list of detective colours
+     *
+     * @return A set containing the colours of the winning players
+     */
+    public Set<Colour> calculateWinningPlayers() {
+        calculateIsGameOver(); // updates winningPlayers too
+        return winningPlayers;
+    }
+
+
+    /**
+     * The game is over when MrX has been found or the agents are out of
+     * tickets. See the rules for other conditions.
+     *
+     * @return true when the game is over, false otherwise.
+     */
+    public boolean calculateIsGameOver() {
+        // case: game not yet ready
+        if (!isReady())
+            return false;
+
+        // case: MrX has won
+        if (areAllDetectivesStuck() || areAllTurnsPlayed() || isOnlyOnePlayer()) {
+            winningPlayers = new HashSet<>();
+            winningPlayers.addAll(Collections.singletonList(Colour.Black));
+            return true;
+        }
+
+        // case: Detectives have won
+        Set<Colour> detectiveColours = new HashSet<>(players);
+        detectiveColours.remove(Colour.Black);
+        if (isMrXCaught() || isMrXStuck()) {
+            winningPlayers = new HashSet<>();
+            winningPlayers.addAll(detectiveColours);
+            return true;
+        }
+
+        // case: otherwise game not over
+        return false;
+    }
+
+
+    /**
+     * @return true if all detectives in game are unable to make a move
+     */
+    private boolean areAllDetectivesStuck() {
+        List<Colour> detectives = players.subList(1, players.size());
+
+        for (Colour detective : detectives) {
+            if (!isDetectiveStuck(detective))
+                return false;
+        }
+        return true;
+    }
+
+
+    /**
+     * Determines if a detective is stuck. A detective is stuck if it has no
+     * tickets for the available transport links from their current location.
+     *
+     * @param detective the detective PlayerData to check if stuck or not
+     * @return true if detective is stuck
+     */
+    private boolean isDetectiveStuck(Colour detective) {
+        return validMoves(detective).contains(MovePass.instance(detective));
+    }
+
+
+    /**
+     * @return true if MrX is unable to make a move
+     */
+    private boolean isMrXStuck() {
+        return validMoves(Colour.Black).isEmpty();
+    }
+
+
+    /**
+     * @return true if number of rounds has been played and detectives have
+     * played their turns
+     */
+    private boolean areAllTurnsPlayed() {
+        return currentPlayer == Colour.Black && (round >= rounds.size() - 1);
+    }
+
+
+    /**
+     * @return true if MrX is caught by a detective
+     */
+    private boolean isMrXCaught() {
+        List<Colour> detectives = players.subList(1, players.size());
+
+        for (Colour detective : detectives) {
+            if (Objects.equals(playerLocations.get(detective), playerLocations.get(Colour.Black)))
+                return true;
+        }
+        return false;
+    }
+
+
+    /**
+     * @return true if there is currently only one player in the game
+     */
+    private boolean isOnlyOnePlayer() {
+        return (players.size() == 1);
     }
 
 
