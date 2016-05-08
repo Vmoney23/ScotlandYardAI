@@ -4,15 +4,13 @@ import aigraph.AINode;
 import aigraph.ScotlandYardGameTree;
 import graph.Edge;
 import graph.Graph;
+import pair.Pair;
 import prijkstra.DijkstraCalculator;
 import prijkstra.Weighter;
 import scotlandyard.*;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A class for a player in a Scotland Yard game, implementing Player. A player
@@ -136,30 +134,31 @@ public class MiniMaxPlayer implements Player {
      *         played.
      */
     private Move score(int depth, boolean mrx) {
-        // initialise move ai will choose
-        Move aiMove = moves.get(0);
-
-        // generate the game tree
-        generateTree(gameTree, depth, mrx);
-        System.out.println("generateTree returned");
-
-        System.out.println("gameTree.getListFirstLevelEdges().size() = " + gameTree.getListFirstLevelEdges().size());
-        // choose the move
-        double bestMoveScore = gameTree.getHead().getScore();
-
-        // check all first level edges to see which move gave the best score
-        for (Edge<ScotlandYardState, Move> possibleBest : gameTree.getListFirstLevelEdges()) {
-            if (((AINode) possibleBest.getTarget()).getScore() == bestMoveScore) { // ERROR IF STATEMENT BROKEN
-                aiMove = possibleBest.getData();
-                break;
-            }
-        }
-//        if (!gotAMove) System.out.println("score(): Move was not assigned " +
-//                "from gameTree");
-//        else System.out.println("score(): Move was assigned from gameTree");
-
-        System.out.println("aiMove = " + aiMove);
-        return aiMove;
+//        // initialise move ai will choose
+//        Move aiMove = moves.get(0);
+//
+//        // generate the game tree
+//        generateTree(gameTree, depth, mrx);
+//        System.out.println("generateTree returned");
+//
+//        System.out.println("gameTree.getListFirstLevelEdges().size() = " + gameTree.getListFirstLevelEdges().size());
+//        // choose the move
+//        double bestMoveScore = gameTree.getHead().getScore();
+//
+//        // check all first level edges to see which move gave the best score
+//        for (Edge<ScotlandYardState, Move> possibleBest : gameTree.getListFirstLevelEdges()) {
+//            if (((AINode) possibleBest.getTarget()).getScore() == bestMoveScore) { // ERROR IF STATEMENT BROKEN
+//                aiMove = possibleBest.getData();
+//                break;
+//            }
+//        }
+////        if (!gotAMove) System.out.println("score(): Move was not assigned " +
+////                "from gameTree");
+////        else System.out.println("score(): Move was assigned from gameTree");
+//
+//        System.out.println("aiMove = " + aiMove);
+//        return aiMove;
+        return generateTree(gameTree, depth, mrx);
     }
 
 
@@ -173,15 +172,22 @@ public class MiniMaxPlayer implements Player {
      * @param depth depth to which to generate the tree
      * @param max true if this player wants to maximise the score
      */
-    private void generateTree(ScotlandYardGameTree gameTree, int depth, boolean max) {
+    private Move generateTree(ScotlandYardGameTree gameTree, int depth, boolean max) {
+
+//        // generate the tree
+//        MiniMax(gameTree.getHead(), depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, max);
+//        System.out.println("finished minimax");
+//
+//        // set the score for game tree head
+//        gameTree.getHead().setScore(Collections.max(gameTree.getFirstLevelScores()));
+//        System.out.println("set gameTree head score");
 
         // generate the tree
-        MiniMax(gameTree.getHead(), depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, max);
-        System.out.println("finished minimax");
+        Pair<Double, Move> result = MiniMax(gameTree.getHead(), depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, max);
 
-        // set the score for game tree head
-        gameTree.getHead().setScore(Collections.max(gameTree.getFirstLevelScores()));
-        System.out.println("set gameTree head score");
+        gameTree.getHead().setScore(result.getLeft());
+        return result.getRight();
+
     }
 
 
@@ -191,8 +197,12 @@ public class MiniMaxPlayer implements Player {
      * @param node the AINode from which to create a tree from. node will be
      *             head of the (sub)tree.
      * @param depth the number of lays to generate for the tree.
-     * @param alpha should be set to initial value Double.NEGATIVE_INFINITY.
-     * @param beta should be set to initial value Double.POSITIVE_INFINITY.
+     * @param alpha Best already explored score along path to the root for
+     *              maximiser. Should be set to initial value
+     *              <p>Double.NEGATIVE_INFINITY</p>
+     * @param beta Best already explored option along path to the root for
+     *             minimiser. Should be set to initial value
+     *             <p>Double.POSITIVE_INFINITY</p>
      * @param max If true, the player who's turn it is in
      *            {@code node.getGameState()}
      *            should be a maximising player, else minimising player.
@@ -201,78 +211,80 @@ public class MiniMaxPlayer implements Player {
      *         {@code node.getGameState().getCurrentPlayer()}
      *         can get, based on a tree of {@code depth} depth.
      */
-    private Double MiniMax(AINode node, int depth, double alpha, double beta, boolean max) {
-        //System.out.println("minimax recurse");
-        // base case 1 - depth is zero
-        if (depth <= 0) {
+    private Pair<Double, Move> MiniMax(AINode node, int depth, Double alpha, Double beta, boolean max) {
+        // store the valid moves for current player at current game state
+        List<Move> nodeValidMoves = node.getGameState().validMoves(node.getGameState().getCurrentPlayer());
+
+        System.out.println("depth = " + depth);
+
+        // base cases - 1) depth is zero. 2) node is leaf (no valid moves).
+        //              3) game is over in current state
+        if (depth == 0 || nodeValidMoves.size() == 0 || node.getGameState().isGameOver()) {
+            if (depth == 0) System.out.println("BASE CASE - depth == 0");
+            if (node.getGameState().isGameOver()) System.out.println("BASE CASE - game over");
+            if (nodeValidMoves.size() == 0) System.out.println("BASE CASE - no valid moves");
+
             calculateScore(node);
-            return node.getScore();
+            return new Pair<>(node.getScore(), null);
         }
 
-        // create children nodes and add to tree
-        //System.out.println("number of valid moves: " + node.getGameState().validMoves(node.getGameState().getCurrentPlayer()).size());
-//        System.out.println(node.getGameState().getCurrentPlayer());
+        // store the current bestPair, initialising it's score also
+        double bestScore = max ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
+        Pair<Double, Move> bestPair = new Pair<>(bestScore, null);
 
-        //System.out.println("number of valid moves = " + node.getGameState().validMoves(node.getGameState().getCurrentPlayer()).size());
-        for (Move move : node.getGameState().validMoves(node.getGameState().getCurrentPlayer())) {
+        // store the pair to be returned from each child
+        Pair<Double, Move> currentPair;
+
+        for (Move currentMove : nodeValidMoves) {
+
             // make a copy of currentGameState for the next move
             ScotlandYardState stateAfterMove = node.getGameState().copy();
-            stateAfterMove.playMove(move);
+            // play move on the copy
+            stateAfterMove.playMove(currentMove);
 
-            // create node for this game state and link to tree.
-            // Give unassigned score = 0
-            AINode child = new AINode(stateAfterMove, 0.0);
+            // create child node for this game state and link to tree.
+            // Give unassigned score = -1.0
+            AINode child = new AINode(stateAfterMove, -1.0);
             gameTree.add(child);
-            Edge<ScotlandYardState, Move> edgeToChild = new Edge<>(node, child, move);
+            Edge<ScotlandYardState, Move> edgeToChild = new Edge<>(node, child, currentMove);
             gameTree.add(edgeToChild);
-            calculateScore(child);
-        }
 
-        // base case 2 - node is leaf (no valid moves)
-        if (gameTree.getChildren(node).size() == 0) {
-            calculateScore(node);
-            return node.getScore();
-        }
 
-        // store the score for the best move
-        Double v;
+            // get the MiniMax pair for current node
+            boolean isMax = Objects.equals(child.getGameState().getCurrentPlayer(), Colour.Black);
+            currentPair = MiniMax(child, depth-1, alpha, beta, isMax);
 
-        // this player is maximising MrX score
-        if (max) {
-            // find child node with highest score
-            v = Double.NEGATIVE_INFINITY;
-
-            //System.out.println("MiniMax: NUMBER OF CHILDREN NODES: " + gameTree.getChildren(node).size());
-            for (AINode child : gameTree.getChildrenQueue(node, AINODE_COMPARATOR)) {
-                // see if next player is maximising or minimising
-                boolean isMax = child.getGameState().getCurrentPlayer().equals(Colour.Black);
-
-                v = Math.max(v, MiniMax(child, depth - 1, alpha, beta, isMax));
-                alpha = Math.max(alpha, v);
-                if (beta <= alpha)
-                    break; // beta cut off
+            // if the current pair is better, assign the bestPair it's score,
+            // and make the currentMove the best move.
+            if (max) {
+                if (currentPair.getLeft() > bestPair.getLeft()) {
+                    bestPair = currentPair; // update bestPair score
+                    bestPair.setRight(currentMove);
+                }
+                // update alpha and prune, if possible
+                alpha = Math.max(alpha, bestPair.getLeft());
+                if (beta <= alpha) {
+                    System.out.println("PRUNED FOR MAXIMISER");
+                    break;
+                }
+            }
+            else {//min
+                if (currentPair.getLeft() < bestPair.getLeft()) {
+                    bestPair = currentPair; // update bestPair score
+                    bestPair.setRight(currentMove);
+                }
+                // update beta and prune, if possible
+                beta = Math.min(beta, bestPair.getLeft());
+                if (beta <= alpha) {
+                    System.out.println("PRUNED FOR MINIMISER");
+                    break;
+                }
             }
         }
 
-        // or player is minimising MrX score
-        else {
-            // find child with lowest score
-            v = Double.POSITIVE_INFINITY;
 
-            //System.out.println("MiniMax: NUMBER OF CHILDREN NODES: " + gameTree.getChildren(node).size());
-            for (AINode child : gameTree.getChildrenQueue(node, AINODE_INV_COMPARATOR)) {
-                // see if next player is maximising or minimising
-                boolean isMax = child.getGameState().getCurrentPlayer().equals(Colour.Black);
 
-                v = Math.min(v, MiniMax(child, depth - 1, alpha, beta, isMax));
-                beta = Math.min(beta, v);
-                if (beta <= alpha)
-                    break; // alpha cut off
-            }
-        }
-
-        // return the best score
-        return v;
+        return bestPair;
     }
 
 
