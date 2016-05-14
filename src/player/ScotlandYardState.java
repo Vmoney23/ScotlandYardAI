@@ -154,6 +154,8 @@ public final class ScotlandYardState {
                         validMoves.add(move);
                 }
             }
+            if (validMoves.size() == 0)
+                validMoves.add(MovePass.instance(player));
         }
         return validMoves;
     }
