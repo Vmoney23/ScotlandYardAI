@@ -120,7 +120,7 @@ public class MiniMaxPlayer implements Player {
 
         // calculate a score for each move by using the MiniMax algorithm.
         // return the move with the best score.
-        int depth = 6;
+        int depth = 15;
         boolean mrx = colour.equals(Colour.Black);
         return score(depth, mrx);
     }
@@ -220,10 +220,12 @@ public class MiniMaxPlayer implements Player {
         // base cases - 1) depth is zero. 2) node is leaf (no valid moves).
         //              3) game is over in current state
         if (depth == 0 || nodeValidMoves.size() == 0 || node.getGameState().isGameOver()) {
+            // print the base case(s) satisfied
             if (depth == 0) System.out.println("BASE CASE - depth == 0");
             if (node.getGameState().isGameOver()) System.out.println("BASE CASE - game over");
             if (nodeValidMoves.size() == 0) System.out.println("BASE CASE - no valid moves");
 
+            // calculate score and return
             calculateScore(node);
             return new Pair<>(node.getScore(), null);
         }
