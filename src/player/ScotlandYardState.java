@@ -8,7 +8,6 @@ import java.util.*;
  * A class to store the state of a Scotland Yard game at some fixed point during
  * the game. An object of this type can be cloned.
  */
-// TODO TEST VALID MOVES
 // TODO if playMove returns the cloned object, fields can be made final as the updated fields can be calculated before creating new instance of object.
 public final class ScotlandYardState {
 
@@ -109,55 +108,63 @@ public final class ScotlandYardState {
      * @return the list of valid moves for a given player.
      */
     public List<Move> validMoves(Colour player) {
+
+        // store current location of player to get moves for
         int location = playerLocations.get(player);
+
+        // generate all valid and invalid possible moves
         List<Move> moves = graph.generateMoves(player, location);
+
+        // initialise empty validMoves list to store valid moves in
         List<Move> validMoves = new ArrayList<>();
 
-        if (player != Colour.Black) {
-            for (Move move : moves) {
-                int dest = ((MoveTicket) move).target;
-                boolean occupied = false;
-                for (Colour internalPlayer : players.subList(1, players.size())) {
-                    if (playerLocations.get(internalPlayer).intValue() == dest)
-                        occupied = true;
-                }
-                if (!occupied && hasTickets(player, move))
-                    validMoves.add(move);
-            }
-            if (validMoves.isEmpty())
-                validMoves.add(MovePass.instance(player));
-
-        } else {
-            for (Move move : moves) {
-                if (move instanceof MoveTicket) {
-                    int dest = ((MoveTicket) move).target;
-                    boolean occupied = false;
-                    for (Colour internalPlayer : players) {
-                        if (playerLocations.get(internalPlayer).intValue() == dest)
-                            occupied = true;
-                    }
-                    if (!occupied && hasTickets(player, move))
-                        validMoves.add(move);
-
-                } else if ((move instanceof MoveDouble) && hasTickets(player, move)) {
-                    int dest1 = ((MoveDouble) move).move1.target;
-                    int dest2 = ((MoveDouble) move).move2.target;
-                    boolean occupied1 = false;
-                    boolean occupied2 = false;
-                    for (Colour internalPlayer : players) {
-                        if (playerLocations.get(internalPlayer).intValue() == dest1)
-                            occupied1 = true;
-                        if (playerLocations.get(internalPlayer).intValue() == dest2 && dest2 != location)
-                            occupied2 = true;
-                    }
-                    if (hasTickets(player, move) && !occupied1 && !occupied2)
-                        validMoves.add(move);
-                }
-            }
-            if (validMoves.size() == 0)
-                validMoves.add(MovePass.instance(player));
+        // Filter moves, and return valid moves:
+        for (Move move : moves) {
+            // if target not occupied and player has required tickets for
+            // move, this move is valid
+            boolean occupied = checkMoveTargetsNotOccupiedByADetective(move);
+            if (!occupied && hasTickets(player, move))
+                validMoves.add(move);
         }
+
+        // if no valid moves, add a MovePass
+        if (validMoves.isEmpty())
+            validMoves.add(MovePass.instance(player));
+
+        // all done.
         return validMoves;
+    }
+
+    // helpers for validMoves
+    private boolean checkMoveTargetsNotOccupiedByADetective(Move move) {
+        if (move instanceof MoveTicket)
+            return checkMoveTargetsNotOccupiedByADetective((MoveTicket) move);
+        else if (move instanceof MoveDouble)
+            return checkMoveTargetsNotOccupiedByADetective((MoveDouble) move);
+        else
+            return true;
+    }
+
+    private boolean checkMoveTargetsNotOccupiedByADetective(MoveTicket move) {
+        // store the move's target
+        int dest = move.target;
+
+        // if the target is already occupied, cannot move there, so
+        // do not add to validMoves
+        boolean occupied = false;
+        // check the locations of all detectives
+        for (Colour player : players.subList(1, players.size())) {
+            if (playerLocations.get(player).intValue() == dest) {
+                occupied = true;
+            }
+        }
+
+        return occupied;
+    }
+
+    private boolean checkMoveTargetsNotOccupiedByADetective(MoveDouble move) {
+        return checkMoveTargetsNotOccupiedByADetective(move.move1) &&
+                checkMoveTargetsNotOccupiedByADetective(move.move2);
     }
 
     private boolean hasTickets(Colour player, Move move) {
@@ -418,7 +425,6 @@ public final class ScotlandYardState {
 
 
     // GETTERS
-    //
 
     public Map<Colour, Integer> getPlayerLocations() {
         return playerLocations;
