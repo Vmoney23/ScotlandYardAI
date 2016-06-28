@@ -13,7 +13,6 @@ public final class ScotlandYardState {
 
     private final ScotlandYardGraph graph;
     private final List<Colour> players;
-    // which of these are these needed?
     private Set<Colour> winningPlayers;
     private Map<Colour, Integer> playerLocations;
     private Map<Colour, Map<Ticket, Integer>> playerTickets;
